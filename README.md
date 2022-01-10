@@ -5,3 +5,4 @@ Team members:
 
 * Li, Xinlai "Peter"
 * Su, Yiheng
+* Wang, Blitzen
