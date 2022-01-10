@@ -4,3 +4,4 @@ Golf simulatior game project group for CS269
 Team members:
 
 * Li, Xinlai "Peter"
+* Su, Yiheng
