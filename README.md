@@ -10,4 +10,4 @@ Team members:
 * Zhang, Chloe
 
 
-new game design ideas
+new game design ideas(2)
