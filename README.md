@@ -8,3 +8,6 @@ Team members:
 * Wang, Blitzen
 * Ren, Ashley
 * Zhang, Chloe
+
+
+new game design ideas
