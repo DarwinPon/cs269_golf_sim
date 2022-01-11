@@ -17,6 +17,7 @@ FPS = 30
 
 # set RGB of colors
 WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
 # game events
 GOAL = pygame.USEREVENT + 1
@@ -27,6 +28,9 @@ try:
 except:
     print("Fonts unavailable")
     sys.exit()
+
+# create font for displaying debug info
+INFO_FONT = pygame.font.SysFont("comicsans", 15)
 
 # create a game clock
 gameClock = pygame.time.Clock()
@@ -45,7 +49,7 @@ pygame.display.set_caption("Golf")
 # set the size of the image
 BALL_WIDTH, BALL_HEIGHT = 30, 30
 GOAL_WIDTH, GOAL_HEIGHT = 90, 90
-ball = pygame.image.load( "ball.png" ).convert_alpha() # put the name of ball image here
+ball = pygame.image.load( "golfball.png" ).convert_alpha() # put the name of ball image here
 ball = pygame.transform.scale(ball, (BALL_WIDTH, BALL_HEIGHT)) # scale an image
 goal = pygame.image.load( "ball.png" ).convert_alpha() # put the name of ball image here
 goal = pygame.transform.scale(ball, (GOAL_WIDTH, GOAL_HEIGHT)) # scale an image
@@ -56,12 +60,16 @@ afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 text = afont.render( "Clean up time", True, (0, 0, 0) )
 
 ####################### Filling the Screen #########################
-def draw_window(ballRect, goalRect):
+def draw_window(ballRect, goalRect, scale):
     # clear the screen with white
     screen.fill(WHITE)
 
     # now draw the surfaces to the screen using the blit function
     screen.blit( ball, (ballRect.x, ballRect.y) )
+
+    # display debug info
+    force_text = INFO_FONT.render("Launch force: " + str(scale), 1, BLACK)
+    screen.blit(force_text, (10, HEIGHT-force_text.get_height()-5))
 
     # update the screen
     pygame.display.update()
@@ -79,17 +87,6 @@ def handle_collision(ballRect, goalRect):
 def handle_startScreen():
     """Implement start screen"""
 
-def apply_launch_force(key_pressed, ball, force_scale):
-    """Decides the force applied to the ball based on user input"""
-
-    #scale up by 1 if current scale is less than 10
-    if key_pressed[pygame.K_UP] and force_scale < 10:
-        return force_scale + 1
-    #scale down by 1 if current scale is larger than 0
-    elif key_pressed[pygame.K_DOWN] and force_scale > 0:
-        return force_scale - 1
-    else:
-        return force_scale
 
 
 def handle_gameover():
@@ -118,6 +115,7 @@ def main():
     handle_startScreen()
 
     print("Entering main loop")
+    force_scale = 0
     while True:
         # Check every event in the event list
         for event in pygame.event.get():
@@ -129,7 +127,15 @@ def main():
             if event.type == GOAL:
                 handle_gameover()
 
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP and force_scale < 10:
+                    force_scale += 1
+                if event.key == pygame.K_DOWN and force_scale > 0:
+                    force_scale -= 1
+                print(force_scale)
+
         key_pressed = pygame.key.get_pressed()
+
 
         # move ball according to the rule
         ballRect_movement(key_pressed, ballRect)
@@ -138,7 +144,7 @@ def main():
         handle_collision(goalRect, ballRect)
 
         # update the screen
-        draw_window(ballRect, goalRect)
+        draw_window(ballRect, goalRect, force_scale)
 
         # set FPS
         gameClock.tick(FPS)
