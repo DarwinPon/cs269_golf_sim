@@ -35,6 +35,7 @@ gameClock = pygame.time.Clock()
 WIDTH, HEIGHT = 640, 480
 screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
 
+
 # create caption for the screen
 pygame.display.set_caption("Golf")
 
@@ -42,7 +43,7 @@ pygame.display.set_caption("Golf")
 
 # load some images
 # set the size of the image
-BALL_WIDTH, BALL_HEIGHT = 80, 80
+BALL_WIDTH, BALL_HEIGHT = 30, 30
 GOAL_WIDTH, GOAL_HEIGHT = 90, 90
 ball = pygame.image.load( "ball.png" ).convert_alpha() # put the name of ball image here
 ball = pygame.transform.scale(ball, (BALL_WIDTH, BALL_HEIGHT)) # scale an image
@@ -77,6 +78,19 @@ def handle_collision(ballRect, goalRect):
 
 def handle_startScreen():
     """Implement start screen"""
+
+def apply_launch_force(key_pressed, ball, force_scale):
+    """Decides the force applied to the ball based on user input"""
+
+    #scale up by 1 if current scale is less than 10
+    if key_pressed[pygame.K_UP] and force_scale < 10:
+        return force_scale + 1
+    #scale down by 1 if current scale is larger than 0
+    elif key_pressed[pygame.K_DOWN] and force_scale > 0:
+        return force_scale - 1
+    else:
+        return force_scale
+
 
 def handle_gameover():
     """Implement gameover screen"""
