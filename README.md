@@ -7,3 +7,4 @@ Team members:
 * Su, Yiheng
 * Wang, Blitzen
 * Ren, Ashley
+* Zhang, Chloe
