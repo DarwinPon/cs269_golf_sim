@@ -54,7 +54,7 @@ pygame.display.set_caption("Golf")
 # set the size of the image
 
 BALL_WIDTH, BALL_HEIGHT = 30, 30
-ARROW_WIDTH, ARROW_HEIGHT = 45, 15
+ARROW_WIDTH, ARROW_HEIGHT = 90, 90
 ball = pygame.image.load( "golfball.png" ).convert_alpha() # put the name of ball image here
 arrow = pygame.image.load( "arrow.png" ).convert_alpha()
 
@@ -69,12 +69,14 @@ afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 text = afont.render( "Clean up time", True, (0, 0, 0) )
 
 ####################### Filling the Screen #########################
-def draw_window(ball, ballRect, arrowRect, scale):
+def draw_window(image, ballRect, arrowRect, scale):
     # clear the screen with white
     screen.fill(WHITE)
 
     # now draw the surfaces to the screen using the blit function
 
+    if arrowRect != None:
+        screen.blit(image , (arrowRect.x, arrowRect.y) )
     screen.blit(ball , (ballRect.x, ballRect.y) )
 
     # display debug info
@@ -85,7 +87,7 @@ def draw_window(ball, ballRect, arrowRect, scale):
     pygame.display.update()
 
 ####################### Add Movement #########################
-def ballRect_movement(ballRect):
+def ballRect_movement(ballRect, arrowRect):
     """Implement ball movement"""
     global arrow, ball
     angleInDegree = 0
@@ -93,10 +95,10 @@ def ballRect_movement(ballRect):
     player1trun = True
     force_scale = 0
 
-
+    arrowRect = pygame.Rect((ballRect.x-ballRect.width, ballRect.y-ballRect.height), (ARROW_WIDTH, ARROW_HEIGHT))
     while player1trun:
-        rot_rect = ballRect.copy()
-        rot_ball = ball.copy()
+        rot_rect = arrowRect.copy()
+        rot_arrow = arrow.copy()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -107,15 +109,15 @@ def ballRect_movement(ballRect):
                 if event.key == pygame.K_DOWN and force_scale > 0:
                     force_scale -= 1
 
-                draw_window(rot_ball, ballRect, ballRect, force_scale)
+                draw_window(rot_arrow, ballRect, rot_rect, force_scale)
 
                 if event.key == pygame.K_a:
                     angleInDegree -= angularVel
-                    rot_ball, rot_rect.x, rot_rect.y = rot_image(ballRect, ball, angleInDegree)
+                    rot_arrow, rot_rect.x, rot_rect.y = rot_image(arrowRect, arrow, -angleInDegree)
 
                 if event.key == pygame.K_d:
                     angleInDegree += angularVel
-                    rot_ball, rot_rect.x, rot_rect.y = rot_image(ballRect, ball, angleInDegree)
+                    rot_arrow, rot_rect.x, rot_rect.y = rot_image(arrowRect, arrow, -angleInDegree)
 
                 if event.key == pygame.K_SPACE:
                     angleInRadian = angleInDegree * (math.pi / 180)
@@ -128,14 +130,17 @@ def ballRect_movement(ballRect):
                         ballRect.x += velocity_x
                         ballRect.y += velocity_y
                         velocity -= 1
-                        draw_window(rot_ball, ballRect, ballRect, 0)
+                        draw_window(ball, ballRect, ballRect, 0)
                         gameClock.tick(FPS)
 
                     # end player 1's turn
                     player1trun = False
                     pygame.event.clear()
 
-                draw_window(rot_ball, rot_rect, rot_rect, force_scale)
+                #reset arrow position
+
+
+                draw_window(rot_arrow, ballRect, rot_rect, force_scale)
 
 
 def handle_collision(ballRect, goalRect):
@@ -182,7 +187,7 @@ def rot_image(rect, image, angle):
 
 def main():
     ballRect = pygame.Rect((100, 200), (BALL_WIDTH, BALL_HEIGHT)) # put the initial position of the ball into bracket
-    #arrowRect = pygame.Rect((ballRect.x+ballRect.width/2, ballRect.y+ballRect.height/2), (ARROW_WIDTH, ARROW_HEIGHT))
+    arrowRect = pygame.Rect((ballRect.x-ballRect.width, ballRect.y-ballRect.height), (ARROW_WIDTH, ARROW_HEIGHT))
     draw_window(ball, ballRect, ballRect, 0)
 
 
@@ -208,14 +213,14 @@ def main():
 
             if event.type == PLAYER1TURN:
                 # move ball according to the rule
-                ballRect_movement(ballRect)
+                ballRect_movement(ballRect, arrowRect)
                 # isPlayer1Turn = False
 
         key_pressed = pygame.key.get_pressed()
 
 
         # move ball according to the rule
-        ballRect_movement(ballRect)
+        ballRect_movement(ballRect, arrowRect)
 
 
 
@@ -225,7 +230,7 @@ def main():
         #handle_collision(goalRect, ballRect)
 
         # update the screen
-        draw_window(ball, ballRect, ballRect, force_scale)
+        draw_window(ball, ballRect, None, force_scale)
 
         # set FPS
         gameClock.tick(FPS)
