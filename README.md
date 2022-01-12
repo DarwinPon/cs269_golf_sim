@@ -8,6 +8,7 @@ Team members:
 * Wang, Blitzen
 * Ren, Ashley
 * Zhang, Chloe
+* Yang, Miaoyi "Scottie"
 
 
 ### Name of Game: Hole-in-one
