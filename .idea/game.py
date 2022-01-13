@@ -59,8 +59,12 @@ ball = pygame.image.load( "golfball.png" ).convert_alpha() # put the name of bal
 arrow = pygame.image.load( "arrow.png" ).convert_alpha()
 
 ball = pygame.transform.scale(ball, (BALL_WIDTH, BALL_HEIGHT)) # scale an image
+<<<<<<< Yiheng1.1
 arrow = pygame.transform.scale(arrow, (ARROW_WIDTH, ARROW_HEIGHT)) # scale an image
 
+=======
+ball = pygame.transform.rotate(ball, -90)
+>>>>>>> local
 
 
 # create a font
@@ -89,7 +93,11 @@ def draw_window(image, ballRect, arrowRect, scale):
 ####################### Add Movement #########################
 def ballRect_movement(ballRect, arrowRect):
     """Implement ball movement"""
+<<<<<<< Yiheng1.1
     global arrow, ball
+=======
+    global ball
+>>>>>>> local
     angleInDegree = 0
     angularVel = 15
     player1trun = True
@@ -113,8 +121,13 @@ def ballRect_movement(ballRect, arrowRect):
 
                 if event.key == pygame.K_a:
                     angleInDegree -= angularVel
+<<<<<<< Yiheng1.1
                     rot_arrow, rot_rect.x, rot_rect.y = rot_image(arrowRect, arrow, -angleInDegree)
 
+=======
+                    blitRotateCenter(ball, ballRect.topleft, -angleInDegree)
+      
+>>>>>>> local
                 if event.key == pygame.K_d:
                     angleInDegree += angularVel
                     rot_arrow, rot_rect.x, rot_rect.y = rot_image(arrowRect, arrow, -angleInDegree)
@@ -135,13 +148,20 @@ def ballRect_movement(ballRect, arrowRect):
 
                     # end player 1's turn
                     player1trun = False
-                    pygame.event.clear()
+                    # pygame.event.clear()
 
                 #reset arrow position
 
 
                 draw_window(rot_arrow, ballRect, rot_rect, force_scale)
 
+
+def blitRotateCenter(image, topleft, angle):
+    rotated_image = pygame.transform.rotate(image, angle)
+    new_rect = rotated_image.get_rect(center = image.get_rect(topleft = topleft).center)
+    screen.fill(WHITE)
+    screen.blit(rotated_image, new_rect)
+    pygame.display.update()
 
 def handle_collision(ballRect, goalRect):
     """If collide, add GOAL to the event list"""
