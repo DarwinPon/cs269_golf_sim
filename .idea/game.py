@@ -59,15 +59,18 @@ pygame.display.set_caption("Golf")
 
 BALL_WIDTH, BALL_HEIGHT = 30, 30
 ARROW_WIDTH, ARROW_HEIGHT = BALL_WIDTH*3, BALL_HEIGHT*3
-ball_img = pygame.image.load( "golfball.png" ).convert_alpha() # put the name of ball image here
-arrow_img = pygame.image.load( "arrow.png" ).convert_alpha()
+ball_img1 = pygame.image.load( "../assets/player1ball.png" ).convert_alpha() # put the name of ball image here
+ball_img2 = pygame.image.load( "../assets/player2ball.png" ).convert_alpha()
+arrow_img = pygame.image.load( "../assets/black_arrow.png" ).convert_alpha()
 
 
 
 arrow = Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
-player1 = Ball(ball_img, 100, 200, BALL_WIDTH, BALL_HEIGHT, arrow)
+player1 = Ball(ball_img1, 75, 150, BALL_WIDTH, BALL_HEIGHT, arrow)
+player2 = Ball(ball_img2, 75, 250, BALL_WIDTH, BALL_HEIGHT, arrow)
+
 arrow.reset(player1)
-player_list = [player1]
+player_list = [player1, player2]
 
 # create a font
 afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
@@ -116,7 +119,7 @@ def handle_boundries(plr):
 
         print("reached")
         plr.reflect_y()
-    if plr.y <= 0 or plr.y >= 480-plr.height:
+    if plr.y <= plr.height/5 or plr.y >= 480-plr.height:
         plr.reflect_x()
 
 
@@ -196,8 +199,11 @@ def main():
                 if event.key == pygame.K_SPACE:
                     plr.launch(VELOCITY)
                     arrow.is_visible = False
-
                     current_player = len(player_list)-1-current_player
+                    nxt_p = player_list[current_player]
+                    if nxt_p.vel < 1:
+                        arrow.reset(nxt_p)
+
                 draw_players(player_list, current_player, arrow)
 
         key_pressed = pygame.key.get_pressed()
@@ -212,11 +218,13 @@ def main():
 
         # update the screen
         draw_window(force_scale)
-        for plr in player_list:
-            plr.move()
-            handle_boundries(plr)
-            if plr.vel < 1 and plr.vel != 0:
-                arrow.reset(plr)
+        for i in range(len(player_list)):
+            player_list[i].move()
+            handle_boundries(player_list[i])
+        plr = player_list[current_player]
+        if plr.vel < 1 and plr.vel != 0:
+            arrow.reset(plr)
+
 
         draw_players(player_list, current_player, arrow)
 
