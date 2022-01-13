@@ -61,11 +61,11 @@ pygame.display.set_caption("Golf")
 
 BALL_WIDTH, BALL_HEIGHT = 30, 30
 ARROW_WIDTH, ARROW_HEIGHT = BALL_WIDTH*3, BALL_HEIGHT*3
-ball_img1 = pygame.image.load( "player1ball.png" ).convert_alpha() # put the name of ball image here
-ball_img2 = pygame.image.load( "player2ball.png" ).convert_alpha()
-arrow_img = pygame.image.load( "black_arrow.png" ).convert_alpha()
-hole_img = pygame.image.load("hole.png").convert_alpha()
-BACKGROUND = pygame.transform.scale(pygame.image.load("background.png").convert_alpha(), (WIDTH, HEIGHT))
+ball_img1 = pygame.image.load( "../pictures/player1ball.png" ).convert_alpha() # put the name of ball image here
+ball_img2 = pygame.image.load( "../pictures/player2ball.png" ).convert_alpha()
+arrow_img = pygame.image.load( "../pictures/black_arrow.png" ).convert_alpha()
+hole_img = pygame.image.load("../pictures/hole.png").convert_alpha()
+BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
 
 
 arrow = Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
