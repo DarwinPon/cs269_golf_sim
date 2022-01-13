@@ -55,17 +55,11 @@ pygame.display.set_caption("Golf")
 
 BALL_WIDTH, BALL_HEIGHT = 30, 30
 ARROW_WIDTH, ARROW_HEIGHT = 90, 90
-ball = pygame.image.load( "golfball.png" ).convert_alpha() # put the name of ball image here
-arrow = pygame.image.load( "arrow.png" ).convert_alpha()
+ball = pygame.image.load( "player1ball.png" ).convert_alpha() # put the name of ball image here
+arrow = pygame.image.load( "white_arrow.png" ).convert_alpha()
 
 ball = pygame.transform.scale(ball, (BALL_WIDTH, BALL_HEIGHT)) # scale an image
-<<<<<<< Yiheng1.1
 arrow = pygame.transform.scale(arrow, (ARROW_WIDTH, ARROW_HEIGHT)) # scale an image
-
-=======
-ball = pygame.transform.rotate(ball, -90)
->>>>>>> local
-
 
 # create a font
 afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
@@ -93,11 +87,7 @@ def draw_window(image, ballRect, arrowRect, scale):
 ####################### Add Movement #########################
 def ballRect_movement(ballRect, arrowRect):
     """Implement ball movement"""
-<<<<<<< Yiheng1.1
     global arrow, ball
-=======
-    global ball
->>>>>>> local
     angleInDegree = 0
     angularVel = 15
     player1trun = True
@@ -121,13 +111,8 @@ def ballRect_movement(ballRect, arrowRect):
 
                 if event.key == pygame.K_a:
                     angleInDegree -= angularVel
-<<<<<<< Yiheng1.1
                     rot_arrow, rot_rect.x, rot_rect.y = rot_image(arrowRect, arrow, -angleInDegree)
 
-=======
-                    blitRotateCenter(ball, ballRect.topleft, -angleInDegree)
-      
->>>>>>> local
                 if event.key == pygame.K_d:
                     angleInDegree += angularVel
                     rot_arrow, rot_rect.x, rot_rect.y = rot_image(arrowRect, arrow, -angleInDegree)
@@ -148,20 +133,11 @@ def ballRect_movement(ballRect, arrowRect):
 
                     # end player 1's turn
                     player1trun = False
-                    # pygame.event.clear()
+                    pygame.event.clear()
 
                 #reset arrow position
-
-
                 draw_window(rot_arrow, ballRect, rot_rect, force_scale)
 
-
-def blitRotateCenter(image, topleft, angle):
-    rotated_image = pygame.transform.rotate(image, angle)
-    new_rect = rotated_image.get_rect(center = image.get_rect(topleft = topleft).center)
-    screen.fill(WHITE)
-    screen.blit(rotated_image, new_rect)
-    pygame.display.update()
 
 def handle_collision(ballRect, goalRect):
     """If collide, add GOAL to the event list"""
@@ -199,7 +175,6 @@ def check_button_clicked(button) -> bool:
 
 def rot_image(rect, image, angle):
     rotated_img = pygame.transform.rotate(image, angle)
-
     return rotated_img, rect.x + rect.width/2 - (rotated_img.get_width()/2), rect.y + rect.height/2 - (rotated_img.get_height()/2)
 
 
