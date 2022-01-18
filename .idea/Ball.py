@@ -11,7 +11,7 @@ class Ball:
         self.image = pygame.transform.scale(image, (width, height))
         self.vel_x = 0
         self.vel_y = 0
-        self.acc = 0.25
+        self.acc = 1
         self.angle = 0
         self.launchF = 0
         self.arrow = arrow
@@ -50,16 +50,22 @@ class Ball:
         return math.hypot(self.vel_x, self.vel_y)
     
     def move(self):
+
+
         vel = self.get_vel()
-        if abs(vel) < 1:
+
+
+        if abs(vel) < 2:
             if vel > 0:
                 self.reset()
             self.set_vel(0)
         else:
             angleInRadian = math.radians(self.angle)
             acc_x = self.acc * math.cos(angleInRadian)
-
             acc_y = self.acc * math.sin(angleInRadian)
+            print(self.vel_x)
+            print(self.vel_y)
+            print("")
 
             self.rect.x += self.vel_x
             self.rect.y += self.vel_y
@@ -67,6 +73,21 @@ class Ball:
             self.vel_y -= acc_y
             self.x = self.rect.x
             self.y = self.rect.y
+
+
+
+    def advance(self):
+        '''allows the ball to take a step forward without changing its speed. Only used in collision detection'''
+
+        self.x += self.vel_x
+        self.y += self.vel_y
+
+
+    def trace_back(self):
+        '''allows the ball to take a step back. Only used in collision detection'''
+        self.x -= self.vel_x
+        self.y -= self.vel_y
+
 
     def left(self, angle):
         self.angle -= angle
@@ -87,10 +108,12 @@ class Ball:
 
     def reflect_x(self):
         self.angle = -self.angle
+        self.vel_y = -self.vel_y
 
 
     def reflect_y(self):
         self.angle = 180 - self.angle
+        self.vel_x = -self.vel_x
 
     def launch(self, velocity):
         """set initial speed when player launches ball"""

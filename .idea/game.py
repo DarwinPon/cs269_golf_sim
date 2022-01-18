@@ -31,7 +31,7 @@ BLACK = (0, 0, 0)
 GOAL = pygame.USEREVENT + 1
 
 #initial velocity when force scale is 0
-VELOCITY = 5
+VELOCITY = 8
 TURN_ANGLE = 15
 
 current_player = 0
@@ -87,6 +87,16 @@ player_list = [player1, player2]
 afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 # render a surface with some text
 text = afont.render( "Clean up time", True, (0, 0, 0) )
+#boundaries
+UPPERBOUND_RECT = pygame.Rect( (0, 0), (WIDTH, 35) )
+LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 35), (WIDTH, 35) )
+LEFTBOUND_RECT = pygame.Rect( (0, 0), (45, HEIGHT) )
+RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 45, 0), (45, HEIGHT) )
+BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
+
+#testing stuff
+test_rect = pygame.Rect((300,300), (100,100))
+BOUNDARY.append(test_rect)
 
 ####################### Filling the Screen #########################
 def draw_window(scale):
@@ -98,6 +108,7 @@ def draw_window(scale):
     # display debug info
     force_text = INFO_FONT.render("Launch force: " + str(scale), 1, BLACK)
     screen.blit(force_text, (10, HEIGHT-force_text.get_height()-5))
+    pygame.draw.rect(screen, BLACK, test_rect)
 
     # update the screen
     # pygame.display.update()
@@ -149,6 +160,71 @@ def handle_collision_ball_ball(ball1, ball2):
         # ball2.x -= math.sin(angle)
         # ball2.y += math.cos(angle)
         
+def handle_collision_ball_rect(ball, rect):
+    """handles collision between a ball object and a rectangle"""
+
+    current_col_v = check_collision_v(ball, rect)
+    current_col_h = check_collision_h(ball, rect)
+    ball.advance()
+    new_col_v = check_collision_v(ball, rect)
+    new_col_h = check_collision_h(ball, rect)
+    ball.trace_back()
+
+
+
+    if current_col_h and new_col_h and current_col_v != new_col_v:
+        print("vertical")
+        ball.reflect_y()
+
+    elif current_col_h != new_col_h and current_col_v and new_col_v:
+        print("horizontal")
+        ball.reflect_x()
+    elif current_col_h != new_col_h and current_col_v != new_col_v:
+        ball.reflect_x()
+        ball.reflect_y()
+        ball.move()
+
+def check_collision_v(ball, rect):
+    '''check if the next advance of ball will result in a vertical collision'''
+    if ball.x > rect.x + rect.width or ball.x + 2*ball.RADIUS < rect.x:
+        return False
+    #direct collision
+    elif ball.x + ball.RADIUS > rect.x and ball.x + ball.RADIUS < rect.x + rect.width:
+        return True
+    #corner collision
+    else:
+        if check_corner_collision(ball, rect):
+            return True
+        else:
+            return False
+
+def check_corner_collision(ball, rect):
+    x = ball.x + ball.RADIUS
+    y = ball.y + ball.RADIUS
+    if math.hypot(abs(x-rect.topleft[0]), abs(y-rect.topleft[1])) <= ball.RADIUS:
+        return True
+    elif math.hypot(abs(x-rect.bottomleft[0]), abs(y-rect.bottomleft[1])) <= ball.RADIUS:
+        return True
+    elif math.hypot(abs(x-rect.bottomright[0]), abs(y-rect.bottomright[1])) <= ball.RADIUS:
+        return True
+    elif math.hypot(abs(x-rect.topright[0]), abs(y-rect.topright[1])) <= ball.RADIUS:
+        return True
+    else:
+        return False
+
+def check_collision_h(ball, rect):
+    '''check if the next advance of ball will result in a horizontal collision'''
+    if ball.y > rect.y + rect.height or ball.y + 2*ball.RADIUS < rect.y:
+        return False
+    #direct collision
+    elif ball.y + ball.RADIUS > rect.y and ball.y + ball.RADIUS < rect.y + rect.height:
+        return True
+    #corner collision
+    else:
+        if check_corner_collision(ball, rect):
+            return True
+        else:
+            return False
 
 def handle_collision_ball_hole(ballRect, holeRect):
     """If collide, add GOAL to the event list"""
@@ -159,27 +235,29 @@ def handle_collision_ball_hole(ballRect, holeRect):
 
 def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
-    if plr.x <= 35:
-        plr.angle = 180 - plr.angle
-        plr.x = 35
-        plr.vel_x = abs(plr.vel_x)
-
-
-    if plr.x >= WIDTH-plr.width - 35:
-        plr.angle = 180 - plr.angle
-        plr.x = WIDTH-plr.width - 35
-        plr.vel_x = - abs(plr.vel_x)
-
-    if plr.y <= plr.height/5 + 30:
-        plr.angle = -plr.angle
-        plr.y = plr.height/5 + 30
-        plr.vel_y = abs(plr.vel_y)
-
-
-    if plr.y >= HEIGHT - plr.height - 30:
-        plr.angle = -plr.angle
-        plr.y = HEIGHT - plr.height - 30
-        plr.vel_y = - abs(plr.vel_y)
+    for wall in BOUNDARY:
+        handle_collision_ball_rect(plr, wall)
+    # if plr.x <= 35:
+    #     plr.angle = 180 - plr.angle
+    #     plr.x = 35
+    #     plr.vel_x = abs(plr.vel_x)
+    #
+    #
+    # if plr.x >= WIDTH-plr.width - 35:
+    #     plr.angle = 180 - plr.angle
+    #     plr.x = WIDTH-plr.width - 35
+    #     plr.vel_x = - abs(plr.vel_x)
+    #
+    # if plr.y <= plr.height/5 + 30:
+    #     plr.angle = -plr.angle
+    #     plr.y = plr.height/5 + 30
+    #     plr.vel_y = abs(plr.vel_y)
+    #
+    #
+    # if plr.y >= HEIGHT - plr.height - 30:
+    #     plr.angle = -plr.angle
+    #     plr.y = HEIGHT - plr.height - 30
+    #     plr.vel_y = - abs(plr.vel_y)
 
 
 def handle_startScreen():
@@ -242,6 +320,9 @@ def main():
 
     print("Entering main loop")
     force_scale = 0
+
+
+
     while True:
         # Check every event in the event list
         for event in pygame.event.get():
@@ -291,17 +372,17 @@ def main():
         # update the screen
         draw_window(force_scale)
         for i in range(len(player_list)):
-            player_list[i].move()
-            handle_boundries(player_list[i])
-            if i == 0:
-                handle_collision_ball_ball(player_list[0], player_list[1])
-            else:
-                handle_collision_ball_ball(player_list[1], player_list[0])
 
+
+
+            handle_collision_ball_ball(player_list[0], player_list[1])
+            handle_boundries(player_list[i])
+            player_list[i].move()
             handle_collision_ball_hole(player_list[i].get_rect(), hole.get_rect())
+
         plr = player_list[current_player]
 
-        if plr.get_vel() < 1 and plr.get_vel() != 0:
+        if plr.get_vel() < 2 and plr.get_vel() != 0:
             arrow.reset(plr)
         elif plr.get_vel() > 1:
             arrow.is_visible = False
