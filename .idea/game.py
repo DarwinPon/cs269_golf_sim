@@ -127,6 +127,9 @@ def handle_collision_ball_ball(ball1, ball2):
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
         print("Collide!")
+        if ball1.get_vel() == 0 and ball2.get_vel() == 0:
+            ball1.vel_x = 1
+            ball1.vel_y = 1
         m1, m2 = ball1.mass, ball2.mass
         M = m1 + m2
         r1, r2 = np.array((ball1.x+ball1.RADIUS, ball1.y+ball1.RADIUS)), np.array((ball2.x+ball2.RADIUS, ball2.y+ball2.RADIUS))
@@ -136,6 +139,8 @@ def handle_collision_ball_ball(ball1, ball2):
         u2 = v2 - 2*m1 / M * np.dot(v2-v1, r2-r1) / d * (r2 - r1)
         ball1.vel_x, ball1.vel_y = u1[0], u1[1]
         ball2.vel_x, ball2.vel_y = u2[0], u2[1]
+        ball1.update_angle()
+        ball2.update_angle()
         ball1.move()
         ball2.move()
 
@@ -174,20 +179,24 @@ def handle_collision_ball_hole(ball, holeRect):
 def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
     if plr.x <= 35:
+        plr.angle = 180 - plr.angle
         plr.x = 35
         plr.vel_x = abs(plr.vel_x)
 
 
     if plr.x >= WIDTH-plr.width - 35:
+        plr.angle = 180 - plr.angle
         plr.x = WIDTH-plr.width - 35
         plr.vel_x = - abs(plr.vel_x)
 
     if plr.y <= plr.height/5 + 30:
+        plr.angle = -plr.angle
         plr.y = plr.height/5 + 30
         plr.vel_y = abs(plr.vel_y)
 
 
     if plr.y >= HEIGHT - plr.height - 30:
+        plr.angle = -plr.angle
         plr.y = HEIGHT - plr.height - 30
         plr.vel_y = - abs(plr.vel_y)
 
