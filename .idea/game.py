@@ -10,11 +10,7 @@ import random
 import math
 from turtle import width
 from webbrowser import BackgroundBrowser
-<<<<<<< HEAD
-from xml.dom import HierarchyRequestErr
-=======
 import numpy as np
->>>>>>> remotes/origin/Blitzen
 
 # import pygame
 import pygame
@@ -131,32 +127,6 @@ def handle_collision_ball_ball(ball1, ball2):
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
         print("Collide!")
-<<<<<<< HEAD
-        tangent = math.degrees(math.atan2(dx, dy) - math.pi/2)
-        ball1.angle =  tangent 
-        ball2.angle = tangent
-        (ball1.vel, ball2.vel) = (ball2.vel, ball1.vel)
-
-        angle = 0.5 * math.pi + tangent
-        ball1.x += 3*math.sin(angle)
-        ball1.y -= 3*math.cos(angle)
-        ball2.x -= 3*math.sin(angle)
-        ball2.y += 3*math.cos(angle)
-
-def test_collision_ball_rectangle(ball, rect):
-    r = ball.RADIUS
-    ballCenter = (ball.x + r, ball.y + r)
-    ball_distance_x = abs(ballCenter[0] - rect.centerx)
-    ball_distance_y = abs(ballCenter[1] - rect.centery)
-    if ball_distance_x > rect.width / 2 + r or ball_distance_y > rect.height / 2 + r:
-        return False
-    if ball_distance_x <= rect.width / 2 or ball_distance_y <= rect.height / 2:
-        return True
-    corner_x = ball_distance_x - rect.width / 2
-    corner_y = ball_distance_y - rect.height / 2
-    corner_distance = math.hypot(corner_x, corner_y)
-    return corner_distance <= r
-=======
         m1, m2 = ball1.mass, ball2.mass
         M = m1 + m2
         r1, r2 = np.array((ball1.x+ball1.RADIUS, ball1.y+ball1.RADIUS)), np.array((ball2.x+ball2.RADIUS, ball2.y+ball2.RADIUS))
@@ -179,9 +149,21 @@ def test_collision_ball_rectangle(ball, rect):
         # ball1.y -= math.cos(angle)
         # ball2.x -= math.sin(angle)
         # ball2.y += math.cos(angle)
->>>>>>> remotes/origin/Blitzen
-        
 
+def test_collision_ball_rectangle(ball, rect):
+    r = ball.RADIUS
+    ballCenter = (ball.x + r, ball.y + r)
+    ball_distance_x = abs(ballCenter[0] - rect.centerx)
+    ball_distance_y = abs(ballCenter[1] - rect.centery)
+    if ball_distance_x > rect.width / 2 + r or ball_distance_y > rect.height / 2 + r:
+        return False
+    if ball_distance_x <= rect.width / 2 or ball_distance_y <= rect.height / 2:
+        return True
+    corner_x = ball_distance_x - rect.width / 2
+    corner_y = ball_distance_y - rect.height / 2
+    corner_distance = math.hypot(corner_x, corner_y)
+    return corner_distance <= r
+        
 def handle_collision_ball_hole(ball, holeRect):
     """If collide, add GOAL to the event list"""
     if test_collision_ball_rectangle(ball, holeRect):
@@ -319,9 +301,11 @@ def main():
         draw_window(force_scale)
         for i in range(len(player_list)):
             player_list[i].move()
+
             for bound in BOUNDARY:
                 if test_collision_ball_rectangle(player_list[i], bound):
                     player_list[i].reflect_x()
+
             # handle_boundries(player_list[i])
             if i == 0:
                 handle_collision_ball_ball(player_list[0], player_list[1])
