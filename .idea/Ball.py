@@ -1,3 +1,4 @@
+
 import pygame
 import math
 class Ball:
@@ -13,6 +14,7 @@ class Ball:
         self.angle = 0
         self.launchF = 0
         self.arrow = arrow
+        self.RADIUS = 15
 
     def get_rect(self):
         return self.rect
@@ -23,6 +25,9 @@ class Ball:
     def get_y(self):
         return self.rect.y
 
+    def get_radius(self):
+        return self.RADIUS
+
     def set_rot(self, rot_img, rot_rect):
         self.rot_img = rot_img
         self.rot_rect = rot_rect
@@ -32,16 +37,22 @@ class Ball:
     
     def set_acc(self, acc):
         self.acc = acc
+
+    def get_xy_velocities(self):
+        angleInRadian = math.radians(self.angle)
+        vel_x = self.vel * math.cos(angleInRadian)
+        vel_y = self.vel * math.sin(angleInRadian)
+        return [vel_x, vel_y]
     
     def move(self):
-        angleInRadian = math.radians(self.angle)
+        xy_vel = self.get_xy_velocities()
         if abs(self.vel) < 1:
             if self.vel > 0:
                 self.reset()
             self.vel = 0
         else:
-            vel_x = self.vel * math.cos(angleInRadian)
-            vel_y = self.vel * math.sin(angleInRadian)
+            vel_x = xy_vel[0]
+            vel_y = xy_vel[1]
             self.rect.x += vel_x
             self.rect.y += vel_y
             self.vel -= self.acc
@@ -78,6 +89,7 @@ class Ball:
     def reset(self):
         self.angle = 0
         self.launchF = 0
+
 
 
 
