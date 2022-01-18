@@ -10,6 +10,7 @@ import random
 import math
 from turtle import width
 from webbrowser import BackgroundBrowser
+from xml.dom import HierarchyRequestErr
 
 # import pygame
 import pygame
@@ -78,9 +79,15 @@ player1 = Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL
 player2 = Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
 hole = Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
 
-
 arrow.reset(player1)
 player_list = [player1, player2]
+
+# put rectangles on the boundaries
+UPPERBOUND_RECT = pygame.Rect( (0, 0), (WIDTH, 25) )
+LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 25), (WIDTH, 25) )
+LEFTBOUND_RECT = pygame.Rect( (0, 0), (33, HEIGHT) )
+RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 30, 0), (30, HEIGHT) )
+BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
 # create a font
 afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
@@ -119,7 +126,7 @@ def handle_collision_ball_ball(ball1, ball2):
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
         print("Collide!")
-        tangent = math.atan2(dx, dy) - math.pi/2 
+        tangent = math.degrees(math.atan2(dx, dy) - math.pi/2)
         ball1.angle =  tangent 
         ball2.angle = tangent
         (ball1.vel, ball2.vel) = (ball2.vel, ball1.vel)
@@ -129,11 +136,25 @@ def handle_collision_ball_ball(ball1, ball2):
         ball1.y -= 3*math.cos(angle)
         ball2.x -= 3*math.sin(angle)
         ball2.y += 3*math.cos(angle)
+
+def test_collision_ball_rectangle(ball, rect):
+    r = ball.RADIUS
+    ballCenter = (ball.x + r, ball.y + r)
+    ball_distance_x = abs(ballCenter[0] - rect.centerx)
+    ball_distance_y = abs(ballCenter[1] - rect.centery)
+    if ball_distance_x > rect.width / 2 + r or ball_distance_y > rect.height / 2 + r:
+        return False
+    if ball_distance_x <= rect.width / 2 or ball_distance_y <= rect.height / 2:
+        return True
+    corner_x = ball_distance_x - rect.width / 2
+    corner_y = ball_distance_y - rect.height / 2
+    corner_distance = math.hypot(corner_x, corner_y)
+    return corner_distance <= r
         
 
-def handle_collision_ball_hole(ballRect, holeRect):
+def handle_collision_ball_hole(ball, holeRect):
     """If collide, add GOAL to the event list"""
-    if ballRect.colliderect(holeRect):
+    if test_collision_ball_rectangle(ball, holeRect):
         print("Collision!")
         pygame.event.post(pygame.event.Event(GOAL))
 
@@ -219,7 +240,6 @@ def main():
             if event.type == GOAL:
                 handle_gameover()
 
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     plr.increase_launchF()
@@ -257,13 +277,16 @@ def main():
         draw_window(force_scale)
         for i in range(len(player_list)):
             player_list[i].move()
-            handle_boundries(player_list[i])
+            for bound in BOUNDARY:
+                if test_collision_ball_rectangle(player_list[i], bound):
+                    player_list[i].reflect_x()
+            # handle_boundries(player_list[i])
             if i == 0:
                 handle_collision_ball_ball(player_list[0], player_list[1])
             else:
                 handle_collision_ball_ball(player_list[1], player_list[0])
 
-            handle_collision_ball_hole(player_list[i].get_rect(), hole.get_rect())
+            handle_collision_ball_hole(player_list[i], hole.get_rect())
         plr = player_list[current_player]
         if plr.vel < 1 and plr.vel != 0:
             arrow.reset(plr)
