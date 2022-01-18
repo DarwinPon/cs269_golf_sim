@@ -88,10 +88,11 @@ afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 # render a surface with some text
 text = afont.render( "Clean up time", True, (0, 0, 0) )
 #boundaries
-UPPERBOUND_RECT = pygame.Rect( (0, 0), (WIDTH, 35) )
-LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 35), (WIDTH, 35) )
-LEFTBOUND_RECT = pygame.Rect( (0, 0), (45, HEIGHT) )
-RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 45, 0), (45, HEIGHT) )
+UPPERBOUND_RECT = pygame.Rect( (0, -45), (WIDTH, 80) )
+print(UPPERBOUND_RECT.topleft)
+LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 35), (WIDTH, 80) )
+LEFTBOUND_RECT = pygame.Rect( (-45, 0), (90, HEIGHT) )
+RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 45, 0), (90, HEIGHT) )
 BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
 #testing stuff

@@ -99,7 +99,7 @@ class Ball:
         return self.angle
 
     def increase_launchF(self):
-        if self.launchF < 10:
+        if self.launchF < 20:
             self.launchF += 1
 
     def decrease_launchF(self):
