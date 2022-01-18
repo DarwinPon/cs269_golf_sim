@@ -9,12 +9,14 @@ class Ball:
         self.width = width
         self.height = height
         self.image = pygame.transform.scale(image, (width, height))
-        self.vel = 0
+        self.vel_x = 0
+        self.vel_y = 0
         self.acc = 0.25
         self.angle = 0
         self.launchF = 0
         self.arrow = arrow
         self.RADIUS = 15
+        self.mass = 1
 
     def get_rect(self):
         return self.rect
@@ -33,29 +35,33 @@ class Ball:
         self.rot_rect = rot_rect
 
     def set_vel(self, vel):
-        self.vel = vel
+        angleInRadian = math.radians(self.angle)
+        self.vel_x = vel * math.cos(angleInRadian)
+        self.vel_y = vel * math.sin(angleInRadian)
     
     def set_acc(self, acc):
         self.acc = acc
 
     def get_xy_velocities(self):
-        angleInRadian = math.radians(self.angle)
-        vel_x = self.vel * math.cos(angleInRadian)
-        vel_y = self.vel * math.sin(angleInRadian)
-        return [vel_x, vel_y]
+        return [self.vel_x, self.vel_y]
+
+    def get_vel(self):
+        return math.hypot(self.vel_x, self.vel_y)
     
     def move(self):
-        xy_vel = self.get_xy_velocities()
-        if abs(self.vel) < 1:
-            if self.vel > 0:
+        vel = self.get_vel()
+        if abs(vel) < 1:
+            if vel > 0:
                 self.reset()
-            self.vel = 0
+            self.set_vel(0)
         else:
-            vel_x = xy_vel[0]
-            vel_y = xy_vel[1]
-            self.rect.x += vel_x
-            self.rect.y += vel_y
-            self.vel -= self.acc
+            angleInRadian = math.radians(self.angle)
+            acc_x = self.acc * math.cos(angleInRadian)
+            acc_y = self.acc * math.sin(angleInRadian)
+            self.rect.x += self.vel_x
+            self.rect.y += self.vel_y
+            self.vel_x -= acc_x
+            self.vel_y -= acc_y
             self.x = self.rect.x
             self.y = self.rect.y
 
@@ -78,13 +84,18 @@ class Ball:
 
     def reflect_x(self):
         self.angle = -self.angle
+        self.vel_y = -self.vel_y
 
     def reflect_y(self):
         self.angle = 180 - self.angle
+        self.vel_x = -self.vel_x
 
     def launch(self, velocity):
         """set initial speed when player launches ball"""
-        self.vel = velocity*(1+self.launchF/2)
+        vel = velocity*(1+self.launchF/2)
+        angleInRadian = math.radians(self.angle)
+        self.vel_x = vel * math.cos(angleInRadian)
+        self.vel_y = vel * math.sin(angleInRadian)
 
     def reset(self):
         self.angle = 0

@@ -10,6 +10,7 @@ import random
 import math
 from turtle import width
 from webbrowser import BackgroundBrowser
+import numpy as np
 
 # import pygame
 import pygame
@@ -113,22 +114,35 @@ def draw_players(player_list, current_player, hole, arrow):
 ####################### Add Movement #########################
 
 def handle_collision_ball_ball(ball1, ball2):
+
     dx = ball1.x - ball2.x
     dy = ball1.y - ball2.y
 
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
         print("Collide!")
-        tangent = math.degrees(math.atan2(dx, dy) - math.pi/2)
-        ball1.angle =  tangent 
-        ball2.angle = tangent
-        (ball1.vel, ball2.vel) = (ball2.vel, ball1.vel)
+        m1, m2 = ball1.mass, ball2.mass
+        M = m1 + m2
+        r1, r2 = np.array((ball1.x+ball1.RADIUS, ball1.y+ball1.RADIUS)), np.array((ball2.x+ball2.RADIUS, ball2.y+ball2.RADIUS))
+        d = np.linalg.norm(r1 - r2)**2
+        v1, v2 = np.array((ball1.vel_x, ball1.vel_y)), np.array((ball2.vel_x, ball2.vel_y))
+        u1 = v1 - 2*m2 / M * np.dot(v1-v2, r1-r2) / d * (r1 - r2)
+        u2 = v2 - 2*m1 / M * np.dot(v2-v1, r2-r1) / d * (r2 - r1)
+        ball1.vel_x, ball1.vel_y = u1[0], u1[1]
+        ball2.vel_x, ball2.vel_y = u2[0], u2[1]
+        ball1.move()
+        ball2.move()
 
-        angle = 0.5 * math.pi + tangent
-        ball1.x += 3*math.sin(angle)
-        ball1.y -= 3*math.cos(angle)
-        ball2.x -= 3*math.sin(angle)
-        ball2.y += 3*math.cos(angle)
+        # tangent = -math.degrees(math.atan2(dx, dy)) -90
+        # ball1.angle = tangent
+        # ball2.angle = tangent
+        # (ball1.vel, ball2.vel) = (ball2.vel, ball1.vel)
+        #
+        # angle = 0.5 * math.pi + tangent
+        # ball1.x += math.sin(angle)
+        # ball1.y -= math.cos(angle)
+        # ball2.x -= math.sin(angle)
+        # ball2.y += math.cos(angle)
         
 
 def handle_collision_ball_hole(ballRect, holeRect):
@@ -140,11 +154,23 @@ def handle_collision_ball_hole(ballRect, holeRect):
 
 def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
-    if plr.x <= 35 or plr.x >= WIDTH-plr.width - 35:
-        # print("reached")
-        plr.reflect_y()
-    if plr.y <= plr.height/5 + 30 or plr.y >= HEIGHT - plr.height - 33:
-        plr.reflect_x()
+    if plr.x <= 35:
+        plr.x = 35
+        plr.vel_x = abs(plr.vel_x)
+
+
+    if plr.x >= WIDTH-plr.width - 35:
+        plr.x = WIDTH-plr.width - 35
+        plr.vel_x = - abs(plr.vel_x)
+
+    if plr.y <= plr.height/5 + 30:
+        plr.y = plr.height/5 + 30
+        plr.vel_y = abs(plr.vel_y)
+
+
+    if plr.y >= HEIGHT - plr.height - 30:
+        plr.y = HEIGHT - plr.height - 30
+        plr.vel_y = - abs(plr.vel_y)
 
 
 def handle_startScreen():
@@ -245,7 +271,7 @@ def main():
                     arrow.is_visible = False
                     current_player = len(player_list)-1-current_player
                     nxt_p = player_list[current_player]
-                    if nxt_p.vel < 1:
+                    if nxt_p.get_vel() < 1:
                         arrow.reset(nxt_p)
 
                 draw_players(player_list, current_player, hole, arrow)
@@ -265,9 +291,11 @@ def main():
 
             handle_collision_ball_hole(player_list[i].get_rect(), hole.get_rect())
         plr = player_list[current_player]
-        if plr.vel < 1 and plr.vel != 0:
-            arrow.reset(plr)
 
+        if plr.get_vel() < 1 and plr.get_vel() != 0:
+            arrow.reset(plr)
+        elif plr.get_vel() > 1:
+            arrow.is_visible = False
 
         draw_players(player_list, current_player, hole, arrow)
 
