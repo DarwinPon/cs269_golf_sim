@@ -20,6 +20,7 @@ class Consumable:
         pass
 
 
+
 class MassUp(Consumable):
     def __init__(self):
         Consumable.__init__(3)
