@@ -14,8 +14,8 @@ import numpy as np
 
 # import pygame
 import pygame
-from Ball import Ball
-from Arrow import Arrow
+from game_objects import Ball
+from game_objects import Arrow
 
 # initialize pygame
 pygame.init()
