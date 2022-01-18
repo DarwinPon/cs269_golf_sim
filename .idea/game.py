@@ -3,9 +3,13 @@
 
 ####################### Setup #########################
 # useful imports
+from cmath import tan
+from email.mime import image
 import sys
 import random
 import math
+from turtle import width
+from webbrowser import BackgroundBrowser
 
 # import pygame
 import pygame
@@ -45,7 +49,7 @@ INFO_FONT = pygame.font.SysFont("comicsans", 15)
 gameClock = pygame.time.Clock()
 
 # create a screen and set its width and height
-WIDTH, HEIGHT = 640, 480
+WIDTH, HEIGHT = 1280, 720
 screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
 
 
@@ -59,15 +63,21 @@ pygame.display.set_caption("Golf")
 
 BALL_WIDTH, BALL_HEIGHT = 30, 30
 ARROW_WIDTH, ARROW_HEIGHT = BALL_WIDTH*3, BALL_HEIGHT*3
-ball_img1 = pygame.image.load( "../assets/player1ball.png" ).convert_alpha() # put the name of ball image here
-ball_img2 = pygame.image.load( "../assets/player2ball.png" ).convert_alpha()
-arrow_img = pygame.image.load( "../assets/black_arrow.png" ).convert_alpha()
+ball_img1 = pygame.image.load( "../pictures/player1ball.png" ).convert_alpha() # put the name of ball image here
+ball_img2 = pygame.image.load( "../pictures/player2ball.png" ).convert_alpha()
+arrow_img = pygame.image.load( "../pictures/black_arrow.png" ).convert_alpha()
+hole_img = pygame.image.load("../pictures/hole.png").convert_alpha()
 
+# background scenes
+BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
+STARTSCREEN = pygame.transform.scale(pygame.image.load("../pictures/startScreen.png").convert_alpha(), (WIDTH, HEIGHT))
 
 
 arrow = Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
-player1 = Ball(ball_img1, 75, 150, BALL_WIDTH, BALL_HEIGHT, arrow)
-player2 = Ball(ball_img2, 75, 250, BALL_WIDTH, BALL_HEIGHT, arrow)
+player1 = Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+player2 = Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+hole = Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+
 
 arrow.reset(player1)
 player_list = [player1, player2]
@@ -79,61 +89,98 @@ text = afont.render( "Clean up time", True, (0, 0, 0) )
 
 ####################### Filling the Screen #########################
 def draw_window(scale):
-    # clear the screen with white
-    screen.fill(WHITE)
+    # clear the screen with background
+    screen.blit(BACKGROUND, (0,0))
 
     # now draw the surfaces to the screen using the blit function
-
 
     # display debug info
     force_text = INFO_FONT.render("Launch force: " + str(scale), 1, BLACK)
     screen.blit(force_text, (10, HEIGHT-force_text.get_height()-5))
 
     # update the screen
-    pygame.display.update()
+    # pygame.display.update()
 
-def draw_players(player_list, current_player, arrow):
-
+def draw_players(player_list, current_player, hole, arrow):
     if arrow.is_visible:
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
     for plr in player_list:
         screen.blit(plr.image, (plr.get_x(), plr.get_y()))
+    screen.blit(hole.image, (hole.get_x(), hole.get_y()))
     # update the screen
     pygame.display.update()
 
 ####################### Add Movement #########################
 
+def handle_collision_ball_ball(ball1, ball2):
+    dx = ball1.x - ball2.x
+    dy = ball1.y - ball2.y
 
+    distance = math.hypot(dx, dy)
+    if distance <= ball1.RADIUS + ball2.RADIUS:
+        print("Collide!")
+        tangent = math.atan2(dx, dy) - math.pi/2 
+        ball1.angle =  tangent 
+        ball2.angle = tangent
+        (ball1.vel, ball2.vel) = (ball2.vel, ball1.vel)
 
-def handle_collision(ballRect, goalRect):
+        angle = 0.5 * math.pi + tangent
+        ball1.x += 3*math.sin(angle)
+        ball1.y -= 3*math.cos(angle)
+        ball2.x -= 3*math.sin(angle)
+        ball2.y += 3*math.cos(angle)
+        
+
+def handle_collision_ball_hole(ballRect, holeRect):
     """If collide, add GOAL to the event list"""
-    if ballRect.colliderect(goalRect):
+    if ballRect.colliderect(holeRect):
         print("Collision!")
         pygame.event.post(pygame.event.Event(GOAL))
 
 
 def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
-
-    if plr.x <= 0 or plr.x >= 640-plr.width:
-
-        print("reached")
+    if plr.x <= 35 or plr.x >= WIDTH-plr.width - 35:
+        # print("reached")
         plr.reflect_y()
-    if plr.y <= plr.height/5 or plr.y >= 480-plr.height:
+    if plr.y <= plr.height/5 + 30 or plr.y >= HEIGHT - plr.height - 33:
         plr.reflect_x()
 
 
 def handle_startScreen():
     """Implement start screen"""
-
+    pass
 
 
 def handle_gameover():
     """Implement gameover screen"""
+    print("Entering gameover screen")
+    gameover_text = afont.render( "GOAL!!!", True, (0, 0, 0) )
+    # blit the text surface onto the screen
+    screen.blit( gameover_text, (WIDTH /2 - 100, HEIGHT / 2 - 50) )
+    pygame.display.update()
+    pygame.time.wait(2000)
     handle_endScreen()
 
 def handle_endScreen():
     """Implement end screen"""
+    screen.blit(STARTSCREEN, (0,0))
+
+    button = pygame.Rect( (180, 80), (280, 80) )
+    # pygame.draw.rect( screen, (70, 210, 80), button )
+    pygame.display.update()
+
+    print("Entering end screen")
+    while 1:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if check_button_clicked(button):
+                    pygame.event.clear()
+                    main()
+
 
 def check_button_clicked(button) -> bool:
     """Check if player click the button"""
@@ -142,7 +189,6 @@ def check_button_clicked(button) -> bool:
         return True
     else:
         return False
-
 
 def rot_image(rect, image, angle):
     rotated_img = pygame.transform.rotate(image, angle)
@@ -154,8 +200,7 @@ def rot_image(rect, image, angle):
 def main():
     global current_player
     draw_window(0)
-    draw_players(player_list, current_player, arrow)
-
+    draw_players(player_list, current_player, hole, arrow)
 
     # show the start screen
     handle_startScreen()
@@ -188,7 +233,6 @@ def main():
                 if event.key == pygame.K_LEFT:
                     plr.left(TURN_ANGLE)
                     rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
-
                     arrow.set_rot(rot_img, rot_x, rot_y)
 
                 if event.key == pygame.K_RIGHT:
@@ -204,14 +248,7 @@ def main():
                     if nxt_p.vel < 1:
                         arrow.reset(nxt_p)
 
-                draw_players(player_list, current_player, arrow)
-
-        key_pressed = pygame.key.get_pressed()
-
-
-
-
-        key_pressed = pygame.key.get_pressed()
+                draw_players(player_list, current_player, hole, arrow)
 
         # move to gameover screen when collided
         #handle_collision(goalRect, ballRect)
@@ -221,12 +258,18 @@ def main():
         for i in range(len(player_list)):
             player_list[i].move()
             handle_boundries(player_list[i])
+            if i == 0:
+                handle_collision_ball_ball(player_list[0], player_list[1])
+            else:
+                handle_collision_ball_ball(player_list[1], player_list[0])
+
+            handle_collision_ball_hole(player_list[i].get_rect(), hole.get_rect())
         plr = player_list[current_player]
         if plr.vel < 1 and plr.vel != 0:
             arrow.reset(plr)
 
 
-        draw_players(player_list, current_player, arrow)
+        draw_players(player_list, current_player, hole, arrow)
 
 
         # set FPS
