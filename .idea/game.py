@@ -119,7 +119,7 @@ def handle_collision_ball_ball(ball1, ball2):
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
         print("Collide!")
-        tangent = math.atan2(dx, dy) - math.pi/2 
+        tangent = math.degrees(math.atan2(dx, dy) - math.pi/2)
         ball1.angle =  tangent 
         ball2.angle = tangent
         (ball1.vel, ball2.vel) = (ball2.vel, ball1.vel)
