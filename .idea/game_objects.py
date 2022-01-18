@@ -1,5 +1,6 @@
 import pygame
 import math
+import random
 
 class Thing():
     def __init__(self, image, x, y, width, height):
@@ -22,20 +23,22 @@ class Thing():
     def get_height(self):
         return self.height
 
+    def get_rect(self):
+        return self.rect
+
 
 class Ball(Thing):
     def __init__(self, image, x, y, width, height, arrow):
         super().__init__(image, x, y, width, height)
-        self.rect = pygame.Rect((x, y), (width, height))
         self.vel_x = 0
         self.vel_y = 0
-        self.acc = 0.25
+        self.acc = 1
         self.angle = 0
         self.launchF = 0
         self.arrow = arrow
         self.RADIUS = 15
         self.mass = 1
-        self.max_powe = 10
+        self.max_power = 10
         self.consumables = []
 
     def get_consumables(self):
@@ -46,9 +49,6 @@ class Ball(Thing):
         
     def remove_consumable(self, consumable):
         self.consumables.remove(consumable)
-
-    def get_rect(self):
-        return self.rect
 
     def get_radius(self):
         return self.RADIUS
@@ -100,7 +100,7 @@ class Ball(Thing):
         return self.angle
 
     def increase_launchF(self):
-        if self.launchF < 10:
+        if self.launchF < self.max_power:
             self.launchF += 1
 
     def decrease_launchF(self):
@@ -131,13 +131,9 @@ class Ball(Thing):
 class Arrow(Thing):
     def __init__(self, image, x, y, width, height):
         super().__init__(image, x, y, width, height)
-        self.rect = pygame.Rect((x, y), (width, height))
         self.rot_img = image
         self.rot_rect = self.rect.copy()
         self.is_visible = True
-
-    def get_rect(self):
-        return self.rect
 
     def set_rot(self, rot_img, rot_x, rot_y):
         self.rot_img = rot_img
@@ -157,9 +153,11 @@ class Arrow(Thing):
 class Consumable(Thing):
     def __init__(self, duration, plr, image, x, y, width, height):
         super().__init__(image, x, y, width, height)
-        self.rect = pygame.Rect((x, y), (width, height))
         self.duration = duration
-        self.plr = plr
+        self.plr = None
+
+    def set_plr(self, new_plr):
+        self.plr = new_plr
 
     def get_duration(self):
         return self.duration
@@ -182,7 +180,7 @@ class Consumable(Thing):
 
 
 class MassUp(Consumable):
-    def __init__(self, duration, plr, image, x, y, width, height):
+    def __init__(self, plr, image, x, y, width, height):
         super().__init__(3, plr, image, x, y, width, height)
 
     def activate(self, plr):
@@ -197,10 +195,32 @@ class PowerUp(Consumable):
         super().__init__(2, plr, image, x, y, width, height)
 
     def activate(self, plr):
-        plr.mass = 3*plr.mass
+        plr.max_power = 20
 
     def deactivate(self, plr):
-        plr.mass = plr.mass/3
+        plr.max_power = 10
+
+
+class SpeedUp(Consumable):
+    def __init__(self, plr, image, x, y, width, height):
+        super().__init__(2, plr, image, x, y, width, height)
+
+    def activate(self, plr):
+        plr.acc *= 3
+
+    def deactivate(self, plr):
+        plr.acc /= 3
+
+
+class RandomAngle(Consumable):
+    def __init__(self, plr, image, x, y, width, height):
+        super().__init__(1, plr, image, x, y, width, height)
+
+    def activate(self, plr):
+        plr.angle = random.randint(0, 360)
+
+    def deactivate(self, plr):
+        plr.angle = 0
 
 
 

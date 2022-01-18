@@ -14,8 +14,7 @@ import numpy as np
 
 # import pygame
 import pygame
-from game_objects import Ball
-from game_objects import Arrow
+import game_objects as go
 
 # initialize pygame
 pygame.init()
@@ -68,16 +67,22 @@ ball_img1 = pygame.image.load( "../pictures/player1ball.png" ).convert_alpha() #
 ball_img2 = pygame.image.load( "../pictures/player2ball.png" ).convert_alpha()
 arrow_img = pygame.image.load( "../pictures/black_arrow.png" ).convert_alpha()
 hole_img = pygame.image.load("../pictures/hole.png").convert_alpha()
+speedUp_img = pygame.image.load("../pictures/Broom.png").convert_alpha()
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
 STARTSCREEN = pygame.transform.scale(pygame.image.load("../pictures/startScreen.png").convert_alpha(), (WIDTH, HEIGHT))
 
 
-arrow = Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
-player1 = Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
-player2 = Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
-hole = Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+arrow = go.Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
+player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+
+# test consumable
+speedUp = go.SpeedUp(None, speedUp_img, 200, 200, 40, 40)
+consumableList = [speedUp]
+
 
 arrow.reset(player1)
 player_list = [player1, player2]
@@ -88,6 +93,7 @@ LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 25), (WIDTH, 25) )
 LEFTBOUND_RECT = pygame.Rect( (0, 0), (33, HEIGHT) )
 RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 30, 0), (30, HEIGHT) )
 BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
+
 
 # create a font
 afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
@@ -109,6 +115,8 @@ def draw_window(scale):
     # pygame.display.update()
 
 def draw_players(player_list, current_player, hole, arrow):
+    screen.blit(speedUp.image, (speedUp.get_x(), speedUp.get_y()))
+
     if arrow.is_visible:
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
     for plr in player_list:
@@ -120,7 +128,6 @@ def draw_players(player_list, current_player, hole, arrow):
 ####################### Add Movement #########################
 
 def handle_collision_ball_ball(ball1, ball2):
-
     dx = ball1.x - ball2.x
     dy = ball1.y - ball2.y
 
@@ -144,16 +151,6 @@ def handle_collision_ball_ball(ball1, ball2):
         ball1.move()
         ball2.move()
 
-        # tangent = -math.degrees(math.atan2(dx, dy)) -90
-        # ball1.angle = tangent
-        # ball2.angle = tangent
-        # (ball1.vel, ball2.vel) = (ball2.vel, ball1.vel)
-        #
-        # angle = 0.5 * math.pi + tangent
-        # ball1.x += math.sin(angle)
-        # ball1.y -= math.cos(angle)
-        # ball2.x -= math.sin(angle)
-        # ball2.y += math.cos(angle)
 
 def test_collision_ball_rectangle(ball, rect):
     r = ball.RADIUS
@@ -169,12 +166,22 @@ def test_collision_ball_rectangle(ball, rect):
     corner_distance = math.hypot(corner_x, corner_y)
     return corner_distance <= r
         
+
 def handle_collision_ball_hole(ball, holeRect):
     """If collide, add GOAL to the event list"""
     if test_collision_ball_rectangle(ball, holeRect):
         print("Collision!")
         pygame.event.post(pygame.event.Event(GOAL))
 
+
+def handle_collision_ball_consumables(ball, consumables_list):
+    for consumable in consumables_list:
+        if test_collision_ball_rectangle(ball, consumable.get_rect()):
+            print("Collide with consumable")
+            # set the plr to the consumable
+            consumable.set_plr(ball)
+            # add current consumable into the plr's consumables list
+            ball.consumables.append(consumable)
 
 def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
@@ -311,23 +318,25 @@ def main():
         for i in range(len(player_list)):
             player_list[i].move()
 
-            for bound in BOUNDARY:
-                if test_collision_ball_rectangle(player_list[i], bound):
-                    player_list[i].reflect_x()
+            # for bound in BOUNDARY:
+            #     if test_collision_ball_rectangle(player_list[i], bound):
+            #         player_list[i].reflect_x()
 
-            # handle_boundries(player_list[i])
+            handle_boundries(player_list[i])
             if i == 0:
                 handle_collision_ball_ball(player_list[0], player_list[1])
             else:
                 handle_collision_ball_ball(player_list[1], player_list[0])
 
             handle_collision_ball_hole(player_list[i], hole.get_rect())
+            handle_collision_ball_consumables(player_list[i], consumableList)
         plr = player_list[current_player]
 
         if plr.get_vel() < 1 and plr.get_vel() != 0:
             arrow.reset(plr)
         elif plr.get_vel() > 1:
             arrow.is_visible = False
+
 
         draw_players(player_list, current_player, hole, arrow)
 
