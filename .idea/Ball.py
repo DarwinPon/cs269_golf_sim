@@ -62,10 +62,9 @@ class Ball:
         else:
             angleInRadian = math.radians(self.angle)
             acc_x = self.acc * math.cos(angleInRadian)
+
+
             acc_y = self.acc * math.sin(angleInRadian)
-            print(self.vel_x)
-            print(self.vel_y)
-            print("")
 
             self.rect.x += self.vel_x
             self.rect.y += self.vel_y
