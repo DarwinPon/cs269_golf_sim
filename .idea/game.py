@@ -67,7 +67,7 @@ ball_img1 = pygame.image.load( "../pictures/player1ball.png" ).convert_alpha() #
 ball_img2 = pygame.image.load( "../pictures/player2ball.png" ).convert_alpha()
 arrow_img = pygame.image.load( "../pictures/black_arrow.png" ).convert_alpha()
 hole_img = pygame.image.load("../pictures/hole.png").convert_alpha()
-speedUp_img = pygame.image.load("../pictures/Broom.png").convert_alpha()
+speedUp_img = pygame.image.load("../pictures/muscleArm.png").convert_alpha()
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -80,7 +80,7 @@ player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, B
 hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
 
 # test consumable
-speedUp = go.RandomAngle(speedUp_img, 200, 200, 40, 40)
+speedUp = go.PowerUp(speedUp_img, 200, 200, 120, 120)
 consumableList = [speedUp]
 
 arrow.reset(player1)
@@ -287,13 +287,7 @@ def handle_boundries(plr):
 
 def handle_plr_consumables(plr):
     for consumable in plr.consumables:
-        # if the consumable is random angle, change the angle of TURN_ANGLE to 0
-        if type.consumable is go.RandomAngle:
-            TURN_ANGLE = 0
-
         if consumable.need_to_deactivate():
-            if type.consumable is go.RandomAngle:
-                TURN_ANGLE = 15
             consumable.deactivate(plr)
             plr.consumables.remove(consumable)
 
