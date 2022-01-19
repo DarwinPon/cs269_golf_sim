@@ -14,8 +14,7 @@ import numpy as np
 
 # import pygame
 import pygame
-from Ball import Ball
-from Arrow import Arrow
+import game_objects as go
 
 # initialize pygame
 pygame.init()
@@ -68,20 +67,32 @@ ball_img1 = pygame.image.load( "../pictures/player1ball.png" ).convert_alpha() #
 ball_img2 = pygame.image.load( "../pictures/player2ball.png" ).convert_alpha()
 arrow_img = pygame.image.load( "../pictures/black_arrow.png" ).convert_alpha()
 hole_img = pygame.image.load("../pictures/hole.png").convert_alpha()
+speedUp_img = pygame.image.load("../pictures/Broom.png").convert_alpha()
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
 STARTSCREEN = pygame.transform.scale(pygame.image.load("../pictures/startScreen.png").convert_alpha(), (WIDTH, HEIGHT))
 
 
-arrow = Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
-player1 = Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
-player2 = Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
-hole = Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+arrow = go.Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
+player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
 
+# test consumable
+speedUp = go.RandomAngle(speedUp_img, 200, 200, 40, 40)
+consumableList = [speedUp]
 
 arrow.reset(player1)
 player_list = [player1, player2]
+
+# put rectangles on the boundaries
+UPPERBOUND_RECT = pygame.Rect( (0, 0), (WIDTH, 25) )
+LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 25), (WIDTH, 25) )
+LEFTBOUND_RECT = pygame.Rect( (0, 0), (33, HEIGHT) )
+RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 30, 0), (30, HEIGHT) )
+BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
+
 
 # create a font
 afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
@@ -115,6 +126,9 @@ def draw_window(scale):
     # pygame.display.update()
 
 def draw_players(player_list, current_player, hole, arrow):
+    for consumable in consumableList:
+        screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
+
     if arrow.is_visible:
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
     for plr in player_list:
@@ -126,7 +140,6 @@ def draw_players(player_list, current_player, hole, arrow):
 ####################### Add Movement #########################
 
 def handle_collision_ball_ball(ball1, ball2):
-
     dx = ball1.x - ball2.x
     dy = ball1.y - ball2.y
 
@@ -150,16 +163,20 @@ def handle_collision_ball_ball(ball1, ball2):
         ball1.move()
         ball2.move()
 
-        # tangent = -math.degrees(math.atan2(dx, dy)) -90
-        # ball1.angle = tangent
-        # ball2.angle = tangent
-        # (ball1.vel, ball2.vel) = (ball2.vel, ball1.vel)
-        #
-        # angle = 0.5 * math.pi + tangent
-        # ball1.x += math.sin(angle)
-        # ball1.y -= math.cos(angle)
-        # ball2.x -= math.sin(angle)
-        # ball2.y += math.cos(angle)
+
+def test_collision_ball_rectangle(ball, rect):
+    r = ball.get_radius()
+    ballCenter = (ball.x + r, ball.y + r)
+    ball_distance_x = abs(ballCenter[0] - rect.centerx)
+    ball_distance_y = abs(ballCenter[1] - rect.centery)
+    if ball_distance_x > rect.width / 2 + r or ball_distance_y > rect.height / 2 + r:
+        return False
+    if ball_distance_x <= rect.width / 2 or ball_distance_y <= rect.height / 2:
+        return True
+    corner_x = ball_distance_x - rect.width / 2
+    corner_y = ball_distance_y - rect.height / 2
+    corner_distance = math.hypot(corner_x, corner_y)
+    return corner_distance <= r
         
 def handle_collision_ball_rect(ball, rect):
     """handles collision between a ball object and a rectangle"""
@@ -171,8 +188,6 @@ def handle_collision_ball_rect(ball, rect):
     new_col_v = check_collision_v(ball, rect)
     new_col_h = check_collision_h(ball, rect)
     ball.trace_back()
-
-
 
     if current_col_h and new_col_h and current_col_v != new_col_v:
         print("vertical")
@@ -228,12 +243,23 @@ def check_collision_h(ball, rect):
     else:
         return check_corner_collision(ball, rect)
 
-def handle_collision_ball_hole(ballRect, holeRect):
+def handle_collision_ball_hole(ball, holeRect):
     """If collide, add GOAL to the event list"""
-    if ballRect.colliderect(holeRect):
+    if test_collision_ball_rectangle(ball, holeRect):
         print("Collision!")
         pygame.event.post(pygame.event.Event(GOAL))
 
+
+def handle_collision_ball_consumables(ball, consumables_list):
+    for consumable in consumables_list:
+        if test_collision_ball_rectangle(ball, consumable.get_rect()):
+            print("Collide with consumable")
+            # set the plr to the consumable
+            consumable.activate(ball)
+            # remove consumable from the list and screen
+            consumables_list.remove(consumable)
+            # add current consumable into the plr's consumables list
+            ball.consumables.append(consumable)
 
 def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
@@ -260,6 +286,18 @@ def handle_boundries(plr):
     #     plr.angle = -plr.angle
     #     plr.y = HEIGHT - plr.height - 30
     #     plr.vel_y = - abs(plr.vel_y)
+
+def handle_plr_consumables(plr):
+    for consumable in plr.consumables:
+        # if the consumable is random angle, change the angle of TURN_ANGLE to 0
+        if type.consumable is go.RandomAngle:
+            TURN_ANGLE = 0
+
+        if consumable.need_to_deactivate():
+            if type.consumable is go.RandomAngle:
+                TURN_ANGLE = 15
+            consumable.deactivate(plr)
+            plr.consumables.remove(consumable)
 
 
 def handle_startScreen():
@@ -337,7 +375,6 @@ def main():
             if event.type == GOAL:
                 handle_gameover()
 
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     plr.increase_launchF()
@@ -359,6 +396,7 @@ def main():
                     arrow.set_rot(rot_img, rot_x, rot_y)
 
                 if event.key == pygame.K_SPACE:
+                    handle_plr_consumables(player_list[current_player])
                     plr.launch(VELOCITY)
                     arrow.is_visible = False
                     current_player = len(player_list)-1-current_player
@@ -366,19 +404,21 @@ def main():
                     if nxt_p.get_vel() < 1:
                         arrow.reset(nxt_p)
 
-                draw_players(player_list, current_player, hole, arrow)
+                    
 
-        # move to gameover screen when collided
-        #handle_collision(goalRect, ballRect)
+                draw_players(player_list, current_player, hole, arrow)
 
         # update the screen
         draw_window(force_scale)
-        for i in range(len(player_list)-1):
+
+        for i in range(len(player_list)):
+
 
             handle_collision_ball_ball(player_list[0], player_list[1])
             handle_boundries(player_list[i])
             player_list[i].move()
-            handle_collision_ball_hole(player_list[i].get_rect(), hole.get_rect())
+            handle_collision_ball_hole(player_list[i], hole.get_rect())
+            handle_collision_ball_consumables(player_list[i], consumableList)
 
         plr = player_list[current_player]
 
@@ -386,6 +426,7 @@ def main():
             arrow.reset(plr)
         elif plr.get_vel() > 1:
             arrow.is_visible = False
+
 
         draw_players(player_list, current_player, hole, arrow)
 
