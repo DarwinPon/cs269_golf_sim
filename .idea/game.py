@@ -67,7 +67,7 @@ ball_img1 = pygame.image.load( "../pictures/player1ball.png" ).convert_alpha() #
 ball_img2 = pygame.image.load( "../pictures/player2ball.png" ).convert_alpha()
 arrow_img = pygame.image.load( "../pictures/black_arrow.png" ).convert_alpha()
 hole_img = pygame.image.load("../pictures/hole.png").convert_alpha()
-speedUp_img = pygame.image.load("../pictures/Broom.png").convert_alpha()
+speedUp_img = pygame.image.load("../pictures/muscleArm.png").convert_alpha()
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
