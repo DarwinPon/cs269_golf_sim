@@ -27,7 +27,6 @@ class Thing():
         return self.rect
 
 
-
 class Ball(Thing):
     def __init__(self, image, x, y, width, height, arrow):
         super().__init__(image, x, y, width, height)
@@ -121,11 +120,7 @@ class Ball(Thing):
         return self.angle
 
     def increase_launchF(self):
-<<<<<<< HEAD:.idea/game_objects.py
         if self.launchF < self.max_power:
-=======
-        if self.launchF < 20:
->>>>>>> remotes/origin/Blitzen:.idea/Ball.py
             self.launchF += 1
 
     def decrease_launchF(self):
@@ -242,7 +237,8 @@ class RandomAngle(Consumable):
         super().__init__(1, image, x, y, width, height)
 
     def activate(self, plr):
-        plr.angle = random.randint(0, 360)
+        # plr.angle = random.randint(0, 360)
+        pass
 
     def deactivate(self, plr):
         plr.angle = 0
