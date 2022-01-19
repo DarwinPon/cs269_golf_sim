@@ -85,6 +85,8 @@ class Ball(Thing):
         else:
             angleInRadian = math.radians(self.angle)
             acc_x = self.acc * math.cos(angleInRadian)
+
+
             acc_y = self.acc * math.sin(angleInRadian)
 
             self.rect.x += self.vel_x
@@ -119,7 +121,11 @@ class Ball(Thing):
         return self.angle
 
     def increase_launchF(self):
+<<<<<<< HEAD:.idea/game_objects.py
         if self.launchF < self.max_power:
+=======
+        if self.launchF < 20:
+>>>>>>> remotes/origin/Blitzen:.idea/Ball.py
             self.launchF += 1
 
     def decrease_launchF(self):

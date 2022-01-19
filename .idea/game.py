@@ -99,10 +99,11 @@ afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 # render a surface with some text
 text = afont.render( "Clean up time", True, (0, 0, 0) )
 #boundaries
-UPPERBOUND_RECT = pygame.Rect( (0, 0), (WIDTH, 35) )
-LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 35), (WIDTH, 35) )
-LEFTBOUND_RECT = pygame.Rect( (0, 0), (45, HEIGHT) )
-RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 45, 0), (45, HEIGHT) )
+UPPERBOUND_RECT = pygame.Rect( (0, -45), (WIDTH, 80) )
+print(UPPERBOUND_RECT.topleft)
+LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 35), (WIDTH, 80) )
+LEFTBOUND_RECT = pygame.Rect( (-45, 0), (90, HEIGHT) )
+RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 45, 0), (90, HEIGHT) )
 BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
 #testing stuff
@@ -183,6 +184,7 @@ def handle_collision_ball_rect(ball, rect):
     current_col_v = check_collision_v(ball, rect)
     current_col_h = check_collision_h(ball, rect)
     ball.advance()
+
     new_col_v = check_collision_v(ball, rect)
     new_col_h = check_collision_h(ball, rect)
     ball.trace_back()
@@ -191,27 +193,30 @@ def handle_collision_ball_rect(ball, rect):
         print("vertical")
         ball.reflect_y()
 
+
     elif current_col_h != new_col_h and current_col_v and new_col_v:
         print("horizontal")
         ball.reflect_x()
     elif current_col_h != new_col_h and current_col_v != new_col_v:
+        print("corner")
         ball.reflect_x()
         ball.reflect_y()
         ball.move()
 
 def check_collision_v(ball, rect):
     '''check if the next advance of ball will result in a vertical collision'''
-    if ball.x > rect.x + rect.width or ball.x + 2*ball.RADIUS < rect.x:
-        return False
-    #direct collision
-    elif ball.x + ball.RADIUS > rect.x and ball.x + ball.RADIUS < rect.x + rect.width:
+    if ball.x + ball.RADIUS >= rect.x and ball.x + ball.RADIUS <= rect.x + rect.width:
         return True
-    #corner collision
+    elif ball.x + 2*ball.RADIUS < rect.x or ball.x > rect.x + rect.width:
+        return False
+
+    elif ball.y + 2*ball.RADIUS >= rect.y and ball.y <= rect.y + rect.height:
+        return ball.x + 2*ball.RADIUS >= rect.x and ball.x <= rect.x + rect.width
     else:
-        if check_corner_collision(ball, rect):
-            return True
-        else:
-            return False
+        return check_corner_collision(ball, rect)
+
+
+
 
 def check_corner_collision(ball, rect):
     x = ball.x + ball.RADIUS
@@ -229,17 +234,14 @@ def check_corner_collision(ball, rect):
 
 def check_collision_h(ball, rect):
     '''check if the next advance of ball will result in a horizontal collision'''
-    if ball.y > rect.y + rect.height or ball.y + 2*ball.RADIUS < rect.y:
-        return False
-    #direct collision
-    elif ball.y + ball.RADIUS > rect.y and ball.y + ball.RADIUS < rect.y + rect.height:
+    if ball.y + ball.RADIUS >= rect.y and ball.y + ball.RADIUS <= rect.y + rect.height:
         return True
-    #corner collision
+    elif ball.y + 2*ball.RADIUS < rect.y or ball.y > rect.y + rect.height:
+        return False
+    elif ball.y + 2*ball.RADIUS >= rect.y and ball.y <= rect.y + rect.height:
+        return ball.y + 2*ball.RADIUS >= rect.y and ball.y <= rect.y + rect.height
     else:
-        if check_corner_collision(ball, rect):
-            return True
-        else:
-            return False
+        return check_corner_collision(ball, rect)
 
 def handle_collision_ball_hole(ball, holeRect):
     """If collide, add GOAL to the event list"""
@@ -402,7 +404,11 @@ def main():
 
         # update the screen
         draw_window(force_scale)
+<<<<<<< HEAD
         for i in range(len(player_list)):
+=======
+        for i in range(len(player_list)-1):
+>>>>>>> remotes/origin/Blitzen
 
             handle_collision_ball_ball(player_list[0], player_list[1])
             handle_boundries(player_list[i])
