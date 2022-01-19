@@ -290,17 +290,18 @@ def handle_boundries(plr):
     #     plr.y = HEIGHT - plr.height - 30
     #     plr.vel_y = - abs(plr.vel_y)
 
-def handle_plr_consumables(plr):   
+def handle_plr_consumables(plr):
+    global turn_angle
     for consumable in plr.consumables:
-        print(type(consumable) is go.RandomAngle)
-    
+        print(type(consumable))
         if type(consumable) is go.RandomAngle:
             turn_angle = 0
-            print(turn_angle)
+            print("yeet")
 
         if consumable.need_to_deactivate():
             consumable.deactivate(plr)
             plr.consumables.remove(consumable)
+    print(turn_angle)
 
 
 def handle_startScreen():
