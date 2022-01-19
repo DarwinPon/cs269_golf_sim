@@ -31,7 +31,7 @@ GOAL = pygame.USEREVENT + 1
 
 #initial velocity when force scale is 0
 VELOCITY = 8
-TURN_ANGLE = 15
+turn_angle = 15
 
 current_player = 0
 
@@ -80,7 +80,7 @@ player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, B
 hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
 
 # test consumable
-speedUp = go.RandomAngle(speedUp_img, 200, 200, 40, 40)
+speedUp = go.RandomAngle(speedUp_img, 200, 200, 120, 120)
 consumableList = [speedUp]
 
 arrow.reset(player1)
@@ -177,7 +177,8 @@ def test_collision_ball_rectangle(ball, rect):
     corner_y = ball_distance_y - rect.height / 2
     corner_distance = math.hypot(corner_x, corner_y)
     return corner_distance <= r
-        
+
+
 def handle_collision_ball_rect(ball, rect):
     """handles collision between a ball object and a rectangle"""
 
@@ -203,6 +204,7 @@ def handle_collision_ball_rect(ball, rect):
         ball.reflect_y()
         ball.move()
 
+
 def check_collision_v(ball, rect):
     '''check if the next advance of ball will result in a vertical collision'''
     if ball.x + ball.RADIUS >= rect.x and ball.x + ball.RADIUS <= rect.x + rect.width:
@@ -214,8 +216,6 @@ def check_collision_v(ball, rect):
         return ball.x + 2*ball.RADIUS >= rect.x and ball.x <= rect.x + rect.width
     else:
         return check_corner_collision(ball, rect)
-
-
 
 
 def check_corner_collision(ball, rect):
@@ -232,6 +232,7 @@ def check_corner_collision(ball, rect):
     else:
         return False
 
+
 def check_collision_h(ball, rect):
     '''check if the next advance of ball will result in a horizontal collision'''
     if ball.y + ball.RADIUS >= rect.y and ball.y + ball.RADIUS <= rect.y + rect.height:
@@ -242,6 +243,7 @@ def check_collision_h(ball, rect):
         return ball.y + 2*ball.RADIUS >= rect.y and ball.y <= rect.y + rect.height
     else:
         return check_corner_collision(ball, rect)
+
 
 def handle_collision_ball_hole(ball, holeRect):
     """If collide, add GOAL to the event list"""
@@ -260,6 +262,7 @@ def handle_collision_ball_consumables(ball, consumables_list):
             consumables_list.remove(consumable)
             # add current consumable into the plr's consumables list
             ball.consumables.append(consumable)
+
 
 def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
@@ -287,15 +290,15 @@ def handle_boundries(plr):
     #     plr.y = HEIGHT - plr.height - 30
     #     plr.vel_y = - abs(plr.vel_y)
 
-def handle_plr_consumables(plr):
+def handle_plr_consumables(plr):   
     for consumable in plr.consumables:
-        # if the consumable is random angle, change the angle of TURN_ANGLE to 0
-        if type.consumable is go.RandomAngle:
-            TURN_ANGLE = 0
+        print(type(consumable) is go.RandomAngle)
+    
+        if type(consumable) is go.RandomAngle:
+            turn_angle = 0
+            print(turn_angle)
 
         if consumable.need_to_deactivate():
-            if type.consumable is go.RandomAngle:
-                TURN_ANGLE = 15
             consumable.deactivate(plr)
             plr.consumables.remove(consumable)
 
@@ -386,16 +389,18 @@ def main():
                 draw_window(force_scale)
 
                 if event.key == pygame.K_LEFT:
-                    plr.left(TURN_ANGLE)
+                    print(turn_angle)
+                    plr.left(turn_angle)
                     rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
                     arrow.set_rot(rot_img, rot_x, rot_y)
 
                 if event.key == pygame.K_RIGHT:
-                    plr.right(TURN_ANGLE)
+                    plr.right(turn_angle)
                     rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
                     arrow.set_rot(rot_img, rot_x, rot_y)
 
                 if event.key == pygame.K_SPACE:
+                    # check if we need to delet the consumables
                     handle_plr_consumables(player_list[current_player])
                     plr.launch(VELOCITY)
                     arrow.is_visible = False
@@ -412,7 +417,6 @@ def main():
         draw_window(force_scale)
 
         for i in range(len(player_list)):
-
 
             handle_collision_ball_ball(player_list[0], player_list[1])
             handle_boundries(player_list[i])
