@@ -27,6 +27,7 @@ class Thing():
         return self.rect
 
 
+
 class Ball(Thing):
     def __init__(self, image, x, y, width, height, arrow):
         super().__init__(image, x, y, width, height)
@@ -72,15 +73,18 @@ class Ball(Thing):
         return math.hypot(self.vel_x, self.vel_y)
     
     def move(self):
+
+
         vel = self.get_vel()
-        if abs(vel) < 1:
+
+
+        if abs(vel) < 2:
             if vel > 0:
                 self.reset()
             self.set_vel(0)
         else:
             angleInRadian = math.radians(self.angle)
             acc_x = self.acc * math.cos(angleInRadian)
-
             acc_y = self.acc * math.sin(angleInRadian)
 
             self.rect.x += self.vel_x
@@ -89,6 +93,21 @@ class Ball(Thing):
             self.vel_y -= acc_y
             self.x = self.rect.x
             self.y = self.rect.y
+
+
+
+    def advance(self):
+        '''allows the ball to take a step forward without changing its speed. Only used in collision detection'''
+
+        self.x += self.vel_x
+        self.y += self.vel_y
+
+
+    def trace_back(self):
+        '''allows the ball to take a step back. Only used in collision detection'''
+        self.x -= self.vel_x
+        self.y -= self.vel_y
+
 
     def left(self, angle):
         self.angle -= angle
@@ -109,9 +128,12 @@ class Ball(Thing):
 
     def reflect_x(self):
         self.angle = -self.angle
+        self.vel_y = -self.vel_y
+
 
     def reflect_y(self):
         self.angle = 180 - self.angle
+        self.vel_x = -self.vel_x
 
     def launch(self, velocity):
         """set initial speed when player launches ball"""
@@ -126,7 +148,6 @@ class Ball(Thing):
     def reset(self):
         self.angle = 0
         self.launchF = 0
-
 
 class Arrow(Thing):
     def __init__(self, image, x, y, width, height):
@@ -151,13 +172,9 @@ class Arrow(Thing):
 
 
 class Consumable(Thing):
-    def __init__(self, duration, plr, image, x, y, width, height):
+    def __init__(self, duration, image, x, y, width, height):
         super().__init__(image, x, y, width, height)
         self.duration = duration
-        self.plr = None
-
-    def set_plr(self, new_plr):
-        self.plr = new_plr
 
     def get_duration(self):
         return self.duration
@@ -165,10 +182,12 @@ class Consumable(Thing):
     def set_duration(self, new_duration):
         self.duration = new_duration
 
-    def countdown(self, plr):
-        self.duration -= 1
-        if self.duration <= 0:
-            self.deactive(plr)
+    def need_to_deactivate(self):
+        if self.duration == 0:
+            return True
+        else:
+            self.duration -= 1
+            return False
 
     def activate(self, plr):
         '''activate the item's effect'''
@@ -180,8 +199,8 @@ class Consumable(Thing):
 
 
 class MassUp(Consumable):
-    def __init__(self, plr, image, x, y, width, height):
-        super().__init__(3, plr, image, x, y, width, height)
+    def __init__(self, image, x, y, width, height):
+        super().__init__(3, image, x, y, width, height)
 
     def activate(self, plr):
         plr.mass = 3*plr.mass
@@ -191,8 +210,8 @@ class MassUp(Consumable):
 
 
 class PowerUp(Consumable):
-    def __init__(self, plr, image, x, y, width, height):
-        super().__init__(2, plr, image, x, y, width, height)
+    def __init__(self, image, x, y, width, height):
+        super().__init__(2, image, x, y, width, height)
 
     def activate(self, plr):
         plr.max_power = 20
@@ -202,19 +221,19 @@ class PowerUp(Consumable):
 
 
 class SpeedUp(Consumable):
-    def __init__(self, plr, image, x, y, width, height):
-        super().__init__(2, plr, image, x, y, width, height)
+    def __init__(self, image, x, y, width, height):
+        super().__init__(2, image, x, y, width, height)
 
     def activate(self, plr):
-        plr.acc *= 3
+        plr.acc /= 3
 
     def deactivate(self, plr):
-        plr.acc /= 3
+        plr.acc *= 3
 
 
 class RandomAngle(Consumable):
-    def __init__(self, plr, image, x, y, width, height):
-        super().__init__(1, plr, image, x, y, width, height)
+    def __init__(self, image, x, y, width, height):
+        super().__init__(1, image, x, y, width, height)
 
     def activate(self, plr):
         plr.angle = random.randint(0, 360)

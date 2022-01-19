@@ -80,9 +80,8 @@ player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, B
 hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
 
 # test consumable
-speedUp = go.SpeedUp(None, speedUp_img, 200, 200, 40, 40)
+speedUp = go.RandomAngle(speedUp_img, 200, 200, 40, 40)
 consumableList = [speedUp]
-
 
 arrow.reset(player1)
 player_list = [player1, player2]
@@ -126,7 +125,8 @@ def draw_window(scale):
     # pygame.display.update()
 
 def draw_players(player_list, current_player, hole, arrow):
-    screen.blit(speedUp.image, (speedUp.get_x(), speedUp.get_y()))
+    for consumable in consumableList:
+        screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
 
     if arrow.is_visible:
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
@@ -164,7 +164,7 @@ def handle_collision_ball_ball(ball1, ball2):
 
 
 def test_collision_ball_rectangle(ball, rect):
-    r = ball.RADIUS
+    r = ball.get_radius()
     ballCenter = (ball.x + r, ball.y + r)
     ball_distance_x = abs(ballCenter[0] - rect.centerx)
     ball_distance_y = abs(ballCenter[1] - rect.centery)
@@ -186,8 +186,6 @@ def handle_collision_ball_rect(ball, rect):
     new_col_v = check_collision_v(ball, rect)
     new_col_h = check_collision_h(ball, rect)
     ball.trace_back()
-
-
 
     if current_col_h and new_col_h and current_col_v != new_col_v:
         print("vertical")
@@ -255,7 +253,9 @@ def handle_collision_ball_consumables(ball, consumables_list):
         if test_collision_ball_rectangle(ball, consumable.get_rect()):
             print("Collide with consumable")
             # set the plr to the consumable
-            consumable.set_plr(ball)
+            consumable.activate(ball)
+            # remove consumable from the list and screen
+            consumables_list.remove(consumable)
             # add current consumable into the plr's consumables list
             ball.consumables.append(consumable)
 
@@ -284,6 +284,18 @@ def handle_boundries(plr):
     #     plr.angle = -plr.angle
     #     plr.y = HEIGHT - plr.height - 30
     #     plr.vel_y = - abs(plr.vel_y)
+
+def handle_plr_consumables(plr):
+    for consumable in plr.consumables:
+        # if the consumable is random angle, change the angle of TURN_ANGLE to 0
+        if type.consumable is go.RandomAngle:
+            TURN_ANGLE = 0
+
+        if consumable.need_to_deactivate():
+            if type.consumable is go.RandomAngle:
+                TURN_ANGLE = 15
+            consumable.deactivate(plr)
+            plr.consumables.remove(consumable)
 
 
 def handle_startScreen():
@@ -382,6 +394,7 @@ def main():
                     arrow.set_rot(rot_img, rot_x, rot_y)
 
                 if event.key == pygame.K_SPACE:
+                    handle_plr_consumables(player_list[current_player])
                     plr.launch(VELOCITY)
                     arrow.is_visible = False
                     current_player = len(player_list)-1-current_player
@@ -389,39 +402,20 @@ def main():
                     if nxt_p.get_vel() < 1:
                         arrow.reset(nxt_p)
 
-                draw_players(player_list, current_player, hole, arrow)
+                    
 
-        # move to gameover screen when collided
-        #handle_collision(goalRect, ballRect)
+                draw_players(player_list, current_player, hole, arrow)
 
         # update the screen
         draw_window(force_scale)
         for i in range(len(player_list)):
-<<<<<<< HEAD
-            player_list[i].move()
-
-            # for bound in BOUNDARY:
-            #     if test_collision_ball_rectangle(player_list[i], bound):
-            #         player_list[i].reflect_x()
-
-            handle_boundries(player_list[i])
-            if i == 0:
-                handle_collision_ball_ball(player_list[0], player_list[1])
-            else:
-                handle_collision_ball_ball(player_list[1], player_list[0])
-
-            handle_collision_ball_hole(player_list[i], hole.get_rect())
-            handle_collision_ball_consumables(player_list[i], consumableList)
-=======
-
-
 
             handle_collision_ball_ball(player_list[0], player_list[1])
             handle_boundries(player_list[i])
             player_list[i].move()
-            handle_collision_ball_hole(player_list[i].get_rect(), hole.get_rect())
+            handle_collision_ball_hole(player_list[i], hole.get_rect())
+            handle_collision_ball_consumables(player_list[i], consumableList)
 
->>>>>>> remotes/origin/Blitzen
         plr = player_list[current_player]
 
         if plr.get_vel() < 2 and plr.get_vel() != 0:
