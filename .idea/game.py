@@ -106,6 +106,12 @@ LEFTBOUND_RECT = pygame.Rect( (-45, 0), (90, HEIGHT) )
 RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 45, 0), (90, HEIGHT) )
 BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
+
+# adding terrain
+accl1 = go.AcclPad(None, 100, 100, 80, 80, 3, (1, 0))
+sand1 = go.SandPit(None, 100, 550, 60, 60)
+TERRAIN_LIST = [accl1, sand1]
+
 #testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
 BOUNDARY.append(test_rect)
@@ -302,6 +308,18 @@ def handle_plr_consumables(plr):
             consumable.deactivate(plr)
             plr.consumables.remove(consumable)
     print(turn_angle)
+
+def handle_terrain(plr):
+    for tr in TERRAIN_LIST:
+        if tr.rect.colliderect(plr.rect):
+            if tr.id is "sand":
+                plr.acc = 2
+            else:
+                plr.acc = 1
+            if tr.id is "accl":
+                plr.vel_x += tr.orientation[0] * tr.scale
+                plr.vel_y += tr.orientation[1] * tr.scale
+
 
 
 def handle_startScreen():

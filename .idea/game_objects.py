@@ -243,8 +243,25 @@ class RandomAngle(Consumable):
     def deactivate(self, plr):
         plr.angle = 0
 
+class Terrain(Thing):
+    def __init__(self, image, x, y, width, height, id, color):
+        super().__init__(self, image, x, y, width, height)
+        self.id = id
 
 
+
+class SandPit(Terrain):
+    def __init__(self, image, x, y, width, height):
+        super().__init__(self, image, x, y, width, height, "sand", (253, 223, 119))
+
+
+
+class AcclPad(Terrain):
+    def __init__(self, image, x, y, width, height, scale, orientation):
+        super().__init__(self, image, x, y, width, height, "accl", (126, 200, 80))
+        #orientation is a tuple
+        self.orientation = orientation
+        self.scale = scale
 
 
 
