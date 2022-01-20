@@ -14,10 +14,17 @@ import numpy as np
 
 # import pygame
 import pygame
+from pygame.locals import *
+from pygame import mixer
+
 import game_objects as go
 
 # initialize pygame
 pygame.init()
+
+# initialize bgm
+mixer.init()
+mixer.music.load('../audios/BGM_gameEasy_Pioneer.mp3')
 
 # Frames per second
 FPS = 30
@@ -113,6 +120,7 @@ BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 #testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
 BOUNDARY.append(test_rect)
+
 
 ####################### Filling the Screen #########################
 def draw_window(scale):
@@ -339,6 +347,9 @@ def main():
 
     # show the start screen
     handle_startScreen()
+
+    # play bgm
+    mixer.music.play()
 
     print("Entering main loop")
     force_scale = 0
