@@ -105,20 +105,21 @@ class Ball(Thing):
             self.vel_y -= acc_y
             self.x = self.rect.x
             self.y = self.rect.y
+            print(self.x, self.y)
 
 
 
     def advance(self):
         '''allows the ball to take a step forward without changing its speed. Only used in collision detection'''
 
-        self.x += self.vel_x
-        self.y += self.vel_y
+        self.x = round(self.x + self.vel_x)
+        self.y += round(self.y + self.vel_y)
 
 
     def trace_back(self):
         '''allows the ball to take a step back. Only used in collision detection'''
-        self.x -= self.vel_x
-        self.y -= self.vel_y
+        self.x = round(self.x - self.vel_x)
+        self.y = round(self.y - self.vel_y)
 
 
     def left(self, angle):
@@ -275,20 +276,21 @@ class ExchangePosition(Consumable):
 
 class Terrain(Thing):
     def __init__(self, image, x, y, width, height, id, color):
-        super().__init__(self, image, x, y, width, height)
+        super().__init__(image, x, y, width, height)
         self.id = id
+        self.color = color
 
 
 
 class SandPit(Terrain):
     def __init__(self, image, x, y, width, height):
-        super().__init__(self, image, x, y, width, height, "sand", (253, 223, 119))
+        super().__init__(image, x, y, width, height, "sand", (253, 223, 119))
 
 
 
 class AcclPad(Terrain):
     def __init__(self, image, x, y, width, height, scale, orientation):
-        super().__init__(self, image, x, y, width, height, "accl", (126, 200, 80))
+        super().__init__( image, x, y, width, height, "accl", (126, 200, 80))
         #orientation is a tuple
         self.orientation = orientation
         self.scale = scale

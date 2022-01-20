@@ -102,21 +102,22 @@ afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 text = afont.render( "Clean up time", True, (0, 0, 0) )
 
 # put rectangles on the boundaries
-UPPERBOUND_RECT = pygame.Rect( (0, 0), (WIDTH, 25) )
-LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 25), (WIDTH, 25) )
-LEFTBOUND_RECT = pygame.Rect( (0, 0), (33, HEIGHT) )
-RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 30, 0), (30, HEIGHT) )
-BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
+UPPERBOUND_RECT = pygame.Rect( (0, -35), (WIDTH, 60) )
+LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 25), (WIDTH, 60) )
+LEFTBOUND_RECT = pygame.Rect( (-30, 0), (60, HEIGHT) )
+RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 30, 0), (60, HEIGHT) )
+BOUNDARY = [UPPERBOUND_RECT]
+#BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
 
 # adding terrain
-accl1 = go.AcclPad(None, 100, 100, 80, 80, 3, (1, 0))
-sand1 = go.SandPit(None, 100, 550, 60, 60)
+accl1 = go.AcclPad(hole_img, 100, 100, 80, 80, 3, (1, 0))
+sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 TERRAIN_LIST = [accl1, sand1]
 
 #testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
-BOUNDARY.append(test_rect)
+#BOUNDARY.append(test_rect)
 
 ####################### Filling the Screen #########################
 def draw_window(scale):
@@ -129,6 +130,7 @@ def draw_window(scale):
     force_text = INFO_FONT.render("Launch force: " + str(scale), 1, BLACK)
     screen.blit(force_text, (10, HEIGHT-force_text.get_height()-5))
     pygame.draw.rect(screen, BLACK, test_rect)
+    pygame.draw.rect(screen, BLACK, UPPERBOUND_RECT)
 
     # update the screen
     # pygame.display.update()
@@ -136,6 +138,9 @@ def draw_window(scale):
 def draw_players(player_list, current_player, hole, arrow):
     for consumable in consumableList:
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
+
+    for tr in TERRAIN_LIST:
+        pygame.draw.rect(screen, tr.color, tr.rect)
 
     if arrow.is_visible:
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
@@ -198,6 +203,10 @@ def handle_collision_ball_rect(ball, rect):
     new_col_h = check_collision_h(ball, rect)
     ball.trace_back()
 
+    print(current_col_h)
+    print(new_col_h)
+    print("")
+
     if current_col_h and new_col_h and current_col_v != new_col_v:
         print("vertical")
         ball.reflect_y()
@@ -217,7 +226,7 @@ def check_collision_v(ball, rect):
     '''check if the next advance of ball will result in a vertical collision'''
     if ball.x + ball.RADIUS >= rect.x and ball.x + ball.RADIUS <= rect.x + rect.width:
         return True
-    elif ball.x + 2*ball.RADIUS < rect.x or ball.x > rect.x + rect.width:
+    elif round(ball.x + 2*ball.RADIUS) < rect.x or ball.x > rect.x + rect.width:
         return False
 
     elif ball.y + 2*ball.RADIUS >= rect.y and ball.y <= rect.y + rect.height:
@@ -285,18 +294,21 @@ def handle_plr_consumables(plr):
             print("deactivate")
             consumable.deactivate(plr)
             plr.consumables.remove(consumable)
-    print(turn_angle)
+
 
 def handle_terrain(plr):
     for tr in TERRAIN_LIST:
         if tr.rect.colliderect(plr.rect):
             if tr.id is "sand":
-                plr.acc = 2
+                plr.acc = 3
             else:
                 plr.acc = 1
             if tr.id is "accl":
                 plr.vel_x += tr.orientation[0] * tr.scale
                 plr.vel_y += tr.orientation[1] * tr.scale
+                plr.update_angle()
+        else:
+            plr.acc = 1
 
 
 def rot_image(rect, image, angle):
@@ -410,8 +422,8 @@ def main():
         # update the screen
         draw_window(force_scale)
 
-        for i in range(len(player_list)):
-
+        for i in range(len(player_list)-1):
+            handle_terrain(player_list[i])
             handle_collision_ball_ball(player_list[0], player_list[1])
             handle_boundries(player_list[i])
             player_list[i].move()
