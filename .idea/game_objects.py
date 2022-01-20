@@ -14,8 +14,14 @@ class Thing():
     def get_x(self):
         return self.rect.x
 
+    def set_x(self, x):
+        self.rect.x = x
+
     def get_y(self):
         return self.rect.y
+
+    def set_y(self, y):
+        self.rect.y = y
 
     def get_width(self):
         return self.width
@@ -40,6 +46,11 @@ class Ball(Thing):
         self.mass = 1
         self.max_power = 10
         self.consumables = []
+        self.turn_angle = 15
+        self.opponent = None
+
+    def set_opponent(self, opponent):
+        self.opponent = opponent
 
     def get_consumables(self):
         return self.consumables
@@ -234,14 +245,33 @@ class SpeedUp(Consumable):
 
 class RandomAngle(Consumable):
     def __init__(self, image, x, y, width, height):
-        super().__init__(1, image, x, y, width, height)
+        super().__init__(0, image, x, y, width, height)
 
     def activate(self, plr):
-        # plr.angle = random.randint(0, 360)
-        pass
+        plr.opponent.turn_angle = 0
+        plr.opponent.angle = random.randint(0, 359)
 
     def deactivate(self, plr):
-        plr.angle = 0
+        plr.opponent.turn_angle = 15
+
+class ExchangePosition(Consumable):
+    def __init__(self, image, x, y, width, height):
+        super().__init__(0, image, x, y, width, height)
+
+    def activate(self, plr):
+        print("Exchange")
+        plr_x = plr.x
+        plr_y = plr.y
+        opponent_x = plr.opponent.x
+        opponent_y = plr.opponent.y
+        plr.set_x(opponent_x)
+        plr.set_y(opponent_y)
+        plr.opponent.set_x(plr_x)
+        plr.opponent.set_y(plr_y)
+
+    def deactivate(self, plr):
+        pass
+
 
 class Terrain(Thing):
     def __init__(self, image, x, y, width, height, id, color):

@@ -31,7 +31,7 @@ GOAL = pygame.USEREVENT + 1
 
 #initial velocity when force scale is 0
 VELOCITY = 8
-turn_angle = 15
+
 
 current_player = 0
 
@@ -67,43 +67,45 @@ ball_img1 = pygame.image.load( "../pictures/player1ball.png" ).convert_alpha() #
 ball_img2 = pygame.image.load( "../pictures/player2ball.png" ).convert_alpha()
 arrow_img = pygame.image.load( "../pictures/black_arrow.png" ).convert_alpha()
 hole_img = pygame.image.load("../pictures/hole.png").convert_alpha()
-speedUp_img = pygame.image.load("../pictures/muscleArm.png").convert_alpha()
+massUp_img = pygame.image.load("../pictures/crown.png").convert_alpha()
+powerUp_img = pygame.image.load("../pictures/massUp.png").convert_alpha()
+speedUp_img = pygame.image.load("../pictures/golfClub.png").convert_alpha()
+randomAngle_img = pygame.image.load("../pictures/broom.png").convert_alpha()
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
 STARTSCREEN = pygame.transform.scale(pygame.image.load("../pictures/startScreen.png").convert_alpha(), (WIDTH, HEIGHT))
 
-
+# set up arrow and hole
 arrow = go.Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
-player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
-player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
 hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
 
-# test consumable
-speedUp = go.RandomAngle(speedUp_img, 200, 200, 120, 120)
-consumableList = [speedUp]
+# set up players
+player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+player1.set_opponent(player2)
+player2.set_opponent(player1)
 
 arrow.reset(player1)
 player_list = [player1, player2]
+
+# set consumables
+massUp = go.MassUp(massUp_img, 700, 100, 120, 120)
+speedUp = go.SpeedUp(speedUp_img, 400, 400, 120, 120)
+powerUp = go.PowerUp(powerUp_img, 500, 500, 120, 120)
+randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
+consumableList = [speedUp, massUp, powerUp, randomAngle]
+
+# create a font
+afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
+# render a surface with some text
+text = afont.render( "Clean up time", True, (0, 0, 0) )
 
 # put rectangles on the boundaries
 UPPERBOUND_RECT = pygame.Rect( (0, 0), (WIDTH, 25) )
 LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 25), (WIDTH, 25) )
 LEFTBOUND_RECT = pygame.Rect( (0, 0), (33, HEIGHT) )
 RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 30, 0), (30, HEIGHT) )
-BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
-
-
-# create a font
-afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
-# render a surface with some text
-text = afont.render( "Clean up time", True, (0, 0, 0) )
-#boundaries
-UPPERBOUND_RECT = pygame.Rect( (0, -45), (WIDTH, 80) )
-print(UPPERBOUND_RECT.topleft)
-LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 35), (WIDTH, 80) )
-LEFTBOUND_RECT = pygame.Rect( (-45, 0), (90, HEIGHT) )
-RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 45, 0), (90, HEIGHT) )
 BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
 
@@ -151,7 +153,7 @@ def handle_collision_ball_ball(ball1, ball2):
 
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
-        print("Collide!")
+        print("Ball Ball Collision!")
         if ball1.get_vel() == 0 and ball2.get_vel() == 0:
             ball1.vel_x = 1
             ball1.vel_y = 1
@@ -200,10 +202,10 @@ def handle_collision_ball_rect(ball, rect):
         print("vertical")
         ball.reflect_y()
 
-
     elif current_col_h != new_col_h and current_col_v and new_col_v:
         print("horizontal")
         ball.reflect_x()
+
     elif current_col_h != new_col_h and current_col_v != new_col_v:
         print("corner")
         ball.reflect_x()
@@ -274,37 +276,13 @@ def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
     for wall in BOUNDARY:
         handle_collision_ball_rect(plr, wall)
-    # if plr.x <= 35:
-    #     plr.angle = 180 - plr.angle
-    #     plr.x = 35
-    #     plr.vel_x = abs(plr.vel_x)
-    #
-    #
-    # if plr.x >= WIDTH-plr.width - 35:
-    #     plr.angle = 180 - plr.angle
-    #     plr.x = WIDTH-plr.width - 35
-    #     plr.vel_x = - abs(plr.vel_x)
-    #
-    # if plr.y <= plr.height/5 + 30:
-    #     plr.angle = -plr.angle
-    #     plr.y = plr.height/5 + 30
-    #     plr.vel_y = abs(plr.vel_y)
-    #
-    #
-    # if plr.y >= HEIGHT - plr.height - 30:
-    #     plr.angle = -plr.angle
-    #     plr.y = HEIGHT - plr.height - 30
-    #     plr.vel_y = - abs(plr.vel_y)
+
+
 
 def handle_plr_consumables(plr):
-    global turn_angle
     for consumable in plr.consumables:
-        print(type(consumable))
-        if type(consumable) is go.RandomAngle:
-            turn_angle = 0
-            print("yeet")
-
         if consumable.need_to_deactivate():
+            print("deactivate")
             consumable.deactivate(plr)
             plr.consumables.remove(consumable)
     print(turn_angle)
@@ -321,6 +299,11 @@ def handle_terrain(plr):
                 plr.vel_y += tr.orientation[1] * tr.scale
 
 
+def rot_image(rect, image, angle):
+    rotated_img = pygame.transform.rotate(image, angle)
+    return rotated_img, rect.x + rect.width/2 - (rotated_img.get_width()/2), rect.y + rect.height/2 - (rotated_img.get_height()/2)
+
+####################### Handle Screens #########################
 
 def handle_startScreen():
     """Implement start screen"""
@@ -365,11 +348,6 @@ def check_button_clicked(button) -> bool:
     else:
         return False
 
-def rot_image(rect, image, angle):
-    rotated_img = pygame.transform.rotate(image, angle)
-    return rotated_img, rect.x + rect.width/2 - (rotated_img.get_width()/2), rect.y + rect.height/2 - (rotated_img.get_height()/2)
-
-
 ####################### Main Event Loop #########################
 
 def main():
@@ -382,8 +360,6 @@ def main():
 
     print("Entering main loop")
     force_scale = 0
-
-
 
     while True:
         # Check every event in the event list
@@ -408,13 +384,12 @@ def main():
                 draw_window(force_scale)
 
                 if event.key == pygame.K_LEFT:
-                    print(turn_angle)
-                    plr.left(turn_angle)
+                    plr.left(player_list[current_player].turn_angle)
                     rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
                     arrow.set_rot(rot_img, rot_x, rot_y)
 
                 if event.key == pygame.K_RIGHT:
-                    plr.right(turn_angle)
+                    plr.right(player_list[current_player].turn_angle)
                     rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
                     arrow.set_rot(rot_img, rot_x, rot_y)
 
@@ -450,9 +425,7 @@ def main():
         elif plr.get_vel() > 1:
             arrow.is_visible = False
 
-
         draw_players(player_list, current_player, hole, arrow)
-
 
         # set FPS
         gameClock.tick(FPS)
