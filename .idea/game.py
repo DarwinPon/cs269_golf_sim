@@ -32,6 +32,8 @@ GOAL = pygame.USEREVENT + 1
 #initial velocity when force scale is 0
 VELOCITY = 8
 
+tracing = False
+rect_preview = pygame.Rect((0, 0), (0, 0))
 
 current_player = 0
 
@@ -106,21 +108,36 @@ UPPERBOUND_RECT = pygame.Rect( (0, -35), (WIDTH, 60) )
 LOWERBOUND_RECT = pygame.Rect( (0, HEIGHT - 25), (WIDTH, 60) )
 LEFTBOUND_RECT = pygame.Rect( (-30, 0), (60, HEIGHT) )
 RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 30, 0), (60, HEIGHT) )
-BOUNDARY = [UPPERBOUND_RECT]
-#BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
+
+BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
 
 # adding terrain
 accl1 = go.AcclPad(hole_img, 100, 100, 80, 80, 3, (1, 0))
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
-TERRAIN_LIST = [accl1, sand1]
+TERRAIN_LIST = []
 
-#testing stuff
+# testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
-#BOUNDARY.append(test_rect)
+BOUNDARY.append(test_rect)
+
+# adding walls
+WALLS = []
+'''
+WALLS.append(pygame.Rect( (100, 240), (220, 60) )) #1
+
+WALLS.append(pygame.Rect( (0, 540), (40, 100) )) #3
+WALLS.append(pygame.Rect( (90, 480), (140, 30) ))
+WALLS.append(pygame.Rect( (280, 540), (40, 120) ))
+WALLS.append(pygame.Rect( (90, 690), (140, 30) ))
+'''
+
+
+
 
 ####################### Filling the Screen #########################
 def draw_window(scale):
+    global tracing, rect_preview
     # clear the screen with background
     screen.blit(BACKGROUND, (0,0))
 
@@ -130,7 +147,11 @@ def draw_window(scale):
     force_text = INFO_FONT.render("Launch force: " + str(scale), 1, BLACK)
     screen.blit(force_text, (10, HEIGHT-force_text.get_height()-5))
     pygame.draw.rect(screen, BLACK, test_rect)
-    pygame.draw.rect(screen, BLACK, UPPERBOUND_RECT)
+    if tracing:
+        pygame.draw.rect(screen, BLACK, rect_preview)
+
+    for wall in WALLS:
+        pygame.draw.rect(screen, BLACK, wall)
 
     # update the screen
     # pygame.display.update()
@@ -203,9 +224,6 @@ def handle_collision_ball_rect(ball, rect):
     new_col_h = check_collision_h(ball, rect)
     ball.trace_back()
 
-    print(current_col_h)
-    print(new_col_h)
-    print("")
 
     if current_col_h and new_col_h and current_col_v != new_col_v:
         print("vertical")
@@ -286,6 +304,9 @@ def handle_boundries(plr):
     for wall in BOUNDARY:
         handle_collision_ball_rect(plr, wall)
 
+    for wall in WALLS:
+        handle_collision_ball_rect(plr, wall)
+
 
 
 def handle_plr_consumables(plr):
@@ -363,7 +384,7 @@ def check_button_clicked(button) -> bool:
 ####################### Main Event Loop #########################
 
 def main():
-    global current_player
+    global current_player, tracing, rect_preview
     draw_window(0)
     draw_players(player_list, current_player, hole, arrow)
 
@@ -372,8 +393,21 @@ def main():
 
     print("Entering main loop")
     force_scale = 0
+    topleft = (0, 0)
+    wh = (0, 0)
+    editing = False
+    tracing = False
+    rect_preview = pygame.Rect((0, 0), (0, 0))
+
+
 
     while True:
+
+        if tracing:
+            bottomright = pygame.mouse.get_pos()
+            wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
+            rect_preview = pygame.Rect(topleft, wh)
+
         # Check every event in the event list
         for event in pygame.event.get():
             plr = player_list[current_player]
@@ -384,6 +418,7 @@ def main():
             # if one player goal, then go to the gameover event
             if event.type == GOAL:
                 handle_gameover()
+
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
@@ -415,6 +450,30 @@ def main():
                     if nxt_p.get_vel() < 1:
                         arrow.reset(nxt_p)
 
+                if event.key == pygame.K_e:
+                    editing = not editing
+                    print("editing: "+ str(editing))
+
+                if event.key == pygame.K_1:
+                    tracing = True
+                    topleft = pygame.mouse.get_pos()
+
+
+                if event.key == pygame.K_2:
+                    tracing = False
+                    bottomright = pygame.mouse.get_pos()
+                    wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
+                    WALLS.append(pygame.Rect(topleft, wh))
+
+
+                if event.key == pygame.K_BACKSPACE:
+                    mp = pygame.mouse.get_pos()
+                    for i in range(len(WALLS)):
+                        if mp[0] > WALLS[i].x and mp[0] < WALLS[i].right and mp[1] > WALLS[i].y and mp[1] < WALLS[i].bottom:
+                            del WALLS[i]
+                            break
+
+
                     
 
                 draw_players(player_list, current_player, hole, arrow)
@@ -422,7 +481,7 @@ def main():
         # update the screen
         draw_window(force_scale)
 
-        for i in range(len(player_list)-1):
+        for i in range(len(player_list)):
             handle_terrain(player_list[i])
             handle_collision_ball_ball(player_list[0], player_list[1])
             handle_boundries(player_list[i])

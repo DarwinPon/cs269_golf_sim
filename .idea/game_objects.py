@@ -105,7 +105,6 @@ class Ball(Thing):
             self.vel_y -= acc_y
             self.x = self.rect.x
             self.y = self.rect.y
-            print(self.x, self.y)
 
 
 
@@ -113,7 +112,7 @@ class Ball(Thing):
         '''allows the ball to take a step forward without changing its speed. Only used in collision detection'''
 
         self.x = round(self.x + self.vel_x)
-        self.y += round(self.y + self.vel_y)
+        self.y = round(self.y + self.vel_y)
 
 
     def trace_back(self):
