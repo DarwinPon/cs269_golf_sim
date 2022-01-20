@@ -14,10 +14,17 @@ import numpy as np
 
 # import pygame
 import pygame
+from pygame.locals import *
+from pygame import mixer
+
 import game_objects as go
 
 # initialize pygame
 pygame.init()
+
+# initialize bgm
+mixer.init()
+mixer.music.load('../audios/BGM_gameEasy_Pioneer.mp3')
 
 # Frames per second
 FPS = 30
@@ -69,10 +76,11 @@ ball_img1 = pygame.image.load( "../pictures/player1ball.png" ).convert_alpha() #
 ball_img2 = pygame.image.load( "../pictures/player2ball.png" ).convert_alpha()
 arrow_img = pygame.image.load( "../pictures/black_arrow.png" ).convert_alpha()
 hole_img = pygame.image.load("../pictures/hole.png").convert_alpha()
-massUp_img = pygame.image.load("../pictures/crown.png").convert_alpha()
-powerUp_img = pygame.image.load("../pictures/massUp.png").convert_alpha()
-speedUp_img = pygame.image.load("../pictures/golfClub.png").convert_alpha()
-randomAngle_img = pygame.image.load("../pictures/broom.png").convert_alpha()
+massUp_img = pygame.image.load("../pictures/massUp.png").convert_alpha()
+powerUp_img = pygame.image.load("../pictures/powerUp.png").convert_alpha()
+speedUp_img = pygame.image.load("../pictures/speedUp.png").convert_alpha()
+randomAngle_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
+exchangePosition_img = pygame.image.load("../pictures/exchangePosition.png").convert_alpha()
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -92,11 +100,12 @@ arrow.reset(player1)
 player_list = [player1, player2]
 
 # set consumables
-massUp = go.MassUp(massUp_img, 700, 100, 120, 120)
-speedUp = go.SpeedUp(speedUp_img, 400, 400, 120, 120)
+massUp = go.MassUp(massUp_img, 700, 100, 40, 40)
+speedUp = go.SpeedUp(speedUp_img, 400, 400, 40, 40)
 powerUp = go.PowerUp(powerUp_img, 500, 500, 120, 120)
 randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
-consumableList = [speedUp, massUp, powerUp, randomAngle]
+exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, 40, 40)
+consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
 
 # create a font
 afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
@@ -131,6 +140,7 @@ WALLS.append(pygame.Rect( (90, 480), (140, 30) ))
 WALLS.append(pygame.Rect( (280, 540), (40, 120) ))
 WALLS.append(pygame.Rect( (90, 690), (140, 30) ))
 '''
+
 
 
 
@@ -391,6 +401,9 @@ def main():
     # show the start screen
     handle_startScreen()
 
+    # play bgm
+    mixer.music.play()
+
     print("Entering main loop")
     force_scale = 0
     topleft = (0, 0)
@@ -482,12 +495,12 @@ def main():
         draw_window(force_scale)
 
         for i in range(len(player_list)):
-            handle_terrain(player_list[i])
+            handle_collision_ball_consumables(player_list[i], consumableList)
+
             handle_collision_ball_ball(player_list[0], player_list[1])
             handle_boundries(player_list[i])
             player_list[i].move()
             handle_collision_ball_hole(player_list[i], hole.get_rect())
-            handle_collision_ball_consumables(player_list[i], consumableList)
 
         plr = player_list[current_player]
 
