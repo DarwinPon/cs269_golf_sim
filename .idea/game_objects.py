@@ -262,8 +262,8 @@ class ExchangePosition(Consumable):
         print("Exchange")
         plr_x = plr.x
         plr_y = plr.y
-        opponent_x = plr.opponent.x
-        opponent_y = plr.opponent.y
+        opponent_x = plr.opponent.x + 16
+        opponent_y = plr.opponent.y + 16
         plr.set_x(opponent_x)
         plr.set_y(opponent_y)
         plr.opponent.set_x(plr_x)
