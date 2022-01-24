@@ -125,22 +125,12 @@ BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 # adding terrain
 accl1 = go.AcclPad(hole_img, 100, 100, 80, 80, 3, (1, 0))
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
-TERRAIN_LIST = []
+TERRAIN_LIST = [accl1, sand1]
 
 # testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
 BOUNDARY.append(test_rect)
 
-# adding walls
-WALLS = []
-'''
-WALLS.append(pygame.Rect( (100, 240), (220, 60) )) #1
-
-WALLS.append(pygame.Rect( (0, 540), (40, 100) )) #3
-WALLS.append(pygame.Rect( (90, 480), (140, 30) ))
-WALLS.append(pygame.Rect( (280, 540), (40, 120) ))
-WALLS.append(pygame.Rect( (90, 690), (140, 30) ))
-'''
 
 
 ####################### Filling the Screen #########################
@@ -158,8 +148,8 @@ def draw_window(scale):
     if tracing:
         pygame.draw.rect(screen, BLACK, rect_preview)
 
-    for wall in WALLS:
-        pygame.draw.rect(screen, BLACK, wall)
+    for i in range(4, len(BOUNDARY)):
+        pygame.draw.rect(screen, BLACK, BOUNDARY[i])
 
     # update the screen
     # pygame.display.update()
@@ -229,39 +219,47 @@ def test_collision_ball_rectangle(ball, rect):
 def handle_collision_ball_rect(ball, rect):
     """handles collision between a ball object and a rectangle"""
 
-    current_col_v = check_collision_v(ball, rect)
-    current_col_h = check_collision_h(ball, rect)
-    ball.advance()
 
-    new_col_v = check_collision_v(ball, rect)
-    new_col_h = check_collision_h(ball, rect)
-    ball.trace_back()
+    orig_x = ball.x
+    orig_y = ball.y
+    collisions = []
+    ball.x  = orig_x - abs(ball.vel_x)
+    collisions.append(check_collision_ball_rect(ball, rect))
+
+    ball.x  = orig_x + abs(ball.vel_x)
+    collisions.append(check_collision_ball_rect(ball, rect))
+
+    ball.y  = orig_y + abs(ball.vel_y)
+    collisions.append(check_collision_ball_rect(ball, rect))
+
+    ball.y  = orig_y - abs(ball.vel_y)
+    collisions.append(check_collision_ball_rect(ball, rect))
+
+    ball.x = orig_x
+    ball.y = orig_y
+
+    #0 vertical 1 horizontal 2 corner
+    if collisions[0] != collisions[1] and collisions[2] == collisions[3]:
+        return 0
+
+    if collisions[0] == collisions[1] and collisions[2] != collisions[3]:
+        return 1
+
+    if collisions[0] != collisions[1] and collisions[2] != collisions[3]:
+        return 2
 
 
-    if current_col_h and new_col_h and current_col_v != new_col_v:
-        print("vertical")
-        ball.reflect_y()
-
-    elif current_col_h != new_col_h and current_col_v and new_col_v:
-        print("horizontal")
-        ball.reflect_x()
-
-    elif current_col_h != new_col_h and current_col_v != new_col_v:
-        print("corner")
-        ball.reflect_x()
-        ball.reflect_y()
-        ball.move()
 
 
 def check_collision_v(ball, rect):
     '''check if the next advance of ball will result in a vertical collision'''
-    if ball.x + ball.RADIUS >= rect.x and ball.x + ball.RADIUS <= rect.x + rect.width:
+    if ball.x + ball.RADIUS > rect.x and ball.x + ball.RADIUS < rect.x + rect.width:
         return True
     elif round(ball.x + 2*ball.RADIUS) < rect.x or ball.x > rect.x + rect.width:
         return False
 
-    elif ball.y + 2*ball.RADIUS >= rect.y and ball.y <= rect.y + rect.height:
-        return ball.x + 2*ball.RADIUS >= rect.x and ball.x <= rect.x + rect.width
+    elif ball.y + 2*ball.RADIUS > rect.y and ball.y < rect.y + rect.height:
+        return ball.x + 2*ball.RADIUS > rect.x and ball.x < rect.x + rect.width
     else:
         return check_corner_collision(ball, rect)
 
@@ -283,12 +281,12 @@ def check_corner_collision(ball, rect):
 
 def check_collision_h(ball, rect):
     '''check if the next advance of ball will result in a horizontal collision'''
-    if ball.y + ball.RADIUS >= rect.y and ball.y + ball.RADIUS <= rect.y + rect.height:
+    if ball.y + ball.RADIUS > rect.y and ball.y + ball.RADIUS < rect.y + rect.height:
         return True
     elif ball.y + 2*ball.RADIUS < rect.y or ball.y > rect.y + rect.height:
         return False
-    elif ball.y + 2*ball.RADIUS >= rect.y and ball.y <= rect.y + rect.height:
-        return ball.y + 2*ball.RADIUS >= rect.y and ball.y <= rect.y + rect.height
+    elif ball.y + 2*ball.RADIUS > rect.y and ball.y < rect.y + rect.height:
+        return ball.y + 2*ball.RADIUS > rect.y and ball.y < rect.y + rect.height
     else:
         return check_corner_collision(ball, rect)
 
@@ -321,6 +319,17 @@ def handle_collision_ball_consumables(ball, consumables_list):
             ball.consumables.append(consumable)
 
 
+<<<<<<< HEAD
+=======
+def handle_boundries(plr):
+    """Make sure the ball bounces on the boundries"""
+    for wall in BOUNDARY:
+        handle_collision_ball_rect(plr, wall)
+
+
+
+
+>>>>>>> remotes/origin/Blitzen
 def handle_plr_consumables(plr):
     for consumable in plr.consumables:
         if consumable.need_to_deactivate():
@@ -376,6 +385,38 @@ def rot_image(rect, image, angle):
 def handle_startScreen():
     """Implement start screen"""
     pass
+
+def check_collision_ball_rect(ball, rect):
+    col_v = check_collision_v(ball, rect)
+    col_h = check_collision_h(ball, rect)
+    return col_v and col_h
+
+def move(plr):
+    '''Moves the player and handles collision with obstacles'''
+
+    steps = 10
+
+    for i in range(steps):
+        plr.advance(steps)
+        for wall in BOUNDARY:
+            if check_collision_ball_rect(plr, wall):
+                col_type = handle_collision_ball_rect(plr, wall)
+                plr.traceback(steps)
+                if col_type == 0:
+                    print("vertical")
+                    plr.reflect_y()
+
+                if col_type == 1:
+                    print("horizontal")
+                    plr.reflect_x()
+
+                if col_type == 2:
+                    print("corner")
+                    plr.reflect_x()
+                    plr.reflect_y()
+
+    plr.update_pos()
+
 
 
 def handle_gameover():
@@ -511,7 +552,7 @@ def main():
                     tracing = False
                     bottomright = pygame.mouse.get_pos()
                     wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
-                    WALLS.append(pygame.Rect(topleft, wh))
+                    BOUNDARY.append(pygame.Rect(topleft, wh))
 
                 if event.key == pygame.K_3:
                     for projectile in player_list[current_player].projectiles:
@@ -527,16 +568,27 @@ def main():
 
                 if event.key == pygame.K_BACKSPACE:
                     mp = pygame.mouse.get_pos()
+<<<<<<< HEAD
                     for i in range(len(WALLS)):
                         if mp[0] > WALLS[i].x and mp[0] < WALLS[i].right and mp[1] > WALLS[i].y and mp[1] < WALLS[i].bottom:
                             del WALLS[i]
                             break                  
+=======
+                    for i in range(4, len(BOUNDARY)):
+                        if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
+                            del BOUNDARY[i]
+                            break
+
+
+                    
+>>>>>>> remotes/origin/Blitzen
 
                 draw_players(player_list, current_player, hole, arrow)
 
         # update the screen
         draw_window(force_scale)
 
+<<<<<<< HEAD
 
         # set movement of projectile
         if current_projectile != None:
@@ -554,6 +606,12 @@ def main():
                 handle_conllision_ball_projectiles(player_list[i], projectileList)
             handle_collision_ball_ball(player_list[0], player_list[1])
             handle_boundries(player_list[i])
+=======
+        for i in range(len(player_list)-1):
+            handle_collision_ball_consumables(player_list[i], consumableList)
+            handle_collision_ball_ball(player_list[0], player_list[1])
+            move(player_list[i])
+>>>>>>> remotes/origin/Blitzen
             handle_collision_ball_hole(player_list[i], hole.get_rect())
             player_list[i].move()
 

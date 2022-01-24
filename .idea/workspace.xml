@@ -5,31 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d5cdd050-99e3-483d-91e7-a268c5afa863" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/audios/BGM_Credit_LoveDreamVocal.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/BGM_gameEasy_Pioneer.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/BGM_gameHard_theChase.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/BGM_startingGame_LoveDream.mp3" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/README" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/arctic_wind.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/bear_trap.m4a" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/beer_open.m4a" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/beer_pouring.m4a" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/freeze.m4a" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/grave_wind.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/metal_trap.m4a" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/normal_hit.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/powerful_hit.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/audios/splash.wav" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pictures/exchangePosition.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pictures/powerUp.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pictures/randomAngle.png" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pictures/speedUp.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/game.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/game_objects.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/game_objects.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CODEOWNERS" beforeDir="false" afterPath="$PROJECT_DIR$/CODEOWNERS" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pictures/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/pictures/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pictures/massUp.png" beforeDir="false" afterPath="$PROJECT_DIR$/pictures/massUp.png" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,5 +87,26 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/.idea/game.py</url>
+          <line>215</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/.idea/game.py</url>
+          <line>524</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/.idea/game.py</url>
+          <line>355</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
