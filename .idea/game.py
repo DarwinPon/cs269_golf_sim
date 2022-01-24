@@ -298,15 +298,6 @@ def handle_collision_ball_hole(ball, holeRect):
         pygame.event.post(pygame.event.Event(GOAL))
 
 
-<<<<<<< HEAD
-def handle_boundries(plr):
-    """Make sure the ball bounces on the boundries"""
-    for wall in BOUNDARY:
-        handle_collision_ball_rect(plr, wall)
-=======
->>>>>>> remotes/origin/Blitzen
-
-
 def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
         if test_collision_ball_rectangle(ball, consumable.get_rect()):
@@ -320,18 +311,6 @@ def handle_collision_ball_consumables(ball, consumables_list):
             ball.consumables.append(consumable)
 
 
-<<<<<<< HEAD
-def handle_boundries(plr):
-    """Make sure the ball bounces on the boundries"""
-    for wall in BOUNDARY:
-        handle_collision_ball_rect(plr, wall)
-
-
-
-
-=======
-
->>>>>>> remotes/origin/Blitzen
 def handle_plr_consumables(plr):
     for consumable in plr.consumables:
         if consumable.need_to_deactivate():
@@ -350,10 +329,6 @@ def handle_conllision_ball_projectiles(ball, projectiles_list):
 
 def handle_golfClub_function(golfClub, ball):
     for wall in BOUNDARY:
-        if wall.colliderect(golfClub.get_rect()):
-            golfClub.is_moving = False
-
-    for wall in WALLS:
         if wall.colliderect(golfClub.get_rect()):
             golfClub.is_moving = False
 
@@ -571,31 +546,18 @@ def main():
 
                 if event.key == pygame.K_BACKSPACE:
                     mp = pygame.mouse.get_pos()
-<<<<<<< HEAD
-=======
-
->>>>>>> remotes/origin/Blitzen
                     for i in range(4, len(BOUNDARY)):
                         if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
                             del BOUNDARY[i]
                             break
 
 
-<<<<<<< HEAD
-                    
-=======
->>>>>>> remotes/origin/Blitzen
 
                 draw_players(player_list, current_player, hole, arrow)
 
         # update the screen
         draw_window(force_scale)
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> remotes/origin/Blitzen
-
+        
         # set movement of projectile
         if current_projectile != None:
             if current_projectile.is_moving:
@@ -612,20 +574,10 @@ def main():
             if current_projectile is None:
                 handle_conllision_ball_projectiles(player_list[i], projectileList)
             handle_collision_ball_ball(player_list[0], player_list[1])
-<<<<<<< HEAD
-            handle_boundries(player_list[i])
-=======
-        for i in range(len(player_list)-1):
-            handle_collision_ball_consumables(player_list[i], consumableList)
-            handle_collision_ball_ball(player_list[0], player_list[1])
-            move(player_list[i])
->>>>>>> remotes/origin/Blitzen
-=======
             move(player_list[i])
 
->>>>>>> remotes/origin/Blitzen
             handle_collision_ball_hole(player_list[i], hole.get_rect())
-            player_list[i].move()
+
 
         if plr.get_vel() < 2 and plr.get_vel() != 0:
             arrow.reset(plr)

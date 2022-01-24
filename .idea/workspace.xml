@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="d5cdd050-99e3-483d-91e7-a268c5afa863" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/game.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/game_objects.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/game_objects.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -41,6 +40,7 @@
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/.idea/game.py" />
+    <property name="restartRequiresConfirmation" value="false" />
   </component>
   <component name="RunManager">
     <configuration name="game" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
@@ -93,17 +93,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/.idea/game.py</url>
-          <line>215</line>
+          <line>218</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/.idea/game.py</url>
-          <line>524</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/.idea/game.py</url>
-          <line>355</line>
+          <line>377</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
