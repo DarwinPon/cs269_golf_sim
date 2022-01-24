@@ -84,9 +84,7 @@ class Ball(Thing):
     
     def move(self):
 
-
         vel = self.get_vel()
-
 
         if abs(vel) < 2:
             if vel > 0:
@@ -95,7 +93,6 @@ class Ball(Thing):
         else:
             angleInRadian = math.radians(self.angle)
             acc_x = self.acc * math.cos(angleInRadian)
-
 
             acc_y = self.acc * math.sin(angleInRadian)
 
@@ -107,18 +104,41 @@ class Ball(Thing):
             self.y = self.rect.y
 
 
+    def update_pos(self):
+        vel = self.get_vel()
+        if abs(vel) < 2:
+            if vel > 0:
+                self.reset()
+            self.set_vel(0)
 
-    def advance(self):
+        else:
+            self.rect.x = round(self.x)
+            self.rect.y = round(self.y)
+            self.x = self.rect.x
+            self.y = self.rect.y
+            angleInRadian = math.radians(self.angle)
+            acc_x = self.acc * math.cos(angleInRadian)
+            acc_y = self.acc * math.sin(angleInRadian)
+            self.vel_x -= acc_x
+            self.vel_y -= acc_y
+
+    def advance(self, step):
         '''allows the ball to take a step forward without changing its speed. Only used in collision detection'''
 
-        self.x = round(self.x + self.vel_x)
-        self.y = round(self.y + self.vel_y)
+        self.x = self.x + self.vel_x/step
+        self.y = self.y + self.vel_y/step
 
+    def traceback(self, step):
+        self.x = self.x - self.vel_x/step
+        self.y = self.y - self.vel_y/step
 
-    def trace_back(self):
+    def set_new_pos(self):
         '''allows the ball to take a step back. Only used in collision detection'''
-        self.x = round(self.x - self.vel_x)
-        self.y = round(self.y - self.vel_y)
+        self.rect.x = round(self.x)
+        self.rect.y = round(self.y)
+        self.x = self.rect.x
+        self.y = self.rect.y
+
 
 
     def left(self, angle):
