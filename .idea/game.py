@@ -303,9 +303,6 @@ def handle_boundries(plr):
     for wall in BOUNDARY:
         handle_collision_ball_rect(plr, wall)
 
-    for wall in WALLS:
-        handle_collision_ball_rect(plr, wall)
-
 
 def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
@@ -319,8 +316,6 @@ def handle_collision_ball_consumables(ball, consumables_list):
             ball.consumables.append(consumable)
 
 
-<<<<<<< HEAD
-=======
 def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
     for wall in BOUNDARY:
@@ -329,7 +324,6 @@ def handle_boundries(plr):
 
 
 
->>>>>>> remotes/origin/Blitzen
 def handle_plr_consumables(plr):
     for consumable in plr.consumables:
         if consumable.need_to_deactivate():
@@ -568,12 +562,6 @@ def main():
 
                 if event.key == pygame.K_BACKSPACE:
                     mp = pygame.mouse.get_pos()
-<<<<<<< HEAD
-                    for i in range(len(WALLS)):
-                        if mp[0] > WALLS[i].x and mp[0] < WALLS[i].right and mp[1] > WALLS[i].y and mp[1] < WALLS[i].bottom:
-                            del WALLS[i]
-                            break                  
-=======
                     for i in range(4, len(BOUNDARY)):
                         if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
                             del BOUNDARY[i]
@@ -581,7 +569,6 @@ def main():
 
 
                     
->>>>>>> remotes/origin/Blitzen
 
                 draw_players(player_list, current_player, hole, arrow)
 

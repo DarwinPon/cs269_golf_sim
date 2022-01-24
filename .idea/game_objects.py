@@ -65,10 +65,6 @@ class MovingThing(Thing):
         return math.hypot(self.vel_x, self.vel_y)
     
     def move(self):
-<<<<<<< HEAD
-=======
-
->>>>>>> remotes/origin/Blitzen
         vel = self.get_vel()
 
         if abs(vel) < 2:
@@ -88,9 +84,6 @@ class MovingThing(Thing):
             self.x = self.rect.x
             self.y = self.rect.y
 
-<<<<<<< HEAD
-    def advance(self):
-=======
 
     def update_pos(self):
         vel = self.get_vel()
@@ -111,21 +104,16 @@ class MovingThing(Thing):
             self.vel_y -= acc_y
 
     def advance(self, step):
->>>>>>> remotes/origin/Blitzen
         '''allows the ball to take a step forward without changing its speed. Only used in collision detection'''
 
         self.x = self.x + self.vel_x/step
         self.y = self.y + self.vel_y/step
 
-<<<<<<< HEAD
-    def trace_back(self):
-=======
     def traceback(self, step):
         self.x = self.x - self.vel_x/step
         self.y = self.y - self.vel_y/step
 
     def set_new_pos(self):
->>>>>>> remotes/origin/Blitzen
         '''allows the ball to take a step back. Only used in collision detection'''
         self.rect.x = round(self.x)
         self.rect.y = round(self.y)
