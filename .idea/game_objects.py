@@ -2,6 +2,7 @@ import pygame
 import math
 import random
 
+
 class Thing():
     def __init__(self, image, x, y, width, height):
         self.rect = pygame.Rect((x, y), (width, height))
@@ -32,8 +33,7 @@ class Thing():
     def get_rect(self):
         return self.rect
 
-
-class Ball(Thing):
+class MovingThing(Thing):
     def __init__(self, image, x, y, width, height, arrow):
         super().__init__(image, x, y, width, height)
         self.vel_x = 0
@@ -42,27 +42,9 @@ class Ball(Thing):
         self.angle = 0
         self.launchF = 0
         self.arrow = arrow
-        self.RADIUS = 15
         self.mass = 1
         self.max_power = 10
-        self.consumables = []
         self.turn_angle = 15
-        self.opponent = None
-
-    def set_opponent(self, opponent):
-        self.opponent = opponent
-
-    def get_consumables(self):
-        return self.consumables
-
-    def add_consumable(self, consumable):
-        self.consumables.append(consumable)
-        
-    def remove_consumable(self, consumable):
-        self.consumables.remove(consumable)
-
-    def get_radius(self):
-        return self.RADIUS
 
     def set_rot(self, rot_img, rot_rect):
         self.rot_img = rot_img
@@ -83,10 +65,7 @@ class Ball(Thing):
         return math.hypot(self.vel_x, self.vel_y)
     
     def move(self):
-
-
         vel = self.get_vel()
-
 
         if abs(vel) < 2:
             if vel > 0:
@@ -95,7 +74,6 @@ class Ball(Thing):
         else:
             angleInRadian = math.radians(self.angle)
             acc_x = self.acc * math.cos(angleInRadian)
-
 
             acc_y = self.acc * math.sin(angleInRadian)
 
@@ -106,20 +84,16 @@ class Ball(Thing):
             self.x = self.rect.x
             self.y = self.rect.y
 
-
-
     def advance(self):
         '''allows the ball to take a step forward without changing its speed. Only used in collision detection'''
 
         self.x = round(self.x + self.vel_x)
         self.y = round(self.y + self.vel_y)
 
-
     def trace_back(self):
         '''allows the ball to take a step back. Only used in collision detection'''
         self.x = round(self.x - self.vel_x)
         self.y = round(self.y - self.vel_y)
-
 
     def left(self, angle):
         self.angle -= angle
@@ -142,7 +116,6 @@ class Ball(Thing):
         self.angle = -self.angle
         self.vel_y = -self.vel_y
 
-
     def reflect_y(self):
         self.angle = 180 - self.angle
         self.vel_x = -self.vel_x
@@ -160,6 +133,45 @@ class Ball(Thing):
     def reset(self):
         self.angle = 0
         self.launchF = 0
+
+
+class Ball(MovingThing):
+    def __init__(self, image, x, y, width, height, arrow):
+        super().__init__(image, x, y, width, height, arrow)
+        self.RADIUS = 15
+        self.consumables = []
+        self.projectiles = []
+        self.opponent = None
+
+    def set_opponent(self, opponent):
+        self.opponent = opponent
+
+    def get_consumables(self):
+        return self.consumables
+
+    def add_consumable(self, consumable):
+        self.consumables.append(consumable)
+        
+    def remove_consumable(self, consumable):
+        self.consumables.remove(consumable)
+
+    def get_radius(self):
+        return self.RADIUS
+
+
+class Projectile(MovingThing):
+    def __init__(self, image, x, y, width, height, arrow):
+        super().__init__(image, x, y, width, height, arrow)
+        self.need_arrow = False
+        self.is_moving = False
+
+
+class GolfClub(Projectile):
+    def __init__(self, image, x, y, width, height, arrow):
+        super().__init__(image, x, y, width, height, arrow)
+        self.id = "golfClub"
+        self.attack_object = None
+
 
 class Arrow(Thing):
     def __init__(self, image, x, y, width, height):
@@ -184,9 +196,10 @@ class Arrow(Thing):
 
 
 class Consumable(Thing):
-    def __init__(self, duration, image, x, y, width, height):
+    def __init__(self, duration, image, x, y, width, height, id):
         super().__init__(image, x, y, width, height)
         self.duration = duration
+        self.id = id
 
     def get_duration(self):
         return self.duration
@@ -212,7 +225,7 @@ class Consumable(Thing):
 
 class MassUp(Consumable):
     def __init__(self, image, x, y, width, height):
-        super().__init__(3, image, x, y, width, height)
+        super().__init__(3, image, x, y, width, height, "massUp")
 
     def activate(self, plr):
         plr.mass = 3*plr.mass
@@ -223,7 +236,7 @@ class MassUp(Consumable):
 
 class PowerUp(Consumable):
     def __init__(self, image, x, y, width, height):
-        super().__init__(2, image, x, y, width, height)
+        super().__init__(2, image, x, y, width, height, "powerUp")
 
     def activate(self, plr):
         plr.max_power = 20
@@ -234,7 +247,7 @@ class PowerUp(Consumable):
 
 class SpeedUp(Consumable):
     def __init__(self, image, x, y, width, height):
-        super().__init__(2, image, x, y, width, height)
+        super().__init__(2, image, x, y, width, height, "speedUp")
 
     def activate(self, plr):
         plr.acc /= 3
@@ -245,7 +258,7 @@ class SpeedUp(Consumable):
 
 class RandomAngle(Consumable):
     def __init__(self, image, x, y, width, height):
-        super().__init__(0, image, x, y, width, height)
+        super().__init__(0, image, x, y, width, height, "randomAngle")
 
     def activate(self, plr):
         plr.opponent.turn_angle = 0
@@ -254,9 +267,10 @@ class RandomAngle(Consumable):
     def deactivate(self, plr):
         plr.opponent.turn_angle = 15
 
+
 class ExchangePosition(Consumable):
     def __init__(self, image, x, y, width, height):
-        super().__init__(0, image, x, y, width, height)
+        super().__init__(0, image, x, y, width, height, "exchangePosition")
 
     def activate(self, plr):
         print("Exchange")
@@ -280,11 +294,9 @@ class Terrain(Thing):
         self.color = color
 
 
-
 class SandPit(Terrain):
     def __init__(self, image, x, y, width, height):
         super().__init__(image, x, y, width, height, "sand", (253, 223, 119))
-
 
 
 class AcclPad(Terrain):
@@ -296,7 +308,7 @@ class AcclPad(Terrain):
 
 
 
-
+        
 
 
 

@@ -3,13 +3,10 @@
 
 ####################### Setup #########################
 # useful imports
-from cmath import tan
-from email.mime import image
 import sys
 import random
 import math
 from turtle import width
-from webbrowser import BackgroundBrowser
 import numpy as np
 
 # import pygame
@@ -81,6 +78,7 @@ powerUp_img = pygame.image.load("../pictures/powerUp.png").convert_alpha()
 speedUp_img = pygame.image.load("../pictures/speedUp.png").convert_alpha()
 randomAngle_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 exchangePosition_img = pygame.image.load("../pictures/exchangePosition.png").convert_alpha()
+golfClub_img = pygame.image.load("../pictures/golfClub.png").convert_alpha()
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -98,6 +96,10 @@ player2.set_opponent(player1)
 
 arrow.reset(player1)
 player_list = [player1, player2]
+
+# set projectiles
+golfClub = go.GolfClub(golfClub_img, 500, 600, 80, 80, arrow)
+projectileList = [golfClub]
 
 # set consumables
 massUp = go.MassUp(massUp_img, 700, 100, 40, 40)
@@ -120,7 +122,6 @@ RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 30, 0), (60, HEIGHT) )
 
 BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
-
 # adding terrain
 accl1 = go.AcclPad(hole_img, 100, 100, 80, 80, 3, (1, 0))
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
@@ -140,9 +141,6 @@ WALLS.append(pygame.Rect( (90, 480), (140, 30) ))
 WALLS.append(pygame.Rect( (280, 540), (40, 120) ))
 WALLS.append(pygame.Rect( (90, 690), (140, 30) ))
 '''
-
-
-
 
 
 ####################### Filling the Screen #########################
@@ -167,8 +165,13 @@ def draw_window(scale):
     # pygame.display.update()
 
 def draw_players(player_list, current_player, hole, arrow):
+    # draw consumable on the screen
     for consumable in consumableList:
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
+    
+    # draw projectile on the screen
+    for projectile in projectileList:
+        screen.blit(projectile.image, (projectile.get_x(), projectile.get_y()))
 
     for tr in TERRAIN_LIST:
         pygame.draw.rect(screen, tr.color, tr.rect)
@@ -297,6 +300,15 @@ def handle_collision_ball_hole(ball, holeRect):
         pygame.event.post(pygame.event.Event(GOAL))
 
 
+def handle_boundries(plr):
+    """Make sure the ball bounces on the boundries"""
+    for wall in BOUNDARY:
+        handle_collision_ball_rect(plr, wall)
+
+    for wall in WALLS:
+        handle_collision_ball_rect(plr, wall)
+
+
 def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
         if test_collision_ball_rectangle(ball, consumable.get_rect()):
@@ -309,23 +321,36 @@ def handle_collision_ball_consumables(ball, consumables_list):
             ball.consumables.append(consumable)
 
 
-def handle_boundries(plr):
-    """Make sure the ball bounces on the boundries"""
-    for wall in BOUNDARY:
-        handle_collision_ball_rect(plr, wall)
-
-    for wall in WALLS:
-        handle_collision_ball_rect(plr, wall)
-
-
-
 def handle_plr_consumables(plr):
     for consumable in plr.consumables:
         if consumable.need_to_deactivate():
-            print("deactivate")
+            print("Deactivate: " + consumable.id)
             consumable.deactivate(plr)
             plr.consumables.remove(consumable)
 
+
+def handle_conllision_ball_projectiles(ball, projectiles_list):
+    for projectile in projectiles_list:
+        if test_collision_ball_rectangle(ball, projectile.get_rect()):
+            print("Collide with projectile")
+            projectile.need_arrow = True
+            projectiles_list.remove(projectile)
+            ball.projectiles.append(projectile)
+
+def handle_golfClub_function(golfClub, ball):
+    for wall in BOUNDARY:
+        if wall.colliderect(golfClub.get_rect()):
+            golfClub.is_moving = False
+
+    for wall in WALLS:
+        if wall.colliderect(golfClub.get_rect()):
+            golfClub.is_moving = False
+
+    if test_collision_ball_rectangle(ball, golfClub.get_rect()):
+        ball.angle = golfClub.angle
+        ball.vel_x = golfClub.vel_x * 2
+        ball.vel_y = golfClub.vel_y * 2
+        golfClub.is_moving = False
 
 def handle_terrain(plr):
     for tr in TERRAIN_LIST:
@@ -394,7 +419,7 @@ def check_button_clicked(button) -> bool:
 ####################### Main Event Loop #########################
 
 def main():
-    global current_player, tracing, rect_preview
+    global current_player, tracing, rect_preview, projectileList
     draw_window(0)
     draw_players(player_list, current_player, hole, arrow)
 
@@ -412,7 +437,7 @@ def main():
     tracing = False
     rect_preview = pygame.Rect((0, 0), (0, 0))
 
-
+    current_projectile = None
 
     while True:
 
@@ -421,9 +446,18 @@ def main():
             wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
             rect_preview = pygame.Rect(topleft, wh)
 
+        if current_projectile is None:
+            plr = player_list[current_player]
+        else:
+            if projectile.need_arrow:
+                plr = current_projectile
+                current_projectile.acc = 0
+                projectileList.append(current_projectile)
+                arrow.reset(plr)
+                projectile.need_arrow = False
+
         # Check every event in the event list
         for event in pygame.event.get():
-            plr = player_list[current_player]
             # click quit button, then quit
             if event.type == pygame.QUIT:
                 sys.exit()
@@ -448,6 +482,7 @@ def main():
                     rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
                     arrow.set_rot(rot_img, rot_x, rot_y)
 
+
                 if event.key == pygame.K_RIGHT:
                     plr.right(player_list[current_player].turn_angle)
                     rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
@@ -461,6 +496,7 @@ def main():
                     current_player = len(player_list)-1-current_player
                     nxt_p = player_list[current_player]
                     if nxt_p.get_vel() < 1:
+                        plr = player_list[current_player]
                         arrow.reset(nxt_p)
 
                 if event.key == pygame.K_e:
@@ -471,38 +507,55 @@ def main():
                     tracing = True
                     topleft = pygame.mouse.get_pos()
 
-
                 if event.key == pygame.K_2:
                     tracing = False
                     bottomright = pygame.mouse.get_pos()
                     wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
                     WALLS.append(pygame.Rect(topleft, wh))
 
+                if event.key == pygame.K_3:
+                    for projectile in player_list[current_player].projectiles:
+                        # if the player have golfClub projectile
+                        if projectile.id == "golfClub":
+                            current_projectile = projectile
+                            current_projectile.set_x(player_list[current_player].x)
+                            current_projectile.set_y(player_list[current_player].y)
+                            current_projectile.attack_object = player_list[current_player].opponent
+                            current_projectile.is_moving = True
+                        else:
+                            print(False)
 
                 if event.key == pygame.K_BACKSPACE:
                     mp = pygame.mouse.get_pos()
                     for i in range(len(WALLS)):
                         if mp[0] > WALLS[i].x and mp[0] < WALLS[i].right and mp[1] > WALLS[i].y and mp[1] < WALLS[i].bottom:
                             del WALLS[i]
-                            break
-
-
-                    
+                            break                  
 
                 draw_players(player_list, current_player, hole, arrow)
 
         # update the screen
         draw_window(force_scale)
 
+
+        # set movement of projectile
+        if current_projectile != None:
+            if current_projectile.is_moving:
+                handle_golfClub_function(current_projectile, current_projectile.attack_object)
+                current_projectile.move()                
+            else:
+                projectileList.remove(current_projectile)
+                current_projectile = None
+
+        
         for i in range(len(player_list)):
             handle_collision_ball_consumables(player_list[i], consumableList)
-
+            if current_projectile is None:
+                handle_conllision_ball_projectiles(player_list[i], projectileList)
             handle_collision_ball_ball(player_list[0], player_list[1])
             handle_boundries(player_list[i])
-            player_list[i].move()
             handle_collision_ball_hole(player_list[i], hole.get_rect())
-
-        plr = player_list[current_player]
+            player_list[i].move()
 
         if plr.get_vel() < 2 and plr.get_vel() != 0:
             arrow.reset(plr)
