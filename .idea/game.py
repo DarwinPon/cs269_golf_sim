@@ -168,10 +168,6 @@ def draw_players(player_list, current_player, hole, arrow):
     # draw consumable on the screen
     for consumable in consumableList:
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
-    
-    # draw projectile on the screen
-    for projectile in projectileList:
-        screen.blit(projectile.image, (projectile.get_x(), projectile.get_y()))
 
     for tr in TERRAIN_LIST:
         pygame.draw.rect(screen, tr.color, tr.rect)
@@ -181,6 +177,10 @@ def draw_players(player_list, current_player, hole, arrow):
     for plr in player_list:
         screen.blit(plr.image, (plr.get_x(), plr.get_y()))
     screen.blit(hole.image, (hole.get_x(), hole.get_y()))
+
+        # draw projectile on the screen
+    for projectile in projectileList:
+        screen.blit(projectile.image, (projectile.get_x(), projectile.get_y()))
     # update the screen
     pygame.display.update()
 
@@ -518,8 +518,8 @@ def main():
                         # if the player have golfClub projectile
                         if projectile.id == "golfClub":
                             current_projectile = projectile
-                            current_projectile.set_x(player_list[current_player].x)
-                            current_projectile.set_y(player_list[current_player].y)
+                            current_projectile.set_x(player_list[current_player].x - 20)
+                            current_projectile.set_y(player_list[current_player].y - 20)
                             current_projectile.attack_object = player_list[current_player].opponent
                             current_projectile.is_moving = True
                         else:
