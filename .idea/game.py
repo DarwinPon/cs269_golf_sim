@@ -123,7 +123,7 @@ RIGHTBOUND_RECT = pygame.Rect( (WIDTH - 30, 0), (60, HEIGHT) )
 BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
 # adding terrain
-accl1 = go.AcclPad(hole_img, 100, 100, 80, 80, 3, (1, 0))
+accl1 = go.AcclPad(hole_img, 100, 100, 80, 80, 2, (1, 0))
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 TERRAIN_LIST = [accl1, sand1]
 
@@ -197,8 +197,8 @@ def handle_collision_ball_ball(ball1, ball2):
         ball2.vel_x, ball2.vel_y = u2[0], u2[1]
         ball1.update_angle()
         ball2.update_angle()
-        ball1.move()
-        ball2.move()
+        ball1.advance(10)
+        ball2.advance(10)
 
 
 def test_collision_ball_rectangle(ball, rect):
@@ -298,10 +298,13 @@ def handle_collision_ball_hole(ball, holeRect):
         pygame.event.post(pygame.event.Event(GOAL))
 
 
+<<<<<<< HEAD
 def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
     for wall in BOUNDARY:
         handle_collision_ball_rect(plr, wall)
+=======
+>>>>>>> remotes/origin/Blitzen
 
 
 def handle_collision_ball_consumables(ball, consumables_list):
@@ -309,6 +312,7 @@ def handle_collision_ball_consumables(ball, consumables_list):
         if test_collision_ball_rectangle(ball, consumable.get_rect()):
             print("Collide with consumable")
             # set the plr to the consumable
+            print(ball.rect.x)
             consumable.activate(ball)
             # remove consumable from the list and screen
             consumables_list.remove(consumable)
@@ -316,6 +320,7 @@ def handle_collision_ball_consumables(ball, consumables_list):
             ball.consumables.append(consumable)
 
 
+<<<<<<< HEAD
 def handle_boundries(plr):
     """Make sure the ball bounces on the boundries"""
     for wall in BOUNDARY:
@@ -324,6 +329,9 @@ def handle_boundries(plr):
 
 
 
+=======
+
+>>>>>>> remotes/origin/Blitzen
 def handle_plr_consumables(plr):
     for consumable in plr.consumables:
         if consumable.need_to_deactivate():
@@ -355,19 +363,19 @@ def handle_golfClub_function(golfClub, ball):
         ball.vel_y = golfClub.vel_y * 2
         golfClub.is_moving = False
 
-def handle_terrain(plr):
-    for tr in TERRAIN_LIST:
-        if tr.rect.colliderect(plr.rect):
-            if tr.id is "sand":
-                plr.acc = 3
-            else:
-                plr.acc = 1
-            if tr.id is "accl":
-                plr.vel_x += tr.orientation[0] * tr.scale
-                plr.vel_y += tr.orientation[1] * tr.scale
-                plr.update_angle()
-        else:
-            plr.acc = 1
+def handle_terrain():
+    for plr in player_list:
+        for tr in TERRAIN_LIST:
+            if tr.rect.colliderect(plr.rect):
+                if tr.id is "sand":
+                    plr.acc = 3
+
+                if tr.id is "accl":
+                    plr.vel_x += tr.orientation[0] * tr.scale
+                    plr.vel_y += tr.orientation[1] * tr.scale
+                    plr.update_angle()
+            elif plr.acc == 3:
+                    plr.acc = 1
 
 
 def rot_image(rect, image, angle):
@@ -408,6 +416,7 @@ def move(plr):
                     print("corner")
                     plr.reflect_x()
                     plr.reflect_y()
+        handle_collision_ball_ball(plr, plr.opponent)
 
     plr.update_pos()
 
@@ -562,13 +571,20 @@ def main():
 
                 if event.key == pygame.K_BACKSPACE:
                     mp = pygame.mouse.get_pos()
+<<<<<<< HEAD
+=======
+
+>>>>>>> remotes/origin/Blitzen
                     for i in range(4, len(BOUNDARY)):
                         if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
                             del BOUNDARY[i]
                             break
 
 
+<<<<<<< HEAD
                     
+=======
+>>>>>>> remotes/origin/Blitzen
 
                 draw_players(player_list, current_player, hole, arrow)
 
@@ -576,6 +592,9 @@ def main():
         draw_window(force_scale)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> remotes/origin/Blitzen
 
         # set movement of projectile
         if current_projectile != None:
@@ -589,15 +608,21 @@ def main():
         
         for i in range(len(player_list)):
             handle_collision_ball_consumables(player_list[i], consumableList)
+
             if current_projectile is None:
                 handle_conllision_ball_projectiles(player_list[i], projectileList)
             handle_collision_ball_ball(player_list[0], player_list[1])
+<<<<<<< HEAD
             handle_boundries(player_list[i])
 =======
         for i in range(len(player_list)-1):
             handle_collision_ball_consumables(player_list[i], consumableList)
             handle_collision_ball_ball(player_list[0], player_list[1])
             move(player_list[i])
+>>>>>>> remotes/origin/Blitzen
+=======
+            move(player_list[i])
+
 >>>>>>> remotes/origin/Blitzen
             handle_collision_ball_hole(player_list[i], hole.get_rect())
             player_list[i].move()
