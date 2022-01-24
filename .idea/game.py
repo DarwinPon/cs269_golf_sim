@@ -375,7 +375,7 @@ def check_collision_ball_rect(ball, rect):
     col_h = check_collision_h(ball, rect)
     return col_v and col_h
 
-def move(plr, other_plr):
+def move(plr):
     '''Moves the player and handles collision with obstacles'''
 
     steps = 10
@@ -398,7 +398,7 @@ def move(plr, other_plr):
                     print("corner")
                     plr.reflect_x()
                     plr.reflect_y()
-        handle_collision_ball_ball(plr, other_plr)
+        handle_collision_ball_ball(plr, plr.opponent)
 
     plr.update_pos()
 
@@ -583,7 +583,7 @@ def main():
             if current_projectile is None:
                 handle_conllision_ball_projectiles(player_list[i], projectileList)
             handle_collision_ball_ball(player_list[0], player_list[1])
-            move(player_list[i], player_list[1-i])
+            move(player_list[i])
 
             handle_collision_ball_hole(player_list[i], hole.get_rect())
             player_list[i].move()
