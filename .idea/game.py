@@ -122,7 +122,7 @@ BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
 
 # adding terrain
-accl1 = go.AcclPad(hole_img, 100, 100, 80, 80, 3, (1, 0))
+accl1 = go.AcclPad(hole_img, 100, 100, 80, 80, 2, (1, 0))
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 TERRAIN_LIST = [accl1, sand1]
 
@@ -194,8 +194,8 @@ def handle_collision_ball_ball(ball1, ball2):
         ball2.vel_x, ball2.vel_y = u2[0], u2[1]
         ball1.update_angle()
         ball2.update_angle()
-        ball1.move()
-        ball2.move()
+        ball1.advance(10)
+        ball2.advance(10)
 
 
 def test_collision_ball_rectangle(ball, rect):
@@ -300,6 +300,7 @@ def handle_collision_ball_consumables(ball, consumables_list):
         if test_collision_ball_rectangle(ball, consumable.get_rect()):
             print("Collide with consumable")
             # set the plr to the consumable
+            print(ball.rect.x)
             consumable.activate(ball)
             # remove consumable from the list and screen
             consumables_list.remove(consumable)
@@ -323,19 +324,20 @@ def handle_plr_consumables(plr):
             plr.consumables.remove(consumable)
 
 
-def handle_terrain(plr):
-    for tr in TERRAIN_LIST:
-        if tr.rect.colliderect(plr.rect):
-            if tr.id is "sand":
-                plr.acc = 3
+def handle_terrain():
+    for plr in player_list:
+        for tr in TERRAIN_LIST:
+            if tr.rect.colliderect(plr.rect):
+                if tr.id is "sand":
+                    plr.acc = 3
+                else:
+                    plr.acc = 1
+                if tr.id is "accl":
+                    plr.vel_x += tr.orientation[0] * tr.scale
+                    plr.vel_y += tr.orientation[1] * tr.scale
+                    plr.update_angle()
             else:
                 plr.acc = 1
-            if tr.id is "accl":
-                plr.vel_x += tr.orientation[0] * tr.scale
-                plr.vel_y += tr.orientation[1] * tr.scale
-                plr.update_angle()
-        else:
-            plr.acc = 1
 
 
 def rot_image(rect, image, angle):
@@ -353,7 +355,7 @@ def check_collision_ball_rect(ball, rect):
     col_h = check_collision_h(ball, rect)
     return col_v and col_h
 
-def move(plr):
+def move(plr, other_plr):
     '''Moves the player and handles collision with obstacles'''
 
     steps = 10
@@ -376,6 +378,7 @@ def move(plr):
                     print("corner")
                     plr.reflect_x()
                     plr.reflect_y()
+        handle_collision_ball_ball(plr, other_plr)
 
     plr.update_pos()
 
@@ -522,10 +525,11 @@ def main():
         # update the screen
         draw_window(force_scale)
 
-        for i in range(len(player_list)-1):
+        for i in range(len(player_list)):
             handle_collision_ball_consumables(player_list[i], consumableList)
             handle_collision_ball_ball(player_list[0], player_list[1])
-            move(player_list[i])
+            handle_terrain()
+            move(player_list[i], player_list[1-i])
             handle_collision_ball_hole(player_list[i], hole.get_rect())
 
         plr = player_list[current_player]

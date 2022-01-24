@@ -15,12 +15,14 @@ class Thing():
         return self.rect.x
 
     def set_x(self, x):
+        self.x = x
         self.rect.x = x
 
     def get_y(self):
         return self.rect.y
 
     def set_y(self, y):
+        self.y = y
         self.rect.y = y
 
     def get_width(self):
@@ -235,10 +237,10 @@ class MassUp(Consumable):
         super().__init__(3, image, x, y, width, height)
 
     def activate(self, plr):
-        plr.mass = 3*plr.mass
+        plr.mass = 5*plr.mass
 
     def deactivate(self, plr):
-        plr.mass = plr.mass/3
+        plr.mass = plr.mass/5
 
 
 class PowerUp(Consumable):
@@ -282,12 +284,13 @@ class ExchangePosition(Consumable):
         print("Exchange")
         plr_x = plr.x
         plr_y = plr.y
-        opponent_x = plr.opponent.x + 16
-        opponent_y = plr.opponent.y + 16
+        opponent_x = plr.opponent.x + 6
+        opponent_y = plr.opponent.y + 6
         plr.set_x(opponent_x)
         plr.set_y(opponent_y)
         plr.opponent.set_x(plr_x)
         plr.opponent.set_y(plr_y)
+        plr.opponent.arrow.reset(plr.opponent)
 
     def deactivate(self, plr):
         pass
