@@ -369,18 +369,45 @@ class Terrain(Thing):
         self.id = id
         self.color = color
 
-
 class SandPit(Terrain):
     def __init__(self, image, x, y, width, height):
         super().__init__(image, x, y, width, height, "sand", (253, 223, 119))
 
 
-class AcclPad(Terrain):
-    def __init__(self, image, x, y, width, height, scale, orientation):
-        super().__init__( image, x, y, width, height, "accl", (126, 200, 80))
+class BoostPad(Terrain):
+    def __init__(self, image, x, y, width, scale, angle):
+        super().__init__( image, x, y, width, width, "boost", (126, 200, 80))
         #orientation is a tuple
-        self.orientation = orientation
         self.scale = scale
+        self.angle = angle
+        self.orientation = (1, 0)
+        self.update_ori()
+        self.image = pygame.transform.rotate(self.image, self.angle)
+
+    def right(self):
+        self.angle -= 90
+        if self.angle < 0:
+            self.angle += 360
+        self.update_ori()
+        self.image = pygame.transform.rotate(self.image, -90)
+
+    def left(self):
+        self.angle += 90
+        if self.angle >= 360:
+            self.angle = 360 - self.angle
+        self.update_ori()
+        self.image = pygame.transform.rotate(self.image, 90)
+
+    def update_ori(self):
+        if self.angle == 0:
+            self.orientation = (1, 0)
+        if self.angle == 90:
+            self.orientation = (0, -1)
+        if self.angle == 180:
+            self.orientation = (-1, 0)
+        if self.angle == 270:
+            self.orientation = (0, 1)
+
 
 class Tornado(Terrain):
     def __init__(self, image, x, y, width, height):
