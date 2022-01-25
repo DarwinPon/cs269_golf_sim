@@ -334,6 +334,35 @@ class AcclPad(Terrain):
         self.orientation = orientation
         self.scale = scale
 
+class Tornado(Terrain):
+    def __init__(self, image, x, y, width, height):
+        super().__init__( image, x, y, width, height, "tor", (255, 0, 80))
+        #orientation is a tuple
+        self.center_x = x + width / 2
+        self.center_y = y + height / 2
+        self.scale = 3
+
+
+class RandomBox(Consumable):
+    def __init__(self, image, x, y, width, height):
+        super().__init__(image, x, y, width, height, "RandomBox")
+        self.randomList = [None, None, None, None, None, None, None, 
+                            MassUp(image, x, y, width, height), MassUp(image, x, y, width, height),
+                            SpeedUp(image, x, y, width, height),
+                            PowerUp(image, x, y, width, height)]
+
+
+    def generate_consumable(self, plr):
+        randNum = random.randint(0, 10)
+        consumable = self.randomList[randNum]
+        if consumable is not None:
+            print(consumable.id)
+            plr.consumables.append(consumable)
+        else:
+            print("None")
+
+
+        
 
 
         
