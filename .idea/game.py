@@ -238,8 +238,6 @@ def handle_collision_ball_rect(ball, rect):
         return 2
 
 
-
-
 def check_collision_v(ball, rect):
     '''check if the next advance of ball will result in a vertical collision'''
     if ball.x + ball.RADIUS > rect.x and ball.x + ball.RADIUS < rect.x + rect.width:
@@ -291,13 +289,10 @@ def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
         if check_collision_ball_rect(ball, consumable.get_rect()):
             print("Collide with consumable")
-            # set the plr to the consumable
-            print(ball.rect.x)
+            # activate the consumable
             consumable.activate(ball)
             # remove consumable from the list and screen
             consumables_list.remove(consumable)
-            # add current consumable into the plr's consumables list
-            ball.consumables.append(consumable)
 
 
 def handle_plr_consumables(plr):
@@ -358,11 +353,6 @@ def handle_terrain():
 
                 elif plr.acc == 5:
                     plr.acc = 1
-
-        
-                    
-            
-
 
 
 def rot_image(rect, image, angle):

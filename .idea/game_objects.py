@@ -256,6 +256,7 @@ class MassUp(Consumable):
 
     def activate(self, plr):
         plr.mass = 5*plr.mass
+        plr.add_consumable(self)
 
     def deactivate(self, plr):
         plr.mass = plr.mass/5
@@ -267,6 +268,7 @@ class PowerUp(Consumable):
 
     def activate(self, plr):
         plr.max_power = 20
+        plr.add_consumable(self)
 
     def deactivate(self, plr):
         plr.max_power = 10
@@ -278,6 +280,7 @@ class SpeedUp(Consumable):
 
     def activate(self, plr):
         plr.acc /= 3
+        plr.add_consumable(self)
 
     def deactivate(self, plr):
         plr.acc *= 3
@@ -290,6 +293,8 @@ class RandomAngle(Consumable):
     def activate(self, plr):
         plr.opponent.turn_angle = 0
         plr.opponent.angle = random.randint(0, 359)
+        # add current consumable into the plr's consumables list
+        plr.add_consumable(self)
 
     def deactivate(self, plr):
         plr.opponent.turn_angle = 15
@@ -310,6 +315,7 @@ class ExchangePosition(Consumable):
         plr.opponent.set_x(plr_x)
         plr.opponent.set_y(plr_y)
         plr.opponent.arrow.reset(plr.opponent)
+        plr.add_consumable(self)
 
     def deactivate(self, plr):
         pass
@@ -345,21 +351,30 @@ class Tornado(Terrain):
 
 class RandomBox(Consumable):
     def __init__(self, image, x, y, width, height):
-        super().__init__(image, x, y, width, height, "RandomBox")
-        self.randomList = [None, None, None, None, None, None, None, 
-                            MassUp(image, x, y, width, height), MassUp(image, x, y, width, height),
-                            SpeedUp(image, x, y, width, height),
-                            PowerUp(image, x, y, width, height)]
+        super().__init__(1, image, x, y, width, height, "RandomBox")
 
-
-    def generate_consumable(self, plr):
-        randNum = random.randint(0, 10)
-        consumable = self.randomList[randNum]
-        if consumable is not None:
-            print(consumable.id)
-            plr.consumables.append(consumable)
+    def activate(self, plr):
+        randNum = random.randint(1, 15)
+        random_consumable = None
+        print(randNum)
+        # RandomAngle: 15%
+        if 1 <= randNum <= 15:
+            random_consumable = RandomAngle(self.image, self.x, self.y, self.width, self.height)
+        # SpeedUp: 25%
+        elif 16 <= randNum <= 40:
+            random_consumable = SpeedUp(self.image, self.x, self.y, self.width, self.height)
+        # PowerUp: 25%
+        elif 41 <= randNum <= 65:
+            random_consumable = PowerUp(self.image, self.x, self.y, self.width, self.height)
+        # MassUp: 35%
         else:
-            print("None")
+            random_consumable = MassUp(self.image, self.x, self.y, self.width, self.height)
+            
+        # activate consumable
+        random_consumable.activate(plr)
+
+
+        
 
 
         
