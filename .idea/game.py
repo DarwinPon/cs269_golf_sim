@@ -16,13 +16,14 @@ from pygame.locals import *
 from pygame import mixer
 
 import game_objects as go
+import sound as s
 
 # initialize pygame
 pygame.init()
 
 # initialize bgm
 mixer.init()
-mixer.music.load('../audios/BGM_gameEasy_Pioneer.mp3')
+sound = s.Sound(mixer)
 
 # Frames per second
 FPS = 30
@@ -130,7 +131,10 @@ BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 # adding terrain
 boost1 = go.BoostPad(boost_img, 100, 100, 80, 2, 0)
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
-TERRAIN_LIST = [boost1, sand1]
+
+tor1 = go.Tornado(hole_img, 700, 500, 80, 80)
+TERRAIN_LIST = [accl1, sand1, tor1]
+
 
 # testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
@@ -164,10 +168,6 @@ def draw_players(player_list, current_player, hole, arrow):
     # draw consumable on the screen
     for consumable in consumableList:
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
-    
-    # draw projectile on the screen
-    for projectile in projectileList:
-        screen.blit(projectile.image, (projectile.get_x(), projectile.get_y()))
 
     for tr in TERRAIN_LIST:
         pygame.draw.rect(screen, tr.color, tr.rect)
@@ -179,6 +179,10 @@ def draw_players(player_list, current_player, hole, arrow):
     for plr in player_list:
         screen.blit(plr.image, (plr.get_x(), plr.get_y()))
     screen.blit(hole.image, (hole.get_x(), hole.get_y()))
+
+        # draw projectile on the screen
+    for projectile in projectileList:
+        screen.blit(projectile.image, (projectile.get_x(), projectile.get_y()))
     # update the screen
     pygame.display.update()
 
@@ -209,23 +213,10 @@ def handle_collision_ball_ball(ball1, ball2):
         ball2.advance(10)
 
 
-def test_collision_ball_rectangle(ball, rect):
-    r = ball.get_radius()
-    ballCenter = (ball.x + r, ball.y + r)
-    ball_distance_x = abs(ballCenter[0] - rect.centerx)
-    ball_distance_y = abs(ballCenter[1] - rect.centery)
-    if ball_distance_x > rect.width / 2 + r or ball_distance_y > rect.height / 2 + r:
-        return False
-    if ball_distance_x <= rect.width / 2 or ball_distance_y <= rect.height / 2:
-        return True
-    corner_x = ball_distance_x - rect.width / 2
-    corner_y = ball_distance_y - rect.height / 2
-    corner_distance = math.hypot(corner_x, corner_y)
-    return corner_distance <= r
-
-
 def handle_collision_ball_rect(ball, rect):
     """handles collision between a ball object and a rectangle"""
+    # add sound
+    sound.collision_ball_wall()
 
     orig_x = ball.x
     orig_y = ball.y
@@ -256,17 +247,17 @@ def handle_collision_ball_rect(ball, rect):
         return 2
 
 
-
-
 def check_collision_v(ball, rect):
     '''check if the next advance of ball will result in a vertical collision'''
     if ball.x + ball.RADIUS > rect.x and ball.x + ball.RADIUS < rect.x + rect.width:
         return True
+
     elif round(ball.x + 2*ball.RADIUS) < rect.x or ball.x > rect.x + rect.width:
         return False
 
     elif ball.y + 2*ball.RADIUS > rect.y and ball.y < rect.y + rect.height:
         return ball.x + 2*ball.RADIUS > rect.x and ball.x < rect.x + rect.width
+
     else:
         return check_corner_collision(ball, rect)
 
@@ -300,25 +291,19 @@ def check_collision_h(ball, rect):
 
 def handle_collision_ball_hole(ball, holeRect):
     """If collide, add GOAL to the event list"""
-    if test_collision_ball_rectangle(ball, holeRect):
+    if check_collision_ball_rect(ball, holeRect):
         print("Collision!")
         pygame.event.post(pygame.event.Event(GOAL))
 
 
-
-
 def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
-        if test_collision_ball_rectangle(ball, consumable.get_rect()):
+        if len(ball.get_consumables()) < 2 and check_collision_ball_rect(ball, consumable.get_rect()):
             print("Collide with consumable")
-            # set the plr to the consumable
-            print(ball.rect.x)
+            # activate the consumable
             consumable.activate(ball)
             # remove consumable from the list and screen
             consumables_list.remove(consumable)
-            # add current consumable into the plr's consumables list
-            ball.consumables.append(consumable)
-
 
 
 def handle_plr_consumables(plr):
@@ -331,22 +316,18 @@ def handle_plr_consumables(plr):
 
 def handle_conllision_ball_projectiles(ball, projectiles_list):
     for projectile in projectiles_list:
-        if test_collision_ball_rectangle(ball, projectile.get_rect()):
+        if len(ball.get_projectiles()) < 1 and check_collision_ball_rect(ball, projectile.get_rect()):
             print("Collide with projectile")
-            projectile.need_arrow = True
+            projectile.prepare(ball)
             projectiles_list.remove(projectile)
-            ball.projectiles.append(projectile)
+            
 
 def handle_golfClub_function(golfClub, ball):
     for wall in BOUNDARY:
         if wall.colliderect(golfClub.get_rect()):
             golfClub.is_moving = False
 
-    for wall in WALLS:
-        if wall.colliderect(golfClub.get_rect()):
-            golfClub.is_moving = False
-
-    if test_collision_ball_rectangle(ball, golfClub.get_rect()):
+    if check_collision_ball_rect(ball, golfClub.get_rect()):
         ball.angle = golfClub.angle
         ball.vel_x = golfClub.vel_x * 2
         ball.vel_y = golfClub.vel_y * 2
@@ -363,7 +344,25 @@ def handle_terrain():
                     plr.vel_x += tr.orientation[0] * tr.scale
                     plr.vel_y += tr.orientation[1] * tr.scale
                     plr.update_angle()
-            elif plr.acc == 3:
+
+                if tr.id == "tor":
+                    # deal with tornado
+                    dx = plr.x - tr.center_x
+                    dy = plr.y - tr.center_y
+                    
+                    angle = math.atan2(dy, dx)
+                    if dx > 0:
+                        plr.vel_x += tr.scale * math.cos(angle)
+                    else:
+                        plr.vel_x -= tr.scale * math.cos(angle)
+                    if dy > 0:
+                        plr.vel_y += tr.scale * math.sin(angle)
+                    else:
+                        plr.vel_y -= tr.scale * math.sin(angle)
+                    plr.update_angle()
+                    
+
+                elif plr.acc == 5:
                     plr.acc = 1
 
 
@@ -485,6 +484,18 @@ def check_button_clicked(button) -> bool:
     else:
         return False
 
+def check_ball_clicked(ball) -> bool:
+    """Check if player click the ball"""
+    mousePos = pygame.mouse.get_pos()
+    dx = ball.x - mousePos[0]
+    dy = ball.y - mousePos[1]
+    distance = math.hypot(dx, dy)
+
+    if distance <= ball.RADIUS:
+        return True
+    else:
+        return False
+
 ####################### Main Event Loop #########################
 
 def main():
@@ -497,7 +508,7 @@ def main():
     handle_startScreen()
 
     # play bgm
-    mixer.music.play()
+    sound.bgm()
 
     print("Entering main loop")
     force_scale = 0
@@ -523,7 +534,6 @@ def main():
                 plr = current_projectile
                 current_projectile.acc = 0
                 projectileList.append(current_projectile)
-                arrow.reset(plr)
                 projectile.need_arrow = False
 
         # Check every event in the event list
@@ -575,7 +585,13 @@ def main():
                         arrow.set_rot(rot_img, rot_x, rot_y)
 
                 if event.key == pygame.K_SPACE:
+                    # Add sound
+                    if current_projectile is None:
+                        sound.normal_hit()
+                    else:
+                        sound.hard_hit()
                     # check if we need to delet the consumables
+
                     if editing:
                         tracing = False
                         bottomright = pygame.mouse.get_pos()
@@ -596,9 +612,15 @@ def main():
                         arrow.is_visible = False
                         current_player = len(player_list)-1-current_player
                         nxt_p = player_list[current_player]
+
+                        if random.randint(1, 10) <= 3:
+                            random_projectile = go.GolfClub(golfClub_img, 0, 0, 80, 80, arrow)
+                        random_projectile.prepare(nxt_p)
+
                         if nxt_p.get_vel() < 1:
                             plr = player_list[current_player]
                             arrow.reset(nxt_p)
+
 
                 if event.key == pygame.K_e:
                     editing = not editing
@@ -623,15 +645,16 @@ def main():
                     trace_color = GREEN
                     topleft = pygame.mouse.get_pos()
 
-                if event.key == pygame.K_3:
+                if event.key == pygame.K_3 and current_projectile is None:
                     for projectile in player_list[current_player].projectiles:
                         # if the player have golfClub projectile
                         if projectile.id == "golfClub":
                             current_projectile = projectile
-                            current_projectile.set_x(player_list[current_player].x)
-                            current_projectile.set_y(player_list[current_player].y)
+                            current_projectile.set_x(player_list[current_player].x - 25)
+                            current_projectile.set_y(player_list[current_player].y - 25)
                             current_projectile.attack_object = player_list[current_player].opponent
                             current_projectile.is_moving = True
+                            arrow.reset(player_list[current_player])
                         else:
                             print(False)
 
@@ -645,17 +668,17 @@ def main():
                         if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
                             TERRAIN_LIST.remove(tr)
                             break
+
                 draw_players(player_list, current_player, hole, arrow)
 
         # update the screen
         draw_window(force_scale)
-
-
+        
         # set movement of projectile
         if current_projectile != None:
             if current_projectile.is_moving:
                 handle_golfClub_function(current_projectile, current_projectile.attack_object)
-                current_projectile.move()                
+                current_projectile.move()
             else:
                 projectileList.remove(current_projectile)
                 current_projectile = None
@@ -663,7 +686,7 @@ def main():
         
         for i in range(len(player_list)):
             handle_collision_ball_consumables(player_list[i], consumableList)
-
+            handle_terrain()
             if current_projectile is None:
                 handle_conllision_ball_projectiles(player_list[i], projectileList)
             handle_collision_ball_ball(player_list[0], player_list[1])

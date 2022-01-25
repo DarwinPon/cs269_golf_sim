@@ -105,19 +105,16 @@ class MovingThing(Thing):
             self.vel_y -= acc_y
 
     def advance(self, step):
-
         '''allows the ball to take a step forward without changing its speed. Only used in collision detection'''
 
         self.x = self.x + self.vel_x/step
         self.y = self.y + self.vel_y/step
-
 
     def traceback(self, step):
         self.x = self.x - self.vel_x/step
         self.y = self.y - self.vel_y/step
 
     def set_new_pos(self):
-
         '''allows the ball to take a step back. Only used in collision detection'''
         self.rect.x = round(self.x)
         self.rect.y = round(self.y)
@@ -173,6 +170,12 @@ class Ball(MovingThing):
         self.projectiles = []
         self.opponent = None
 
+    def get_projectiles(self):
+        return self.projectiles
+    
+    def add_projectile(self, projectile):
+        self.projectiles.append(projectile)
+
     def set_opponent(self, opponent):
         self.opponent = opponent
 
@@ -201,6 +204,10 @@ class GolfClub(Projectile):
         super().__init__(image, x, y, width, height, arrow)
         self.id = "golfClub"
         self.attack_object = None
+
+    def prepare(self, plr):
+        self.need_arrow = True
+        plr.add_projectile(self)
 
 
 class Arrow(Thing):
@@ -259,6 +266,7 @@ class MassUp(Consumable):
 
     def activate(self, plr):
         plr.mass = 5*plr.mass
+        plr.add_consumable(self)
 
     def deactivate(self, plr):
         plr.mass = plr.mass/5
@@ -270,6 +278,7 @@ class PowerUp(Consumable):
 
     def activate(self, plr):
         plr.max_power = 20
+        plr.add_consumable(self)
 
     def deactivate(self, plr):
         plr.max_power = 10
@@ -281,6 +290,7 @@ class SpeedUp(Consumable):
 
     def activate(self, plr):
         plr.acc /= 3
+        plr.add_consumable(self)
 
     def deactivate(self, plr):
         plr.acc *= 3
@@ -293,6 +303,8 @@ class RandomAngle(Consumable):
     def activate(self, plr):
         plr.opponent.turn_angle = 0
         plr.opponent.angle = random.randint(0, 359)
+        # add current consumable into the plr's consumables list
+        plr.add_consumable(self)
 
     def deactivate(self, plr):
         plr.opponent.turn_angle = 15
@@ -313,6 +325,7 @@ class ExchangePosition(Consumable):
         plr.opponent.set_x(plr_x)
         plr.opponent.set_y(plr_y)
         plr.opponent.arrow.reset(plr.opponent)
+        plr.add_consumable(self)
 
     def deactivate(self, plr):
         pass
@@ -364,6 +377,44 @@ class BoostPad(Terrain):
             self.orientation = (0, 1)
 
 
+class Tornado(Terrain):
+    def __init__(self, image, x, y, width, height):
+        super().__init__( image, x, y, width, height, "tor", (255, 0, 80))
+        #orientation is a tuple
+        self.center_x = x + width / 2
+        self.center_y = y + height / 2
+        self.scale = 3
+
+
+class RandomBox(Consumable):
+    def __init__(self, image, x, y, width, height):
+        super().__init__(1, image, x, y, width, height, "RandomBox")
+
+    def activate(self, plr):
+        randNum = random.randint(1, 15)
+        random_consumable = None
+        print(randNum)
+        # RandomAngle: 15%
+        if 1 <= randNum <= 15:
+            random_consumable = RandomAngle(self.image, self.x, self.y, self.width, self.height)
+        # SpeedUp: 25%
+        elif 16 <= randNum <= 40:
+            random_consumable = SpeedUp(self.image, self.x, self.y, self.width, self.height)
+        # PowerUp: 25%
+        elif 41 <= randNum <= 65:
+            random_consumable = PowerUp(self.image, self.x, self.y, self.width, self.height)
+        # MassUp: 35%
+        else:
+            random_consumable = MassUp(self.image, self.x, self.y, self.width, self.height)
+            
+        # activate consumable
+        random_consumable.activate(plr)
+
+
+        
+
+
+        
 
 
         
