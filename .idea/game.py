@@ -611,7 +611,6 @@ def main():
                         sound.normal_hit()
                     else:
                         sound.hard_hit()
-                    # check if we need to delet the consumables
 
                     if editing:
                         tracing = False
@@ -633,6 +632,7 @@ def main():
                         current_player = len(player_list)-1-current_player
                         nxt_p = player_list[current_player]
 
+                        # check if we need to delet the consumables
                         handle_plr_consumables(nxt_p)
 
                         if random.randint(1, 10) <= 3:
@@ -667,7 +667,7 @@ def main():
                     trace_color = GREEN
                     topleft = pygame.mouse.get_pos()
 
-                if event.key == pygame.K_RETURN and current_projectile is not None:
+                if event.key == pygame.K_RETURN and current_projectile is None:
                     for projectile in player_list[current_player].projectiles:
                         # if the player have golfClub projectile
                         if projectile.id == "golfClub":
@@ -677,8 +677,6 @@ def main():
                             current_projectile.attack_object = player_list[current_player].opponent
                             current_projectile.is_moving = True
                             arrow.reset(player_list[current_player])
-                        else:
-                            print(False)
 
                 if event.key == pygame.K_BACKSPACE:
                     mp = pygame.mouse.get_pos()
@@ -702,7 +700,8 @@ def main():
                 handle_golfClub_function(current_projectile, current_projectile.attack_object)
                 current_projectile.move()
             else:
-                projectileList.remove(current_projectile)
+                if current_projectile in projectileList:
+                    projectileList.remove(current_projectile)
                 current_projectile = None
 
         

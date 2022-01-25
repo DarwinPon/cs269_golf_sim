@@ -229,6 +229,7 @@ class Projectile(MovingThing):
         super().__init__(image, x, y, width, height, arrow)
         self.need_arrow = False
         self.is_moving = False
+        self.need_to_set = False
 
 
 class GolfClub(Projectile):
@@ -421,19 +422,16 @@ class RandomBox(Consumable):
         super().__init__(1, image, x, y, width, height, "RandomBox")
 
     def activate(self, plr):
-        randNum = random.randint(1, 15)
+        randNum = random.randint(1, 10)
         random_consumable = None
         print(randNum)
-        # RandomAngle: 15%
-        if 1 <= randNum <= 15:
-            random_consumable = RandomAngle(self.image, self.x, self.y, self.width, self.height)
-        # SpeedUp: 25%
-        elif 16 <= randNum <= 40:
+        # SpeedUp: 30%
+        if 1 <= randNum <= 3:
             random_consumable = SpeedUp(self.image, self.x, self.y, self.width, self.height)
-        # PowerUp: 25%
-        elif 41 <= randNum <= 65:
+        # PowerUp: 30%
+        elif 4 <= randNum <= 7:
             random_consumable = PowerUp(self.image, self.x, self.y, self.width, self.height)
-        # MassUp: 35%
+        # MassUp: 40%
         else:
             random_consumable = MassUp(self.image, self.x, self.y, self.width, self.height)
             
