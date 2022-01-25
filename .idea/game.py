@@ -138,7 +138,7 @@ boost1 = go.BoostPad(boost_img, 100, 100, 80, 2, 0)
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 
 tor1 = go.Tornado(hole_img, 700, 500, 80, 80)
-TERRAIN_LIST = [accl1, sand1, tor1]
+TERRAIN_LIST = [boost1, sand1, tor1]
 
 
 # testing stuff
@@ -612,23 +612,6 @@ def main():
                     else:
                         sound.hard_hit()
                     # check if we need to delet the consumables
-<<<<<<< HEAD
-                    plr.launch(VELOCITY)
-                    arrow.is_visible = False
-                    current_player = len(player_list)-1-current_player
-                    nxt_p = player_list[current_player]
-
-                    # .3 chance to give current player a projectile
-                    if random.randint(1, 10) <= 3:
-                        random_projectile = go.GolfClub(golfClub_img, 0, 0, 80, 80, arrow)
-                        random_projectile.prepare(nxt_p)
-
-                    handle_plr_consumables(nxt_p)
-
-                    if nxt_p.get_vel() < 1:
-                        plr = player_list[current_player]
-                        arrow.reset(nxt_p)
-=======
 
                     if editing:
                         tracing = False
@@ -645,21 +628,21 @@ def main():
                             TERRAIN_LIST.append(sand)
 
                     else:
-                        handle_plr_consumables(player_list[current_player])
                         plr.launch(VELOCITY)
                         arrow.is_visible = False
                         current_player = len(player_list)-1-current_player
                         nxt_p = player_list[current_player]
 
+                        handle_plr_consumables(nxt_p)
+
                         if random.randint(1, 10) <= 3:
                             random_projectile = go.GolfClub(golfClub_img, 0, 0, 80, 80, arrow)
-                        random_projectile.prepare(nxt_p)
+                            random_projectile.prepare(nxt_p)
 
                         if nxt_p.get_vel() < 1:
                             plr = player_list[current_player]
                             arrow.reset(nxt_p)
 
->>>>>>> remotes/origin/Blitzen
 
                 if event.key == pygame.K_e:
                     editing = not editing
@@ -703,13 +686,10 @@ def main():
                         if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
                             del BOUNDARY[i]
                             break
-<<<<<<< HEAD
-=======
                     for tr in TERRAIN_LIST:
                         if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
                             TERRAIN_LIST.remove(tr)
                             break
->>>>>>> remotes/origin/Blitzen
 
                 draw_players(player_list, current_player, hole, arrow)
 
