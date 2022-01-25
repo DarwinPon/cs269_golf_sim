@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d5cdd050-99e3-483d-91e7-a268c5afa863" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/sound.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/game.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/game.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/game_objects.py" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/game_objects.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
@@ -94,12 +95,12 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/.idea/game.py</url>
-          <line>384</line>
+          <line>381</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/.idea/game.py</url>
-          <line>549</line>
+          <line>546</line>
           <option name="timeStamp" value="4" />
         </line-breakpoint>
       </breakpoints>
