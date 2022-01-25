@@ -170,6 +170,12 @@ class Ball(MovingThing):
         self.projectiles = []
         self.opponent = None
 
+    def get_projectiles(self):
+        return self.projectiles
+    
+    def add_projectile(self, projectile):
+        self.projectiles.append(projectile)
+
     def set_opponent(self, opponent):
         self.opponent = opponent
 
@@ -198,6 +204,10 @@ class GolfClub(Projectile):
         super().__init__(image, x, y, width, height, arrow)
         self.id = "golfClub"
         self.attack_object = None
+
+    def prepare(self, plr):
+        self.need_arrow = True
+        plr.add_projectile(self)
 
 
 class Arrow(Thing):

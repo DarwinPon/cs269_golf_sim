@@ -207,11 +207,8 @@ def handle_collision_ball_ball(ball1, ball2):
 
 def handle_collision_ball_rect(ball, rect):
     """handles collision between a ball object and a rectangle"""
-<<<<<<< HEAD
     # add sound
     sound.collision_ball_wall()
-=======
->>>>>>> remotes/origin/Blitzen
 
     orig_x = ball.x
     orig_y = ball.y
@@ -246,11 +243,13 @@ def check_collision_v(ball, rect):
     '''check if the next advance of ball will result in a vertical collision'''
     if ball.x + ball.RADIUS > rect.x and ball.x + ball.RADIUS < rect.x + rect.width:
         return True
+
     elif round(ball.x + 2*ball.RADIUS) < rect.x or ball.x > rect.x + rect.width:
         return False
 
     elif ball.y + 2*ball.RADIUS > rect.y and ball.y < rect.y + rect.height:
         return ball.x + 2*ball.RADIUS > rect.x and ball.x < rect.x + rect.width
+
     else:
         return check_corner_collision(ball, rect)
 
@@ -291,7 +290,7 @@ def handle_collision_ball_hole(ball, holeRect):
 
 def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
-        if check_collision_ball_rect(ball, consumable.get_rect()):
+        if len(ball.get_consumables()) < 2 and check_collision_ball_rect(ball, consumable.get_rect()):
             print("Collide with consumable")
             # activate the consumable
             consumable.activate(ball)
@@ -309,11 +308,11 @@ def handle_plr_consumables(plr):
 
 def handle_conllision_ball_projectiles(ball, projectiles_list):
     for projectile in projectiles_list:
-        if check_collision_ball_rect(ball, projectile.get_rect()):
+        if len(ball.get_projectiles()) < 1 and check_collision_ball_rect(ball, projectile.get_rect()):
             print("Collide with projectile")
-            projectile.need_arrow = True
+            projectile.prepare(ball)
             projectiles_list.remove(projectile)
-            ball.projectiles.append(projectile)
+            
 
 def handle_golfClub_function(golfClub, ball):
     for wall in BOUNDARY:
@@ -331,11 +330,7 @@ def handle_terrain():
         for tr in TERRAIN_LIST:
             if tr.rect.colliderect(plr.rect):
                 if tr.id == "sand":
-<<<<<<< HEAD
                     plr.acc = 5
-=======
-                    plr.acc = 3
->>>>>>> remotes/origin/Blitzen
 
                 if tr.id == "accl":
                     plr.vel_x += tr.orientation[0] * tr.scale
@@ -464,6 +459,18 @@ def check_button_clicked(button) -> bool:
     else:
         return False
 
+def check_ball_clicked(ball) -> bool:
+    """Check if player click the ball"""
+    mousePos = pygame.mouse.get_pos()
+    dx = ball.x - mousePos[0]
+    dy = ball.y - mousePos[1]
+    distance = math.hypot(dx, dy)
+
+    if distance <= ball.RADIUS:
+        return True
+    else:
+        return False
+
 ####################### Main Event Loop #########################
 
 def main():
@@ -548,6 +555,12 @@ def main():
                     arrow.is_visible = False
                     current_player = len(player_list)-1-current_player
                     nxt_p = player_list[current_player]
+
+                    # .3 chance to give current player a projectile
+                    if random.randint(1, 10) <= 3:
+                        random_projectile = go.GolfClub(golfClub_img, 0, 0, 80, 80, arrow)
+                        random_projectile.prepare(nxt_p)
+
                     if nxt_p.get_vel() < 1:
                         plr = player_list[current_player]
                         arrow.reset(nxt_p)
@@ -575,7 +588,7 @@ def main():
                     wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
                     BOUNDARY.append(pygame.Rect(topleft, wh))
 
-                if event.key == pygame.K_3:
+                if event.key == pygame.K_3 and current_projectile is None:
                     for projectile in player_list[current_player].projectiles:
                         # if the player have golfClub projectile
                         if projectile.id == "golfClub":
@@ -594,6 +607,8 @@ def main():
                         if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
                             del BOUNDARY[i]
                             break
+
+                
 
                 draw_players(player_list, current_player, hole, arrow)
 
