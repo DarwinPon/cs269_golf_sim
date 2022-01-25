@@ -8,6 +8,7 @@ import random
 import math
 from turtle import width
 import numpy as np
+import os.path
 
 # import pygame
 import pygame
@@ -206,8 +207,11 @@ def handle_collision_ball_ball(ball1, ball2):
 
 def handle_collision_ball_rect(ball, rect):
     """handles collision between a ball object and a rectangle"""
+<<<<<<< HEAD
     # add sound
     sound.collision_ball_wall()
+=======
+>>>>>>> remotes/origin/Blitzen
 
     orig_x = ball.x
     orig_y = ball.y
@@ -327,7 +331,11 @@ def handle_terrain():
         for tr in TERRAIN_LIST:
             if tr.rect.colliderect(plr.rect):
                 if tr.id == "sand":
+<<<<<<< HEAD
                     plr.acc = 5
+=======
+                    plr.acc = 3
+>>>>>>> remotes/origin/Blitzen
 
                 if tr.id == "accl":
                     plr.vel_x += tr.orientation[0] * tr.scale
@@ -382,15 +390,12 @@ def move(plr):
                 col_type = handle_collision_ball_rect(plr, wall)
                 plr.traceback(steps)
                 if col_type == 0:
-                    print("vertical")
                     plr.reflect_y()
 
                 if col_type == 1:
-                    print("horizontal")
                     plr.reflect_x()
 
                 if col_type == 2:
-                    print("corner")
                     plr.reflect_x()
                     plr.reflect_y()
         handle_collision_ball_ball(plr, plr.opponent)
@@ -429,6 +434,28 @@ def handle_endScreen():
                     main()
 
 
+def read_level(filename):
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'levels', filename))
+    with open(path) as f:
+        lines = f.readlines()
+        for l in lines:
+            l = l.split(",")
+            if l[0] == "w":
+                wall = pygame.Rect((int(l[1]), int(l[2])), (int(l[3]), int(l[4])))
+                BOUNDARY.append(wall)
+
+        f.close()
+
+def save_level():
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'levels', "new level.txt"))
+    lvl = ""
+    for i in range(5, len(BOUNDARY)):
+        line = "w," + str(BOUNDARY[i].x)+"," + str(BOUNDARY[i].y)+"," + str(BOUNDARY[i].width)+"," + str(BOUNDARY[i].height)+"\n"
+        lvl += line
+    with open(path, 'w') as f:
+        f.write(lvl)
+        f.close
+
 def check_button_clicked(button) -> bool:
     """Check if player click the button"""
     mousePos = pygame.mouse.get_pos()
@@ -441,6 +468,7 @@ def check_button_clicked(button) -> bool:
 
 def main():
     global current_player, tracing, rect_preview, projectileList
+
     draw_window(0)
     draw_players(player_list, current_player, hole, arrow)
 
@@ -528,6 +556,15 @@ def main():
                     editing = not editing
                     print("editing: "+ str(editing))
 
+                if event.key == pygame.K_s:
+                    #save
+                    save_level()
+
+                if event.key == pygame.K_r:
+                    #reads level file
+                    level_name = input("Please input level file name: ")
+                    read_level(level_name)
+
                 if event.key == pygame.K_1:
                     tracing = True
                     topleft = pygame.mouse.get_pos()
@@ -580,7 +617,7 @@ def main():
                 handle_conllision_ball_projectiles(player_list[i], projectileList)
             handle_collision_ball_ball(player_list[0], player_list[1])
             move(player_list[i])
-
+            handle_terrain()
             handle_collision_ball_hole(player_list[i], hole.get_rect())
 
 

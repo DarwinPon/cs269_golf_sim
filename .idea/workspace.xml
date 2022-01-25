@@ -93,11 +93,6 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/.idea/game.py</url>
-          <line>218</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/.idea/game.py</url>
           <line>377</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
