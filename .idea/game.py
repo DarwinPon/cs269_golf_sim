@@ -3,6 +3,7 @@
 
 ####################### Setup #########################
 # useful imports
+from dis import dis
 import sys
 import random
 import math
@@ -115,6 +116,10 @@ randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
 exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, 40, 40)
 consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
 
+# player1.add_consumable(massUp)
+# player1.add_consumable(speedUp)
+# player1.add_projectile(golfClub)
+
 # create a font
 afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 # render a surface with some text
@@ -133,7 +138,7 @@ boost1 = go.BoostPad(boost_img, 100, 100, 80, 2, 0)
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 
 tor1 = go.Tornado(hole_img, 700, 500, 80, 80)
-TERRAIN_LIST = [accl1, sand1, tor1]
+TERRAIN_LIST = [boost1, sand1, tor1]
 
 
 # testing stuff
@@ -176,13 +181,23 @@ def draw_players(player_list, current_player, hole, arrow):
 
     if arrow.is_visible:
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
+
     for plr in player_list:
+        # draw players
         screen.blit(plr.image, (plr.get_x(), plr.get_y()))
+        # check if need to show play's items
+        if plr.need_to_display:
+            displayList = plr.display()
+            for info_tuple in displayList:
+                screen.blit(info_tuple[0].image, (info_tuple[1][0], info_tuple[1][1]))
+
+
     screen.blit(hole.image, (hole.get_x(), hole.get_y()))
 
         # draw projectile on the screen
     for projectile in projectileList:
         screen.blit(projectile.image, (projectile.get_x(), projectile.get_y()))
+
     # update the screen
     pygame.display.update()
 
@@ -487,8 +502,8 @@ def check_button_clicked(button) -> bool:
 def check_ball_clicked(ball) -> bool:
     """Check if player click the ball"""
     mousePos = pygame.mouse.get_pos()
-    dx = ball.x - mousePos[0]
-    dy = ball.y - mousePos[1]
+    dx = ball.get_center_x() - mousePos[0]
+    dy = ball.get_center_y() - mousePos[1]
     distance = math.hypot(dx, dy)
 
     if distance <= ball.RADIUS:
@@ -545,6 +560,12 @@ def main():
             # if one player goal, then go to the gameover event
             if event.type == GOAL:
                 handle_gameover()
+
+            # display game items a ball have
+            if event.type == pygame.MOUSEBUTTONDOWN and check_ball_clicked(player_list[current_player]):
+                player_list[current_player].need_to_display = True 
+            if event.type == pygame.MOUSEBUTTONUP and player_list[current_player].need_to_display:
+                player_list[current_player].need_to_display = False
 
 
             if event.type == pygame.KEYDOWN:
@@ -607,15 +628,16 @@ def main():
                             TERRAIN_LIST.append(sand)
 
                     else:
-                        handle_plr_consumables(player_list[current_player])
                         plr.launch(VELOCITY)
                         arrow.is_visible = False
                         current_player = len(player_list)-1-current_player
                         nxt_p = player_list[current_player]
 
+                        handle_plr_consumables(nxt_p)
+
                         if random.randint(1, 10) <= 3:
                             random_projectile = go.GolfClub(golfClub_img, 0, 0, 80, 80, arrow)
-                        random_projectile.prepare(nxt_p)
+                            random_projectile.prepare(nxt_p)
 
                         if nxt_p.get_vel() < 1:
                             plr = player_list[current_player]
@@ -645,7 +667,7 @@ def main():
                     trace_color = GREEN
                     topleft = pygame.mouse.get_pos()
 
-                if event.key == pygame.K_3 and current_projectile is None:
+                if event.key == pygame.K_RETURN and current_projectile is not None:
                     for projectile in player_list[current_player].projectiles:
                         # if the player have golfClub projectile
                         if projectile.id == "golfClub":
