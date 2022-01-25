@@ -3,6 +3,7 @@
 
 ####################### Setup #########################
 # useful imports
+from dis import dis
 import sys
 import random
 import math
@@ -111,6 +112,10 @@ randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
 exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, 40, 40)
 consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
 
+# player1.add_consumable(massUp)
+# player1.add_consumable(speedUp)
+# player1.add_projectile(golfClub)
+
 # create a font
 afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
 # render a surface with some text
@@ -168,13 +173,23 @@ def draw_players(player_list, current_player, hole, arrow):
 
     if arrow.is_visible:
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
+
     for plr in player_list:
+        # draw players
         screen.blit(plr.image, (plr.get_x(), plr.get_y()))
+        # check if need to show play's items
+        if plr.need_to_display:
+            displayList = plr.display()
+            for info_tuple in displayList:
+                screen.blit(info_tuple[0].image, (info_tuple[1][0], info_tuple[1][1]))
+
+
     screen.blit(hole.image, (hole.get_x(), hole.get_y()))
 
         # draw projectile on the screen
     for projectile in projectileList:
         screen.blit(projectile.image, (projectile.get_x(), projectile.get_y()))
+
     # update the screen
     pygame.display.update()
 
@@ -462,8 +477,8 @@ def check_button_clicked(button) -> bool:
 def check_ball_clicked(ball) -> bool:
     """Check if player click the ball"""
     mousePos = pygame.mouse.get_pos()
-    dx = ball.x - mousePos[0]
-    dy = ball.y - mousePos[1]
+    dx = ball.get_center_x() - mousePos[0]
+    dy = ball.get_center_y() - mousePos[1]
     distance = math.hypot(dx, dy)
 
     if distance <= ball.RADIUS:
@@ -521,6 +536,12 @@ def main():
             if event.type == GOAL:
                 handle_gameover()
 
+            # display game items a ball have
+            if event.type == pygame.MOUSEBUTTONDOWN and check_ball_clicked(player_list[current_player]):
+                player_list[current_player].need_to_display = True 
+            if event.type == pygame.MOUSEBUTTONUP and player_list[current_player].need_to_display:
+                player_list[current_player].need_to_display = False
+
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
@@ -550,7 +571,6 @@ def main():
                     else:
                         sound.hard_hit()
                     # check if we need to delet the consumables
-                    handle_plr_consumables(player_list[current_player])
                     plr.launch(VELOCITY)
                     arrow.is_visible = False
                     current_player = len(player_list)-1-current_player
@@ -560,6 +580,8 @@ def main():
                     if random.randint(1, 10) <= 3:
                         random_projectile = go.GolfClub(golfClub_img, 0, 0, 80, 80, arrow)
                         random_projectile.prepare(nxt_p)
+
+                    handle_plr_consumables(nxt_p)
 
                     if nxt_p.get_vel() < 1:
                         plr = player_list[current_player]
@@ -588,7 +610,7 @@ def main():
                     wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
                     BOUNDARY.append(pygame.Rect(topleft, wh))
 
-                if event.key == pygame.K_3 and current_projectile is None:
+                if event.key == pygame.K_RETURN and current_projectile is not None:
                     for projectile in player_list[current_player].projectiles:
                         # if the player have golfClub projectile
                         if projectile.id == "golfClub":
@@ -607,8 +629,6 @@ def main():
                         if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
                             del BOUNDARY[i]
                             break
-
-                
 
                 draw_players(player_list, current_player, hole, arrow)
 

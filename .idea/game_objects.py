@@ -1,3 +1,4 @@
+from turtle import width
 import pygame
 import math
 import random
@@ -11,6 +12,14 @@ class Thing():
         self.width = width
         self.height = height
         self.image = pygame.transform.scale(image, (width, height))
+        self.center_x = self.x + self.width / 2
+        self.center_y = self.y + self.height / 2
+
+    def get_center_x(self):
+        return self.x + self.width / 2
+
+    def get_center_y(self):
+        return self.y + self.height / 2
 
     def get_x(self):
         return self.rect.x
@@ -169,6 +178,29 @@ class Ball(MovingThing):
         self.consumables = []
         self.projectiles = []
         self.opponent = None
+        self.need_to_display = False
+
+    def display(self):
+        # this list stores tuples ((x, y), consumable)
+        displayList = []
+        # display consumables
+        if len(self.consumables) == 1:
+            c0 = self.consumables[0]
+            displayList.append( (c0, (self.x, self.y-c0.height)) )
+        elif len(self.consumables) == 2:
+            c0 = self.consumables[0]
+            displayList.append( (c0, (self.x-c0.width/2 , self.y-c0.height)) )
+            c1 = self.consumables[1]
+            displayList.append( (c1, (self.x+c0.width/2 , self.y-c1.height)) )
+        
+        # display projectile
+        if len(self.projectiles) == 1:
+            p0 = self.projectiles[0]
+            displayList.append( (p0, (self.x-p0.width/3, self.y+p0.height/5)) )
+        
+        return displayList
+
+
 
     def get_projectiles(self):
         return self.projectiles
@@ -354,8 +386,6 @@ class Tornado(Terrain):
     def __init__(self, image, x, y, width, height):
         super().__init__( image, x, y, width, height, "tor", (255, 0, 80))
         #orientation is a tuple
-        self.center_x = x + width / 2
-        self.center_y = y + height / 2
         self.scale = 3
 
 
