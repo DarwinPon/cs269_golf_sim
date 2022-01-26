@@ -104,7 +104,7 @@ arrow = go.Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
 hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 0, arrow)
 
 # set up players
-player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
+player1 = go.Ball(ball_img1, 1200, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
 player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
 player1.set_opponent(player2)
 player2.set_opponent(player1)
@@ -466,7 +466,7 @@ def handle_next_level(plr):
     global current_level, replay_game
     """Takes player to the next level"""
     goal_text = afont.render( "Player %d scored!" %plr.id, True, BLUE )
-
+    plr.score += 1
     tr_cover = pygame.Surface((WIDTH, HEIGHT))
     tr_cover.set_alpha(130)
     tr_cover.fill(WHITE)
@@ -591,13 +591,22 @@ def check_ball_clicked(ball) -> bool:
         return False
 
 
-def game_reset():
-    player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
-    player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
+def game_reset(reset_score = False):
+    if reset_score:
+        player1.score = 0
+        player2.score = 0
+    player1.set_x(75)
+    player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
+    player2.set_x(75)
+    player2.set_y(HEIGHT / 2 + 50 + BALL_WIDTH / 2)
     player1.set_opponent(player2)
     player2.set_opponent(player1)
-    player_list[0] = player2
-    player_list[1] = player1
+    if random.random()>0.5:
+        player_list[0] = player1
+        player_list[1] = player2
+    else:
+        player_list[0] = player2
+        player_list[1] = player1
 
 ####################### Main Event Loop #########################
 
@@ -625,8 +634,8 @@ def main():
 
 
 
-    replay_text_1 = afont.render( "You finished all the levels!", True, (30,144,255) )
-    replay_text_2 = afont.render( "Press \"R\" to replay, \"Q\" to quit", True, (30,144,255) )
+    replay_text_1 = afont.render( "You finished all the levels!", True, BLUE)
+    replay_text_2 = afont.render( "Press \"R\" to replay, \"Q\" to quit", True, BLUE )
 
 
     while True:
@@ -870,12 +879,23 @@ def main():
 
 
         if replay_game:
+            if player_list[0].id == 1:
+                p1 = player_list[0]
+            else:
+                p1 = player_list[0]
+            p2 = p1.opponent
+            score_1_text  = afont.render( "player 1 score: %d" %p1.score, True, BLUE)
+            score_2_text = afont.render( "player 2 score: %d" %p2.score, True, BLUE )
+
+
             tr_cover = pygame.Surface((WIDTH, HEIGHT))
             tr_cover.set_alpha(130)
             tr_cover.fill(WHITE)
             screen.blit(tr_cover, (0,0))
-            screen.blit(replay_text_1, (WIDTH/2 - 250, HEIGHT/2 - 100))
-            screen.blit(replay_text_2, (WIDTH/2 - 290, HEIGHT/2))
+            screen.blit(replay_text_1, (WIDTH/2 - 200, HEIGHT/2 ))
+            screen.blit(replay_text_2, (WIDTH/2 - 240, HEIGHT/2 + 100))
+            screen.blit(score_1_text, (WIDTH/2 - 350, HEIGHT/2 - 100))
+            screen.blit(score_2_text, (WIDTH/2 + 100, HEIGHT/2 - 100))
 
 
             while replay_game:
@@ -889,7 +909,8 @@ def main():
                             current_level = 1
                             current_player = 0
                             current_projectile = None
-                            game_reset()
+
+                            game_reset(True)
                             read_level("level 1.txt")
                 pygame.display.update()
                 gameClock.tick(FPS)
