@@ -86,9 +86,10 @@ speedUp_img = pygame.image.load("../pictures/speedUp.png").convert_alpha()
 randomAngle_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 exchangePosition_img = pygame.image.load("../pictures/exchangePosition.png").convert_alpha()
 golfClub_img = pygame.image.load("../pictures/golfClub.png").convert_alpha()
-boost_img = pygame.image.load("../pictures/speedBoost.png").convert_alpha()
+boost_img = pygame.image.load("../pictures/accelerate_icon.png").convert_alpha()
 tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
+images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
 
 
 # background scenes
@@ -119,12 +120,12 @@ speedUp = go.SpeedUp(speedUp_img, 400, 400, 40, 40)
 powerUp = go.PowerUp(powerUp_img, 500, 500, 120, 120)
 #randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
 exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, 40, 40)
-randomBox = go.RandomBox(random_img, 650, 300)
+randomBox = go.RandomBox(random_img, 650, 300, images)
 #consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
 consumableList = [exchangePosition]
-# player1.add_consumable(massUp)
-# player1.add_consumable(speedUp)
-# player1.add_projectile(golfClub)
+
+# 
+player2.add_projectile(golfClub)
 
 # create a font
 afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
@@ -143,7 +144,7 @@ BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 boost1 = go.BoostPad(boost_img, 100, 100, 80, 2, 0)
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 
-tor1 = go.Tornado(tornado_img, 700, 500, 80, 80)
+tor1 = go.Tornado(tornado_img, 700, 500, 120, 120)
 TERRAIN_LIST = [boost1, sand1, tor1]
 
 
@@ -181,7 +182,8 @@ def draw_players(player_list, current_player, hole, arrow):
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
 
     for tr in TERRAIN_LIST:
-        pygame.draw.rect(screen, tr.color, tr.rect)
+        if tr.id != "tor":
+            pygame.draw.rect(screen, tr.color, tr.rect)
         if tr.id == "boost":
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
         if tr.id == "tor":
@@ -332,7 +334,12 @@ def handle_collision_ball_consumables(ball, consumables_list):
             print("Collide with consumable")
             # play sounds
             if consumable.id == "randomAngle":
-                sound.random_angle()
+                print(1)
+                sound.randomAngle()
+
+            elif consumable.id == "speedUp":
+                print("speedUp")
+                sound.speedUp()
 
             # activate the consumable
             consumable.activate(ball)
@@ -444,7 +451,7 @@ def move(plr):
                 #     plr.reflect_y()
         handle_collision_ball_ball(plr, plr.opponent)
 
-    print(plr.angle)
+    # print(plr.angle)
     plr.update_pos()
 
 
@@ -506,18 +513,16 @@ def read_level(filename):
                     TERRAIN_LIST.append(sand)
                 if l[0] == "t":
                     #tornado
-                    tornado = go.Tornado(hole_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
+                    tornado = go.Tornado(tornado_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
                     TERRAIN_LIST.append(tornado)
                 if l[0] == "i":
                     #item box
-                    box = go.RandomBox(random_img, int(l[1]), int(l[2]))
+                    box = go.RandomBox(random_img, int(l[1]), int(l[2]), images)
+                    box.reset()
                     consumableList.append(box)
         f.close()
     except FileNotFoundError:
         print("Level does not exist")
-
-
-
 
 
 def save_level():
@@ -542,6 +547,8 @@ def save_level():
         f.write(lvl)
         f.close
     print("level saved as \"new level.txt\"")
+
+    
 def check_button_clicked(button) -> bool:
     """Check if player click the button"""
     mousePos = pygame.mouse.get_pos()
@@ -798,7 +805,7 @@ def main():
             move(player_list[i])
             handle_terrain()
             handle_collision_ball_hole(player_list[i], hole.get_rect())
-            
+
 
         if plr.get_vel() < 2 and plr.get_vel() != 0:
             arrow.reset(plr)
