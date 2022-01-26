@@ -93,7 +93,7 @@ boost_img = pygame.image.load("../pictures/accelerate_icon.png").convert_alpha()
 tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
-
+obstacle_img = pygame.image.load("../pictures/placeholder_obstacle.png")
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -181,7 +181,8 @@ def draw_window(scale):
 
 
     for i in range(4, len(BOUNDARY)):
-        pygame.draw.rect(screen, BLACK, BOUNDARY[i])
+        # pygame.draw.rect(screen, BLACK, BOUNDARY[i])
+        screen.blit(obstacle_img,BOUNDARY[i][0:2],BOUNDARY[i])
 
     for tr in TERRAIN_LIST:
         if tr.id != "tor":
