@@ -242,6 +242,12 @@ class GolfClub(Projectile):
         self.need_arrow = True
         plr.add_projectile(self)
 
+    def setPosition(self, plr):
+        self.set_x(plr.x - 10)
+        self.set_y(plr.y - 10)
+        self.attack_object = plr.opponent
+        self.is_moving = True
+
 
 class Arrow(Thing):
     def __init__(self, image, x, y, width, height):

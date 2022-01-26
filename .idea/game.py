@@ -87,12 +87,9 @@ randomAngle_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha
 exchangePosition_img = pygame.image.load("../pictures/exchangePosition.png").convert_alpha()
 golfClub_img = pygame.image.load("../pictures/golfClub.png").convert_alpha()
 boost_img = pygame.image.load("../pictures/speedBoost.png").convert_alpha()
-<<<<<<< HEAD
 tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
-=======
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 
->>>>>>> remotes/origin/Blitzen
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -117,16 +114,6 @@ golfClub = go.GolfClub(golfClub_img, 500, 600, ICON_SIZE, ICON_SIZE, arrow)
 projectileList = [golfClub]
 
 # set consumables
-<<<<<<< HEAD
-massUp = go.MassUp(massUp_img, 700, 100, ICON_SIZE, ICON_SIZE)
-speedUp = go.SpeedUp(speedUp_img, 400, 400, ICON_SIZE, ICON_SIZE)
-powerUp = go.PowerUp(powerUp_img, 500, 500, ICON_SIZE, ICON_SIZE)
-randomAngle = go.RandomAngle(randomAngle_img, 650, 300, ICON_SIZE, ICON_SIZE)
-exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, ICON_SIZE, ICON_SIZE)
-consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
-
-# player1.add_consumable(powerUp)
-=======
 massUp = go.MassUp(massUp_img, 700, 100, 40, 40)
 speedUp = go.SpeedUp(speedUp_img, 400, 400, 40, 40)
 powerUp = go.PowerUp(powerUp_img, 500, 500, 120, 120)
@@ -136,7 +123,6 @@ randomBox = go.RandomBox(random_img, 650, 300)
 #consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
 consumableList = [exchangePosition]
 # player1.add_consumable(massUp)
->>>>>>> remotes/origin/Blitzen
 # player1.add_consumable(speedUp)
 # player1.add_projectile(golfClub)
 
@@ -672,16 +658,11 @@ def main():
                         arrow.set_rot(rot_img, rot_x, rot_y)
 
                 if event.key == pygame.K_SPACE:
-<<<<<<< HEAD
                     # Add sound
                     if current_projectile is None:
                         sound.normal_hit()
                     else:
                         sound.hard_hit()
-=======
-
-                    # check if we need to delet the consumables
->>>>>>> remotes/origin/Blitzen
 
                     if editing:
                         if tracing:
@@ -734,20 +715,12 @@ def main():
                     print("editing: "+ str(editing))
 
 
-
-
-
-
                 if event.key == pygame.K_RETURN and current_projectile is None:
                     for projectile in player_list[current_player].projectiles:
                         # if the player have golfClub projectile
-                        if projectile.id == "golfClub":
-                            current_projectile = projectile
-                            current_projectile.set_x(player_list[current_player].x - 25)
-                            current_projectile.set_y(player_list[current_player].y - 25)
-                            current_projectile.attack_object = player_list[current_player].opponent
-                            current_projectile.is_moving = True
-                            arrow.reset(player_list[current_player])
+                        projectile.setPosition(player_list[current_player])
+                        current_projectile = projectile
+                        arrow.reset(player_list[current_player])
 
                 #level editing
                 if editing:
@@ -825,7 +798,7 @@ def main():
             move(player_list[i])
             handle_terrain()
             handle_collision_ball_hole(player_list[i], hole.get_rect())
-
+            
 
         if plr.get_vel() < 2 and plr.get_vel() != 0:
             arrow.reset(plr)
