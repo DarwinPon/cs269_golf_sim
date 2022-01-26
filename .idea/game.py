@@ -34,6 +34,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (126, 200, 80)
 YELLOW = (253, 223, 119)
+RED =  (255, 0, 80)
 
 # game events
 GOAL = pygame.USEREVENT + 1
@@ -86,6 +87,8 @@ randomAngle_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha
 exchangePosition_img = pygame.image.load("../pictures/exchangePosition.png").convert_alpha()
 golfClub_img = pygame.image.load("../pictures/golfClub.png").convert_alpha()
 boost_img = pygame.image.load("../pictures/speedBoost.png").convert_alpha()
+random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
+
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -112,10 +115,11 @@ projectileList = [golfClub]
 massUp = go.MassUp(massUp_img, 700, 100, 40, 40)
 speedUp = go.SpeedUp(speedUp_img, 400, 400, 40, 40)
 powerUp = go.PowerUp(powerUp_img, 500, 500, 120, 120)
-randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
+#randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
 exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, 40, 40)
-consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
-
+randomBox = go.RandomBox(random_img, 650, 300)
+#consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
+consumableList = [exchangePosition]
 # player1.add_consumable(massUp)
 # player1.add_consumable(speedUp)
 # player1.add_projectile(golfClub)
@@ -158,7 +162,8 @@ def draw_window(scale):
     # display debug info
     force_text = INFO_FONT.render("Launch force: " + str(scale), 1, BLACK)
     screen.blit(force_text, (10, HEIGHT-force_text.get_height()-5))
-    pygame.draw.rect(screen, BLACK, test_rect)
+
+
     if tracing:
         pygame.draw.rect(screen, trace_color, current_tracing)
 
@@ -252,14 +257,21 @@ def handle_collision_ball_rect(ball, rect):
     ball.y = orig_y
 
     #0 vertical 1 horizontal 2 corner
-    if collisions[0] != collisions[1] and collisions[2] == collisions[3]:
+    if collisions[0] != collisions[1]:
         return 0
 
-    if collisions[0] == collisions[1] and collisions[2] != collisions[3]:
+    if collisions[2] != collisions[3]:
         return 1
 
-    if collisions[0] != collisions[1] and collisions[2] != collisions[3]:
-        return 2
+
+    # if collisions[0] != collisions[1] and collisions[2] == collisions[3]:
+    #     return 0
+    #
+    # if collisions[0] == collisions[1] and collisions[2] != collisions[3]:
+    #     return 1
+    #
+    # if collisions[0] != collisions[1] and collisions[2] != collisions[3]:
+    #     return 2
 
 
 def check_collision_v(ball, rect):
@@ -348,13 +360,24 @@ def handle_golfClub_function(golfClub, ball):
         ball.vel_y = golfClub.vel_y * 2
         golfClub.is_moving = False
 
+
+def check_sand(plr):
+    for tr in TERRAIN_LIST:
+        if tr.id == "sand":
+            if tr.rect.colliderect(plr.rect):
+                return True
+        else:
+            continue
+
 def handle_terrain():
     for plr in player_list:
+        if check_sand(plr) and plr.acc != 1/3:
+            plr.acc = 3
+        elif plr.acc != 1/3:
+            plr.acc = 1
+
         for tr in TERRAIN_LIST:
             if tr.rect.colliderect(plr.rect):
-                if tr.id == "sand":
-                    plr.acc = 5
-
                 if tr.id == "boost":
                     plr.vel_x += tr.orientation[0] * tr.scale
                     plr.vel_y += tr.orientation[1] * tr.scale
@@ -375,10 +398,7 @@ def handle_terrain():
                     else:
                         plr.vel_y -= tr.scale * math.sin(angle)
                     plr.update_angle()
-                    
 
-                elif plr.acc == 5:
-                    plr.acc = 1
 
 
 def rot_image(rect, image, angle):
@@ -400,7 +420,6 @@ def move(plr):
     '''Moves the player and handles collision with obstacles'''
 
     steps = 10
-
     for i in range(steps):
         plr.advance(steps)
         for wall in BOUNDARY:
@@ -413,11 +432,12 @@ def move(plr):
                 if col_type == 1:
                     plr.reflect_x()
 
-                if col_type == 2:
-                    plr.reflect_x()
-                    plr.reflect_y()
+                # if col_type == 2:
+                #     plr.reflect_x()
+                #     plr.reflect_y()
         handle_collision_ball_ball(plr, plr.opponent)
 
+    print(plr.angle)
     plr.update_pos()
 
 
@@ -453,32 +473,50 @@ def handle_endScreen():
 
 
 def read_level(filename):
+    global BOUNDARY, TERRAIN_LIST, consumableList
+    BOUNDARY = BOUNDARY[:4]
+    TERRAIN_LIST = []
+    consumableList = []
+    if len(filename) == 0:
+        return
     path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'levels', filename))
-    with open(path) as f:
-        lines = f.readlines()
-        for l in lines:
-            l = l.split(",")
-            if l[0] == "w":
-                #wall
-                wall = pygame.Rect((int(l[1]), int(l[2])), (int(l[3]), int(l[4])))
-                BOUNDARY.append(wall)
-            if l[0] == "b":
-                #boost
-                boost = go.BoostPad(boost_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]), int(l[5]))
-                TERRAIN_LIST.append(boost)
-            if l[0] == "s":
-                #sand
-                sand = go.SandPit(hole_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
-                TERRAIN_LIST.append(sand)
+    try:
+        with open(path) as f:
+            lines = f.readlines()
+            for l in lines:
+                l = l.split(",")
+                if l[0] == "w":
+                    #wall
+                    wall = pygame.Rect((int(l[1]), int(l[2])), (int(l[3]), int(l[4])))
+                    BOUNDARY.append(wall)
+                if l[0] == "b":
+                    #boost
+                    boost = go.BoostPad(boost_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]), int(l[5]))
+                    TERRAIN_LIST.append(boost)
+                if l[0] == "s":
+                    #sand
+                    sand = go.SandPit(hole_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
+                    TERRAIN_LIST.append(sand)
+                if l[0] == "t":
+                    #tornado
+                    tornado = go.Tornado(hole_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
+                    TERRAIN_LIST.append(tornado)
+                if l[0] == "i":
+                    #item box
+                    box = go.RandomBox(random_img, int(l[1]), int(l[2]))
+                    consumableList.append(box)
+        f.close()
+    except FileNotFoundError:
+        print("Level does not exist")
 
 
 
-    f.close()
+
 
 def save_level():
     path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'levels', "new level.txt"))
     lvl = ""
-    for i in range(5, len(BOUNDARY)):
+    for i in range(4, len(BOUNDARY)):
         line = "w," + str(BOUNDARY[i].x)+"," + str(BOUNDARY[i].y)+"," + str(BOUNDARY[i].width)+"," + str(BOUNDARY[i].height)+"\n"
         lvl += line
     for tr in TERRAIN_LIST:
@@ -486,6 +524,12 @@ def save_level():
             line = "b," + str(tr.x)+"," + str(tr.y)+"," + str(tr.width)+"," + str(tr.scale)+"," + str(tr.angle)+"\n"
         if tr.id == "sand":
             line = "s," + str(tr.x)+"," + str(tr.y)+"," + str(tr.width)+"," + str(tr.height)+"\n"
+        if tr.id == "tor":
+            line = "t," + str(tr.x)+"," + str(tr.y)+"," + str(tr.width)+"," + str(tr.height)+"\n"
+        lvl += line
+    for item in consumableList:
+        if type(item) is go.RandomBox:
+            line = "i," + str(item.x)+"," + str(item.y)+"\n"
         lvl += line
     with open(path, 'w') as f:
         f.write(lvl)
@@ -537,7 +581,7 @@ def main():
         if tracing:
             bottomright = pygame.mouse.get_pos()
             wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
-            if trace_color == GREEN:
+            if trace_color == GREEN or trace_color == RED:
                 mn = min(wh[0], wh[1])
                 wh = (mn, mn)
             current_tracing = pygame.Rect(topleft, wh)
@@ -582,9 +626,10 @@ def main():
                     if editing:
                         mp = pygame.mouse.get_pos()
                         for tr in TERRAIN_LIST:
-                            if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
-                                tr.left()
-                                break
+                            if tr.id == "boost":
+                                if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
+                                    tr.left()
+                                    break
 
                     else:
                         plr.left(player_list[current_player].turn_angle)
@@ -596,9 +641,10 @@ def main():
                     if editing:
                         mp = pygame.mouse.get_pos()
                         for tr in TERRAIN_LIST:
-                            if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
-                                tr.right()
-                                break
+                            if tr.id == "boost":
+                                if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
+                                    tr.right()
+                                    break
 
                     else:
                         plr.right(player_list[current_player].turn_angle)
@@ -606,28 +652,38 @@ def main():
                         arrow.set_rot(rot_img, rot_x, rot_y)
 
                 if event.key == pygame.K_SPACE:
-                    # Add sound
-                    if current_projectile is None:
-                        sound.normal_hit()
-                    else:
-                        sound.hard_hit()
+
                     # check if we need to delet the consumables
 
                     if editing:
+                        if tracing:
+                            print(trace_color)
+                            bottomright = pygame.mouse.get_pos()
+                            wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
+                            if trace_color == BLACK:
+                                BOUNDARY.append(pygame.Rect(topleft, wh))
+                            elif trace_color == GREEN:
+                                mn = min(wh[0], wh[1])
+                                boost = go.BoostPad(boost_img, topleft[0], topleft[1], mn, 2, 0)
+                                TERRAIN_LIST.append(boost)
+                            elif trace_color == YELLOW:
+                                sand = go.SandPit(hole_img, topleft[0], topleft[1], wh[0], wh[1])
+                                TERRAIN_LIST.append(sand)
+                            elif trace_color == RED:
+                                mn = min(wh[0], wh[1])
+                                tornado = go.Tornado(hole_img, topleft[0], topleft[1], mn, mn)
+                                TERRAIN_LIST.append(tornado)
+
                         tracing = False
-                        bottomright = pygame.mouse.get_pos()
-                        wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
-                        if trace_color == BLACK:
-                            BOUNDARY.append(pygame.Rect(topleft, wh))
-                        elif trace_color == GREEN:
-                            mn = min(wh[0], wh[1])
-                            boost = go.BoostPad(boost_img, topleft[0], topleft[1], mn, 2, 0)
-                            TERRAIN_LIST.append(boost)
-                        elif trace_color == YELLOW:
-                            sand = go.SandPit(hole_img, topleft[0], topleft[1], wh[0], wh[1])
-                            TERRAIN_LIST.append(sand)
 
                     else:
+                        # Add sound
+                        if current_projectile is None:
+                            sound.normal_hit()
+                        else:
+                            sound.hard_hit()
+
+
                         plr.launch(VELOCITY)
                         arrow.is_visible = False
                         current_player = len(player_list)-1-current_player
@@ -648,24 +704,10 @@ def main():
                     editing = not editing
                     print("editing: "+ str(editing))
 
-                if event.key == pygame.K_s:
-                    #save
-                    save_level()
 
-                if event.key == pygame.K_r:
-                    #reads level file
-                    level_name = input("Please input level file name: ")
-                    read_level(level_name)
 
-                if event.key == pygame.K_1:
-                    tracing = True
-                    trace_color = BLACK
-                    topleft = pygame.mouse.get_pos()
 
-                if event.key == pygame.K_2:
-                    tracing = True
-                    trace_color = GREEN
-                    topleft = pygame.mouse.get_pos()
+
 
                 if event.key == pygame.K_RETURN and current_projectile is not None:
                     for projectile in player_list[current_player].projectiles:
@@ -680,16 +722,56 @@ def main():
                         else:
                             print(False)
 
-                if event.key == pygame.K_BACKSPACE:
-                    mp = pygame.mouse.get_pos()
-                    for i in range(4, len(BOUNDARY)):
-                        if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
-                            del BOUNDARY[i]
-                            break
-                    for tr in TERRAIN_LIST:
-                        if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
-                            TERRAIN_LIST.remove(tr)
-                            break
+                #level editing
+                if editing:
+                    if event.key == pygame.K_1:
+                        tracing = True
+                        trace_color = BLACK
+                        topleft = pygame.mouse.get_pos()
+
+                    if event.key == pygame.K_2:
+                        tracing = True
+                        trace_color = GREEN
+                        topleft = pygame.mouse.get_pos()
+
+                    if event.key == pygame.K_3:
+                        tracing = True
+                        trace_color = YELLOW
+                        topleft = pygame.mouse.get_pos()
+
+                    if event.key == pygame.K_4:
+                        tracing = True
+                        trace_color = RED
+                        topleft = pygame.mouse.get_pos()
+
+                    if event.key == pygame.K_0:
+                        center = pygame.mouse.get_pos()
+                        box = go.RandomBox(random_img, center[0]-20, center[1]-20)
+                        consumableList.append(box)
+
+                    if event.key == pygame.K_BACKSPACE:
+                        mp = pygame.mouse.get_pos()
+                        for i in range(4, len(BOUNDARY)):
+                            if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
+                                del BOUNDARY[i]
+                                break
+                        for tr in TERRAIN_LIST:
+                            if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
+                                TERRAIN_LIST.remove(tr)
+                                break
+                        for item in consumableList:
+                            if mp[0] > item.x and mp[0] < item.x + item.width and mp[1] > item.y and mp[1] < item.y + item.height:
+                                consumableList.remove(item)
+                                break
+
+                    if event.key == pygame.K_s:
+                        #save
+                        save_level()
+
+                    if event.key == pygame.K_r:
+                        #reads level file
+                        level_name = input("Please input level file name: ")
+                        read_level(level_name)
 
                 draw_players(player_list, current_player, hole, arrow)
 

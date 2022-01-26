@@ -413,12 +413,12 @@ class Tornado(Terrain):
     def __init__(self, image, x, y, width, height):
         super().__init__( image, x, y, width, height, "tor", (255, 0, 80))
         #orientation is a tuple
-        self.scale = 3
+        self.scale = 1.5
 
 
 class RandomBox(Consumable):
-    def __init__(self, image, x, y, width, height):
-        super().__init__(1, image, x, y, width, height, "RandomBox")
+    def __init__(self, image, x, y):
+        super().__init__(1, image, x, y, 40, 40, "RandomBox")
 
     def activate(self, plr):
         randNum = random.randint(1, 15)
@@ -439,6 +439,9 @@ class RandomBox(Consumable):
             
         # activate consumable
         random_consumable.activate(plr)
+
+    def deactivate(self, plr):
+        pass
 
 
         
