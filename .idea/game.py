@@ -319,8 +319,9 @@ def check_collision_h(ball, rect):
 def handle_collision_ball_hole(ball, holeRect):
     """If collide, add GOAL to the event list"""
     if check_collision_ball_rect(ball, holeRect):
-        print("Collision!")
-        pygame.event.post(pygame.event.Event(GOAL))
+        if abs(ball.get_vel())<2:
+            print("goal!")
+            pygame.event.post(pygame.event.Event(GOAL))
 
 
 def handle_collision_ball_consumables(ball, consumables_list):
@@ -437,7 +438,6 @@ def move(plr):
                 #     plr.reflect_y()
         handle_collision_ball_ball(plr, plr.opponent)
 
-    print(plr.angle)
     plr.update_pos()
 
 
