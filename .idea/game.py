@@ -88,9 +88,10 @@ speedUp_img = pygame.image.load("../pictures/speedUp.png").convert_alpha()
 randomAngle_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 exchangePosition_img = pygame.image.load("../pictures/exchangePosition.png").convert_alpha()
 golfClub_img = pygame.image.load("../pictures/golfClub.png").convert_alpha()
-boost_img = pygame.image.load("../pictures/speedBoost.png").convert_alpha()
+boost_img = pygame.image.load("../pictures/accelerate_icon.png").convert_alpha()
 tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
+images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
 
 
 # background scenes
@@ -121,12 +122,12 @@ speedUp = go.SpeedUp(speedUp_img, 400, 400, 40, 40)
 powerUp = go.PowerUp(powerUp_img, 500, 500, 120, 120)
 #randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
 exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, 40, 40)
-randomBox = go.RandomBox(random_img, 650, 300)
+randomBox = go.RandomBox(random_img, 650, 300, images)
 #consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
 consumableList = [exchangePosition]
-# player1.add_consumable(massUp)
-# player1.add_consumable(speedUp)
-# player1.add_projectile(golfClub)
+
+# 
+player2.add_projectile(golfClub)
 
 # create a font
 afont = pygame.font.SysFont( "comicsans", 32, bold=True )
@@ -146,7 +147,7 @@ BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 boost1 = go.BoostPad(boost_img, 100, 100, 80, 2, 0)
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 
-tor1 = go.Tornado(tornado_img, 700, 500, 80, 80)
+tor1 = go.Tornado(tornado_img, 700, 500, 120, 120)
 TERRAIN_LIST = [boost1, sand1, tor1]
 
 
@@ -188,8 +189,8 @@ def draw_players(player_list, current_player, hole, arrow):
     # draw consumable on the screen
 
     for tr in TERRAIN_LIST:
-
-        pygame.draw.rect(screen, tr.color, tr.rect)
+        if tr.id != "tor":
+            pygame.draw.rect(screen, tr.color, tr.rect)
         if tr.id == "boost":
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
         if tr.id == "tor":
@@ -269,21 +270,16 @@ def handle_collision_ball_rect(ball, rect):
     ball.y = orig_y
 
     #0 vertical 1 horizontal 2 corner
-    if collisions[0] != collisions[1]:
+
+
+    if collisions[0] != collisions[1] and collisions[2] == collisions[3]:
         return 0
 
-    if collisions[2] != collisions[3]:
+    if collisions[0] == collisions[1] and collisions[2] != collisions[3]:
         return 1
 
-
-    # if collisions[0] != collisions[1] and collisions[2] == collisions[3]:
-    #     return 0
-    #
-    # if collisions[0] == collisions[1] and collisions[2] != collisions[3]:
-    #     return 1
-    #
-    # if collisions[0] != collisions[1] and collisions[2] != collisions[3]:
-    #     return 2
+    if collisions[0] != collisions[1] and collisions[2] != collisions[3]:
+        return 2
 
 
 def check_collision_v(ball, rect):
@@ -342,7 +338,12 @@ def handle_collision_ball_consumables(ball, consumables_list):
             print("Collide with consumable")
             # play sounds
             if consumable.id == "randomAngle":
-                sound.random_angle()
+                print(1)
+                sound.randomAngle()
+
+            elif consumable.id == "speedUp":
+                print("speedUp")
+                sound.speedUp()
 
             # activate the consumable
             consumable.activate(ball)
@@ -389,6 +390,7 @@ def check_sand(plr):
 
 def handle_terrain():
     for plr in player_list:
+        print(plr.get_vel())
         if check_sand(plr) and plr.acc != 1/3:
             plr.acc = 3
         elif plr.acc != 1/3:
@@ -437,7 +439,7 @@ def check_collision_ball_rect(ball, rect):
 def move(plr):
     '''Moves the player and handles collision with obstacles'''
 
-    steps = 10
+    steps = 15
     for i in range(steps):
         plr.advance(steps)
         for wall in BOUNDARY:
@@ -450,9 +452,9 @@ def move(plr):
                 if col_type == 1:
                     plr.reflect_x()
 
-                # if col_type == 2:
-                #     plr.reflect_x()
-                #     plr.reflect_y()
+                if col_type == 2:
+                    plr.reflect_x()
+                    plr.reflect_y()
         handle_collision_ball_ball(plr, plr.opponent)
 
     plr.update_pos()
@@ -523,11 +525,12 @@ def read_level(filename):
                     TERRAIN_LIST.append(sand)
                 if l[0] == "t":
                     #tornado
-                    tornado = go.Tornado(hole_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
+                    tornado = go.Tornado(tornado_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
                     TERRAIN_LIST.append(tornado)
                 if l[0] == "i":
                     #item box
-                    box = go.RandomBox(random_img, int(l[1]), int(l[2]))
+                    box = go.RandomBox(random_img, int(l[1]), int(l[2]), images)
+                    box.reset()
                     consumableList.append(box)
         f.close()
     except FileNotFoundError:
@@ -556,6 +559,7 @@ def save_level():
         f.write(lvl)
         f.close
     print("level saved as \"new level.txt\"")
+
 
 def check_button_clicked(button) -> bool:
     """Check if player click the button"""
@@ -716,7 +720,7 @@ def main():
                                     TERRAIN_LIST.append(sand)
                                 elif trace_color == RED:
                                     mn = min(wh[0], wh[1])
-                                    tornado = go.Tornado(hole_img, topleft[0], topleft[1], mn, mn)
+                                    tornado = go.Tornado(tornado_img, topleft[0], topleft[1], mn, mn)
                                     TERRAIN_LIST.append(tornado)
 
                             tracing = False
@@ -794,7 +798,7 @@ def main():
 
                         if event.key == pygame.K_0:
                             center = pygame.mouse.get_pos()
-                            box = go.RandomBox(random_img, center[0]-20, center[1]-20)
+                            box = go.RandomBox(random_img, center[0]-20, center[1]-20, images)
                             consumableList.append(box)
 
                         if event.key == pygame.K_BACKSPACE:
@@ -825,7 +829,6 @@ def main():
 
             # update the screen
             draw_window(force_scale)
-
             # set movement of projectile
             if current_projectile != None:
                 if current_projectile.is_moving:
@@ -844,7 +847,7 @@ def main():
                     handle_conllision_ball_projectiles(player_list[i], projectileList)
                 handle_collision_ball_ball(player_list[0], player_list[1])
                 move(player_list[i])
-                handle_terrain()
+
                 handle_collision_ball_hole(player_list[i], hole.get_rect())
 
 

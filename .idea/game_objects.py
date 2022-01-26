@@ -421,32 +421,54 @@ class Tornado(Terrain):
     def __init__(self, image, x, y, width, height):
         super().__init__( image, x, y, width, height, "tor", (255, 0, 80))
         #orientation is a tuple
-        self.scale = 1.5
+        self.scale = 2
 
 
 class RandomBox(Consumable):
-    def __init__(self, image, x, y):
+    def __init__(self, image, x, y, images):
+        # images is a list storing all icons RandomBox needs
+        # index 0: speedUp; index 1: powerUp; index 2: massUp
         super().__init__(1, image, x, y, 40, 40, "RandomBox")
+        self.consumable = MassUp(self.image, self.x, self.y, self.width, self.height)
+        self.images = images
 
-    def activate(self, plr):
-        randNum = random.randint(1, 10)
+    def generate_consumable(self):
+        randNum = random.randint(1, 100)
         random_consumable = None
-        print(randNum)
-        # SpeedUp: 30%
-        if 1 <= randNum <= 3:
-            random_consumable = SpeedUp(self.image, self.x, self.y, self.width, self.height)
-        # PowerUp: 30%
-        elif 4 <= randNum <= 7:
-            random_consumable = PowerUp(self.image, self.x, self.y, self.width, self.height)
-        # MassUp: 40%
+
+        # SpeedUp: 20%
+        if 1 <= randNum <= 20:
+            random_consumable = SpeedUp(self.images[0], self.x, self.y, self.width, self.height)
+        # PowerUp: 25%
+        elif 21 <= randNum <= 45:
+            random_consumable = PowerUp(self.images[1], self.x, self.y, self.width, self.height)
+        # RandomAngle: 15%
+        elif 46 <= randNum <= 60:
+            random_consumable = PowerUp(self.images[3], self.x, self.y, self.width, self.height)
+        # ExchangePosition: 15%
+        elif 61 <= randNum <= 75:
+            random_consumable = PowerUp(self.images[4], self.x, self.y, self.width, self.height)
+        # MassUp: 25%
         else:
-            random_consumable = MassUp(self.image, self.x, self.y, self.width, self.height)
+            random_consumable = MassUp(self.images[2], self.x, self.y, self.width, self.height)
             
         # activate consumable
-        random_consumable.activate(plr)
+        return random_consumable
+
+    def reset(self):
+        self.consumable = self.generate_consumable()
+        self.image = self.consumable.image
+        self.id = self.consumable.id
+
+
+    def activate(self, plr):
+        self.consumable.activate(plr)
 
     def deactivate(self, plr):
         pass
+
+
+        
 
 
 
