@@ -180,6 +180,7 @@ def draw_players(player_list, current_player, hole, arrow):
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
 
     for tr in TERRAIN_LIST:
+
         pygame.draw.rect(screen, tr.color, tr.rect)
         if tr.id == "boost":
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
@@ -187,6 +188,7 @@ def draw_players(player_list, current_player, hole, arrow):
     if arrow.is_visible:
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
 
+    screen.blit(hole.image, (hole.get_x(), hole.get_y()))
     for plr in player_list:
         # draw players
         screen.blit(plr.image, (plr.get_x(), plr.get_y()))
@@ -197,7 +199,7 @@ def draw_players(player_list, current_player, hole, arrow):
                 screen.blit(info_tuple[0].image, (info_tuple[1][0], info_tuple[1][1]))
 
 
-    screen.blit(hole.image, (hole.get_x(), hole.get_y()))
+
 
         # draw projectile on the screen
     for projectile in projectileList:
