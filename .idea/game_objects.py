@@ -196,7 +196,7 @@ class Ball(MovingThing):
         # display projectile
         if len(self.projectiles) == 1:
             p0 = self.projectiles[0]
-            displayList.append( (p0, (self.x-p0.width/3, self.y+p0.height/5)) )
+            displayList.append( (p0, (self.x-p0.width/3, self.y+p0.height/1.8)) )
         
         return displayList
 
@@ -229,6 +229,7 @@ class Projectile(MovingThing):
         super().__init__(image, x, y, width, height, arrow)
         self.need_arrow = False
         self.is_moving = False
+        self.need_to_set = False
 
 
 class GolfClub(Projectile):
@@ -240,6 +241,12 @@ class GolfClub(Projectile):
     def prepare(self, plr):
         self.need_arrow = True
         plr.add_projectile(self)
+
+    def setPosition(self, plr):
+        self.set_x(plr.x - 10)
+        self.set_y(plr.y - 10)
+        self.attack_object = plr.opponent
+        self.is_moving = True
 
 
 class Arrow(Thing):
@@ -421,19 +428,16 @@ class RandomBox(Consumable):
         super().__init__(1, image, x, y, 40, 40, "RandomBox")
 
     def activate(self, plr):
-        randNum = random.randint(1, 15)
+        randNum = random.randint(1, 10)
         random_consumable = None
         print(randNum)
-        # RandomAngle: 15%
-        if 1 <= randNum <= 15:
-            random_consumable = RandomAngle(self.image, self.x, self.y, self.width, self.height)
-        # SpeedUp: 25%
-        elif 16 <= randNum <= 40:
+        # SpeedUp: 30%
+        if 1 <= randNum <= 3:
             random_consumable = SpeedUp(self.image, self.x, self.y, self.width, self.height)
-        # PowerUp: 25%
-        elif 41 <= randNum <= 65:
+        # PowerUp: 30%
+        elif 4 <= randNum <= 7:
             random_consumable = PowerUp(self.image, self.x, self.y, self.width, self.height)
-        # MassUp: 35%
+        # MassUp: 40%
         else:
             random_consumable = MassUp(self.image, self.x, self.y, self.width, self.height)
             
@@ -443,11 +447,6 @@ class RandomBox(Consumable):
     def deactivate(self, plr):
         pass
 
-
-        
-
-
-        
 
 
         

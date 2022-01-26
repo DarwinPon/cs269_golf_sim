@@ -87,6 +87,7 @@ randomAngle_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha
 exchangePosition_img = pygame.image.load("../pictures/exchangePosition.png").convert_alpha()
 golfClub_img = pygame.image.load("../pictures/golfClub.png").convert_alpha()
 boost_img = pygame.image.load("../pictures/speedBoost.png").convert_alpha()
+tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 
 
@@ -107,8 +108,9 @@ player2.set_opponent(player1)
 arrow.reset(player1)
 player_list = [player1, player2]
 
+ICON_SIZE = 55
 # set projectiles
-golfClub = go.GolfClub(golfClub_img, 500, 600, 80, 80, arrow)
+golfClub = go.GolfClub(golfClub_img, 500, 600, ICON_SIZE, ICON_SIZE, arrow)
 projectileList = [golfClub]
 
 # set consumables
@@ -141,14 +143,13 @@ BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 boost1 = go.BoostPad(boost_img, 100, 100, 80, 2, 0)
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 
-tor1 = go.Tornado(hole_img, 700, 500, 80, 80)
+tor1 = go.Tornado(tornado_img, 700, 500, 80, 80)
 TERRAIN_LIST = [boost1, sand1, tor1]
 
 
 # testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
 BOUNDARY.append(test_rect)
-
 
 
 ####################### Filling the Screen #########################
@@ -183,6 +184,8 @@ def draw_players(player_list, current_player, hole, arrow):
 
         pygame.draw.rect(screen, tr.color, tr.rect)
         if tr.id == "boost":
+            screen.blit(tr.image, (tr.get_x(), tr.get_y()))
+        if tr.id == "tor":
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
 
     if arrow.is_visible:
@@ -330,6 +333,10 @@ def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
         if len(ball.get_consumables()) < 2 and check_collision_ball_rect(ball, consumable.get_rect()):
             print("Collide with consumable")
+            # play sounds
+            if consumable.id == "randomAngle":
+                sound.random_angle()
+
             # activate the consumable
             consumable.activate(ball)
             # remove consumable from the list and screen
@@ -613,7 +620,6 @@ def main():
             if event.type == pygame.MOUSEBUTTONUP and player_list[current_player].need_to_display:
                 player_list[current_player].need_to_display = False
 
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     plr.increase_launchF()
@@ -654,8 +660,11 @@ def main():
                         arrow.set_rot(rot_img, rot_x, rot_y)
 
                 if event.key == pygame.K_SPACE:
-
-                    # check if we need to delet the consumables
+                    # Add sound
+                    if current_projectile is None:
+                        sound.normal_hit()
+                    else:
+                        sound.hard_hit()
 
                     if editing:
                         if tracing:
@@ -691,10 +700,11 @@ def main():
                         current_player = len(player_list)-1-current_player
                         nxt_p = player_list[current_player]
 
+                        # check if we need to delet the consumables
                         handle_plr_consumables(nxt_p)
 
                         if random.randint(1, 10) <= 3:
-                            random_projectile = go.GolfClub(golfClub_img, 0, 0, 80, 80, arrow)
+                            random_projectile = go.GolfClub(golfClub_img, 0, 0, ICON_SIZE, ICON_SIZE, arrow)
                             random_projectile.prepare(nxt_p)
 
                         if nxt_p.get_vel() < 1:
@@ -707,22 +717,12 @@ def main():
                     print("editing: "+ str(editing))
 
 
-
-
-
-
-                if event.key == pygame.K_RETURN and current_projectile is not None:
+                if event.key == pygame.K_RETURN and current_projectile is None:
                     for projectile in player_list[current_player].projectiles:
                         # if the player have golfClub projectile
-                        if projectile.id == "golfClub":
-                            current_projectile = projectile
-                            current_projectile.set_x(player_list[current_player].x - 25)
-                            current_projectile.set_y(player_list[current_player].y - 25)
-                            current_projectile.attack_object = player_list[current_player].opponent
-                            current_projectile.is_moving = True
-                            arrow.reset(player_list[current_player])
-                        else:
-                            print(False)
+                        projectile.setPosition(player_list[current_player])
+                        current_projectile = projectile
+                        arrow.reset(player_list[current_player])
 
                 #level editing
                 if editing:
@@ -786,7 +786,8 @@ def main():
                 handle_golfClub_function(current_projectile, current_projectile.attack_object)
                 current_projectile.move()
             else:
-                projectileList.remove(current_projectile)
+                if current_projectile in projectileList:
+                    projectileList.remove(current_projectile)
                 current_projectile = None
 
         
@@ -799,7 +800,7 @@ def main():
             move(player_list[i])
             handle_terrain()
             handle_collision_ball_hole(player_list[i], hole.get_rect())
-
+            
 
         if plr.get_vel() < 2 and plr.get_vel() != 0:
             arrow.reset(plr)
