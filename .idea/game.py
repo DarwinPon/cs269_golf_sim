@@ -36,6 +36,7 @@ GREEN = (126, 200, 80)
 YELLOW = (253, 223, 119)
 RED =  (255, 0, 80)
 CARAMEL = (255, 174, 105)
+BLUE = (0, 0, 255)
 
 # game events
 GOAL = pygame.USEREVENT + 1
@@ -100,11 +101,11 @@ STARTSCREEN = pygame.transform.scale(pygame.image.load("../pictures/startScreen.
 
 # set up arrow and hole
 arrow = go.Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
-hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 0, arrow)
 
 # set up players
-player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
-player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
+player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
 player1.set_opponent(player2)
 player2.set_opponent(player1)
 
@@ -114,7 +115,7 @@ player_list = [player1, player2]
 ICON_SIZE = 55
 # set projectiles
 golfClub = go.GolfClub(golfClub_img, 500, 600, ICON_SIZE, ICON_SIZE, arrow)
-projectileList = [golfClub]
+projectileList = []
 
 # set consumables
 massUp = go.MassUp(massUp_img, 700, 100, 40, 40)
@@ -182,12 +183,6 @@ def draw_window(scale):
     for i in range(4, len(BOUNDARY)):
         pygame.draw.rect(screen, BLACK, BOUNDARY[i])
 
-    # update the screen
-    # pygame.display.update()
-
-def draw_players(player_list, current_player, hole, arrow):
-    # draw consumable on the screen
-
     for tr in TERRAIN_LIST:
         if tr.id != "tor":
             pygame.draw.rect(screen, tr.color, tr.rect)
@@ -197,6 +192,12 @@ def draw_players(player_list, current_player, hole, arrow):
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
     for consumable in consumableList:
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
+
+    # update the screen
+    # pygame.display.update()
+
+def draw_players(player_list, current_player, hole, arrow):
+    # draw consumable on the screen
 
     if arrow.is_visible:
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
@@ -272,14 +273,12 @@ def handle_collision_ball_rect(ball, rect):
     #0 vertical 1 horizontal 2 corner
 
 
-    if collisions[0] != collisions[1] and collisions[2] == collisions[3]:
+    if collisions[0] != collisions[1]:
         return 0
 
-    if collisions[0] == collisions[1] and collisions[2] != collisions[3]:
+    if collisions[2] != collisions[3]:
         return 1
 
-    if collisions[0] != collisions[1] and collisions[2] != collisions[3]:
-        return 2
 
 
 def check_collision_v(ball, rect):
@@ -390,7 +389,6 @@ def check_sand(plr):
 
 def handle_terrain():
     for plr in player_list:
-        print(plr.get_vel())
         if check_sand(plr) and plr.acc != 1/3:
             plr.acc = 3
         elif plr.acc != 1/3:
@@ -439,22 +437,26 @@ def check_collision_ball_rect(ball, rect):
 def move(plr):
     '''Moves the player and handles collision with obstacles'''
 
-    steps = 15
+    steps = 20
     for i in range(steps):
         plr.advance(steps)
         for wall in BOUNDARY:
             if check_collision_ball_rect(plr, wall):
                 col_type = handle_collision_ball_rect(plr, wall)
                 plr.traceback(steps)
+                plr.traceback(steps)
+                plr.traceback(steps)
                 if col_type == 0:
+                    print("vertical")
                     plr.reflect_y()
 
                 if col_type == 1:
+                    print("horizontal")
                     plr.reflect_x()
 
-                if col_type == 2:
-                    plr.reflect_x()
-                    plr.reflect_y()
+
+
+
         handle_collision_ball_ball(plr, plr.opponent)
 
     plr.update_pos()
@@ -463,20 +465,27 @@ def move(plr):
 def handle_next_level(plr):
     global current_level, replay_game
     """Takes player to the next level"""
-    if plr == player_list[0]:
-        goal_text = afont.render( "Player 1 scored!", True, (0, 0, 0) )
-    else:
-        goal_text = afont.render( "Player 2 scored!", True, (0, 0, 0) )
+    goal_text = afont.render( "Player %d scored!" %plr.id, True, BLUE )
 
+    tr_cover = pygame.Surface((WIDTH, HEIGHT))
+    tr_cover.set_alpha(130)
+    tr_cover.fill(WHITE)
+    screen.blit(tr_cover, (0,0))
     # blit the text surface onto the screen
     screen.blit( goal_text, (WIDTH /2 - 100, HEIGHT / 2 - 50) )
     pygame.display.update()
     if current_level == 3:
         replay_game = True
+        game_running = False
+    else:
+        print(1)
+        pygame.time.wait(1500)
+        current_level += 1
+        read_level("level %d.txt" %current_level)
+        game_reset()
 
 
-    pygame.time.wait(1500)
-    handle_endScreen()
+
 
 def handle_endScreen():
     """Implement end screen"""
@@ -583,13 +592,12 @@ def check_ball_clicked(ball) -> bool:
 
 
 def game_reset():
-    player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
-    player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+    player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
+    player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
     player1.set_opponent(player2)
     player2.set_opponent(player1)
     player_list[0] = player2
     player_list[1] = player1
-    read_level("level 1.txt")
 
 ####################### Main Event Loop #########################
 
@@ -882,6 +890,7 @@ def main():
                             current_player = 0
                             current_projectile = None
                             game_reset()
+                            read_level("level 1.txt")
                 pygame.display.update()
                 gameClock.tick(FPS)
 

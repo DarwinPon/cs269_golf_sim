@@ -172,7 +172,7 @@ class MovingThing(Thing):
 
 
 class Ball(MovingThing):
-    def __init__(self, image, x, y, width, height, arrow):
+    def __init__(self, image, x, y, width, height, id, arrow):
         super().__init__(image, x, y, width, height, arrow)
         self.RADIUS = 15
         self.consumables = []
@@ -180,6 +180,7 @@ class Ball(MovingThing):
         self.opponent = None
         self.need_to_display = False
         self.score = 0
+        self.id = id
 
     def display(self):
         # this list stores tuples ((x, y), consumable)
