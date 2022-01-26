@@ -86,6 +86,7 @@ randomAngle_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha
 exchangePosition_img = pygame.image.load("../pictures/exchangePosition.png").convert_alpha()
 golfClub_img = pygame.image.load("../pictures/golfClub.png").convert_alpha()
 boost_img = pygame.image.load("../pictures/speedBoost.png").convert_alpha()
+tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -104,19 +105,20 @@ player2.set_opponent(player1)
 arrow.reset(player1)
 player_list = [player1, player2]
 
+ICON_SIZE = 55
 # set projectiles
-golfClub = go.GolfClub(golfClub_img, 500, 600, 80, 80, arrow)
+golfClub = go.GolfClub(golfClub_img, 500, 600, ICON_SIZE, ICON_SIZE, arrow)
 projectileList = [golfClub]
 
 # set consumables
-massUp = go.MassUp(massUp_img, 700, 100, 40, 40)
-speedUp = go.SpeedUp(speedUp_img, 400, 400, 40, 40)
-powerUp = go.PowerUp(powerUp_img, 500, 500, 120, 120)
-randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
-exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, 40, 40)
+massUp = go.MassUp(massUp_img, 700, 100, ICON_SIZE, ICON_SIZE)
+speedUp = go.SpeedUp(speedUp_img, 400, 400, ICON_SIZE, ICON_SIZE)
+powerUp = go.PowerUp(powerUp_img, 500, 500, ICON_SIZE, ICON_SIZE)
+randomAngle = go.RandomAngle(randomAngle_img, 650, 300, ICON_SIZE, ICON_SIZE)
+exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, ICON_SIZE, ICON_SIZE)
 consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
 
-# player1.add_consumable(massUp)
+# player1.add_consumable(powerUp)
 # player1.add_consumable(speedUp)
 # player1.add_projectile(golfClub)
 
@@ -137,14 +139,13 @@ BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 boost1 = go.BoostPad(boost_img, 100, 100, 80, 2, 0)
 sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 
-tor1 = go.Tornado(hole_img, 700, 500, 80, 80)
+tor1 = go.Tornado(tornado_img, 700, 500, 80, 80)
 TERRAIN_LIST = [boost1, sand1, tor1]
 
 
 # testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
 BOUNDARY.append(test_rect)
-
 
 
 ####################### Filling the Screen #########################
@@ -177,6 +178,8 @@ def draw_players(player_list, current_player, hole, arrow):
     for tr in TERRAIN_LIST:
         pygame.draw.rect(screen, tr.color, tr.rect)
         if tr.id == "boost":
+            screen.blit(tr.image, (tr.get_x(), tr.get_y()))
+        if tr.id == "tor":
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
 
     if arrow.is_visible:
@@ -315,6 +318,10 @@ def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
         if len(ball.get_consumables()) < 2 and check_collision_ball_rect(ball, consumable.get_rect()):
             print("Collide with consumable")
+            # play sounds
+            if consumable.id == "randomAngle":
+                sound.random_angle()
+
             # activate the consumable
             consumable.activate(ball)
             # remove consumable from the list and screen
@@ -567,7 +574,6 @@ def main():
             if event.type == pygame.MOUSEBUTTONUP and player_list[current_player].need_to_display:
                 player_list[current_player].need_to_display = False
 
-
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     plr.increase_launchF()
@@ -636,7 +642,7 @@ def main():
                         handle_plr_consumables(nxt_p)
 
                         if random.randint(1, 10) <= 3:
-                            random_projectile = go.GolfClub(golfClub_img, 0, 0, 80, 80, arrow)
+                            random_projectile = go.GolfClub(golfClub_img, 0, 0, ICON_SIZE, ICON_SIZE, arrow)
                             random_projectile.prepare(nxt_p)
 
                         if nxt_p.get_vel() < 1:

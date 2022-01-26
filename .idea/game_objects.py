@@ -196,7 +196,7 @@ class Ball(MovingThing):
         # display projectile
         if len(self.projectiles) == 1:
             p0 = self.projectiles[0]
-            displayList.append( (p0, (self.x-p0.width/3, self.y+p0.height/5)) )
+            displayList.append( (p0, (self.x-p0.width/3, self.y+p0.height/1.8)) )
         
         return displayList
 
@@ -438,11 +438,6 @@ class RandomBox(Consumable):
         # activate consumable
         random_consumable.activate(plr)
 
-
-        
-
-
-        
 
 
         
