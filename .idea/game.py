@@ -35,6 +35,7 @@ BLACK = (0, 0, 0)
 GREEN = (126, 200, 80)
 YELLOW = (253, 223, 119)
 RED =  (255, 0, 80)
+CARAMEL = (255, 174, 105)
 
 # game events
 GOAL = pygame.USEREVENT + 1
@@ -64,6 +65,7 @@ gameClock = pygame.time.Clock()
 # create a screen and set its width and height
 WIDTH, HEIGHT = 1280, 720
 screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
+current_level = 1
 
 
 # create caption for the screen
@@ -127,7 +129,8 @@ consumableList = [exchangePosition]
 # player1.add_projectile(golfClub)
 
 # create a font
-afont = pygame.font.SysFont( "Helvetica", 32, bold=True )
+afont = pygame.font.SysFont( "comicsans", 32, bold=True )
+button_font = pygame.font.SysFont( "comicsans", 22, bold=True )
 # render a surface with some text
 text = afont.render( "Clean up time", True, (0, 0, 0) )
 
@@ -151,6 +154,12 @@ TERRAIN_LIST = [boost1, sand1, tor1]
 test_rect = pygame.Rect((300,300), (100,100))
 BOUNDARY.append(test_rect)
 
+#stgae booleans
+start_screen = False
+tutorial_screen = False
+game_running = True
+replay_game = False
+game_paused = False
 
 ####################### Filling the Screen #########################
 def draw_window(scale):
@@ -177,8 +186,6 @@ def draw_window(scale):
 
 def draw_players(player_list, current_player, hole, arrow):
     # draw consumable on the screen
-    for consumable in consumableList:
-        screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
 
     for tr in TERRAIN_LIST:
 
@@ -187,6 +194,8 @@ def draw_players(player_list, current_player, hole, arrow):
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
         if tr.id == "tor":
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
+    for consumable in consumableList:
+        screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
 
     if arrow.is_visible:
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
@@ -200,8 +209,6 @@ def draw_players(player_list, current_player, hole, arrow):
             displayList = plr.display()
             for info_tuple in displayList:
                 screen.blit(info_tuple[0].image, (info_tuple[1][0], info_tuple[1][1]))
-
-
 
 
         # draw projectile on the screen
@@ -326,7 +333,7 @@ def handle_collision_ball_hole(ball, holeRect):
     if check_collision_ball_rect(ball, holeRect):
         if abs(ball.get_vel())<2:
             print("goal!")
-            pygame.event.post(pygame.event.Event(GOAL))
+            handle_next_level(ball)
 
 
 def handle_collision_ball_consumables(ball, consumables_list):
@@ -379,6 +386,7 @@ def check_sand(plr):
         else:
             continue
 
+
 def handle_terrain():
     for plr in player_list:
         if check_sand(plr) and plr.acc != 1/3:
@@ -410,7 +418,6 @@ def handle_terrain():
                     plr.update_angle()
 
 
-
 def rot_image(rect, image, angle):
     rotated_img = pygame.transform.rotate(image, angle)
     return rotated_img, rect.x + rect.width/2 - (rotated_img.get_width()/2), rect.y + rect.height/2 - (rotated_img.get_height()/2)
@@ -425,6 +432,7 @@ def check_collision_ball_rect(ball, rect):
     col_v = check_collision_v(ball, rect)
     col_h = check_collision_h(ball, rect)
     return col_v and col_h
+
 
 def move(plr):
     '''Moves the player and handles collision with obstacles'''
@@ -450,15 +458,22 @@ def move(plr):
     plr.update_pos()
 
 
+def handle_next_level(plr):
+    global current_level, replay_game
+    """Takes player to the next level"""
+    if plr == player_list[0]:
+        goal_text = afont.render( "Player 1 scored!", True, (0, 0, 0) )
+    else:
+        goal_text = afont.render( "Player 2 scored!", True, (0, 0, 0) )
 
-def handle_gameover():
-    """Implement gameover screen"""
-    print("Entering gameover screen")
-    gameover_text = afont.render( "GOAL!!!", True, (0, 0, 0) )
     # blit the text surface onto the screen
-    screen.blit( gameover_text, (WIDTH /2 - 100, HEIGHT / 2 - 50) )
+    screen.blit( goal_text, (WIDTH /2 - 100, HEIGHT / 2 - 50) )
     pygame.display.update()
-    pygame.time.wait(2000)
+    if current_level == 3:
+        replay_game = True
+
+
+    pygame.time.wait(1500)
     handle_endScreen()
 
 def handle_endScreen():
@@ -519,9 +534,6 @@ def read_level(filename):
         print("Level does not exist")
 
 
-
-
-
 def save_level():
     path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'levels', "new level.txt"))
     lvl = ""
@@ -544,6 +556,7 @@ def save_level():
         f.write(lvl)
         f.close
     print("level saved as \"new level.txt\"")
+
 def check_button_clicked(button) -> bool:
     """Check if player click the button"""
     mousePos = pygame.mouse.get_pos()
@@ -564,11 +577,22 @@ def check_ball_clicked(ball) -> bool:
     else:
         return False
 
+
+def game_reset():
+    player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+    player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, arrow)
+    player1.set_opponent(player2)
+    player2.set_opponent(player1)
+    player_list[0] = player2
+    player_list[1] = player1
+    read_level("level 1.txt")
+
 ####################### Main Event Loop #########################
 
 def main():
-    global current_player, tracing, current_tracing, projectileList, trace_color
+    global current_player, tracing, current_tracing, projectileList, trace_color, current_level, game_running, game_paused, tutorial_screen, replay_game
 
+    read_level("level 1.txt")
     draw_window(0)
     draw_players(player_list, current_player, hole, arrow)
 
@@ -585,229 +609,280 @@ def main():
     editing = False
     current_projectile = None
 
+
+
+
+
+    replay_text_1 = afont.render( "You finished all the levels!", True, (30,144,255) )
+    replay_text_2 = afont.render( "Press \"R\" to replay, \"Q\" to quit", True, (30,144,255) )
+
+
     while True:
 
-        if tracing:
-            bottomright = pygame.mouse.get_pos()
-            wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
-            if trace_color == GREEN or trace_color == RED:
-                mn = min(wh[0], wh[1])
-                wh = (mn, mn)
-            current_tracing = pygame.Rect(topleft, wh)
+        # When the game is running
+        if game_running:
+            if tracing:
+                bottomright = pygame.mouse.get_pos()
+                wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
+                if trace_color == GREEN or trace_color == RED:
+                    mn = min(wh[0], wh[1])
+                    wh = (mn, mn)
+                current_tracing = pygame.Rect(topleft, wh)
 
-        if current_projectile is None:
-            plr = player_list[current_player]
-        else:
-            if projectile.need_arrow:
-                plr = current_projectile
-                current_projectile.acc = 0
-                projectileList.append(current_projectile)
-                projectile.need_arrow = False
+            if current_projectile is None:
+                plr = player_list[current_player]
+            else:
+                if projectile.need_arrow:
+                    plr = current_projectile
+                    current_projectile.acc = 0
+                    projectileList.append(current_projectile)
+                    projectile.need_arrow = False
 
-        # Check every event in the event list
-        for event in pygame.event.get():
-            # click quit button, then quit
-            if event.type == pygame.QUIT:
-                sys.exit()
+            # Check every event in the event list
+            for event in pygame.event.get():
+                # click quit button, then quit
+                if event.type == pygame.QUIT:
+                    sys.exit()
 
-            # if one player goal, then go to the gameover event
-            if event.type == GOAL:
-                handle_gameover()
+                # if one player goal, then go to the gameover event
+                if event.type == GOAL:
+                    handle_gameover()
 
-            # display game items a ball have
-            if event.type == pygame.MOUSEBUTTONDOWN and check_ball_clicked(player_list[current_player]):
-                player_list[current_player].need_to_display = True 
-            if event.type == pygame.MOUSEBUTTONUP and player_list[current_player].need_to_display:
-                player_list[current_player].need_to_display = False
+                # display game items a ball have
+                if event.type == pygame.MOUSEBUTTONDOWN and check_ball_clicked(player_list[current_player]):
+                    player_list[current_player].need_to_display = True
+                if event.type == pygame.MOUSEBUTTONUP and player_list[current_player].need_to_display:
+                    player_list[current_player].need_to_display = False
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    plr.increase_launchF()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_UP:
+                        plr.increase_launchF()
 
-                if event.key == pygame.K_DOWN:
-                    plr.decrease_launchF()
+                    if event.key == pygame.K_DOWN:
+                        plr.decrease_launchF()
 
-                force_scale = plr.launchF
-                draw_window(force_scale)
+                    force_scale = plr.launchF
+                    draw_window(force_scale)
 
-                if event.key == pygame.K_LEFT:
-                    if editing:
-                        mp = pygame.mouse.get_pos()
-                        for tr in TERRAIN_LIST:
-                            if tr.id == "boost":
-                                if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
-                                    tr.left()
-                                    break
+                    if event.key == pygame.K_LEFT:
+                        if editing:
+                            mp = pygame.mouse.get_pos()
+                            for tr in TERRAIN_LIST:
+                                if tr.id == "boost":
+                                    if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
+                                        tr.left()
+                                        break
 
-                    else:
-                        plr.left(player_list[current_player].turn_angle)
-                        rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
-                        arrow.set_rot(rot_img, rot_x, rot_y)
+                        else:
+                            plr.left(player_list[current_player].turn_angle)
+                            rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
+                            arrow.set_rot(rot_img, rot_x, rot_y)
 
 
-                if event.key == pygame.K_RIGHT:
-                    if editing:
-                        mp = pygame.mouse.get_pos()
-                        for tr in TERRAIN_LIST:
-                            if tr.id == "boost":
-                                if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
-                                    tr.right()
-                                    break
+                    if event.key == pygame.K_RIGHT:
+                        if editing:
+                            mp = pygame.mouse.get_pos()
+                            for tr in TERRAIN_LIST:
+                                if tr.id == "boost":
+                                    if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
+                                        tr.right()
+                                        break
 
-                    else:
-                        plr.right(player_list[current_player].turn_angle)
-                        rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
-                        arrow.set_rot(rot_img, rot_x, rot_y)
+                        else:
+                            plr.right(player_list[current_player].turn_angle)
+                            rot_img, rot_x, rot_y = rot_image(arrow.rect, arrow.image, -plr.get_angle())
+                            arrow.set_rot(rot_img, rot_x, rot_y)
 
-                if event.key == pygame.K_SPACE:
-                    # Add sound
-                    if current_projectile is None:
-                        sound.normal_hit()
-                    else:
-                        sound.hard_hit()
-
-                    if editing:
-                        if tracing:
-                            print(trace_color)
-                            bottomright = pygame.mouse.get_pos()
-                            wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
-                            if trace_color == BLACK:
-                                BOUNDARY.append(pygame.Rect(topleft, wh))
-                            elif trace_color == GREEN:
-                                mn = min(wh[0], wh[1])
-                                boost = go.BoostPad(boost_img, topleft[0], topleft[1], mn, 2, 0)
-                                TERRAIN_LIST.append(boost)
-                            elif trace_color == YELLOW:
-                                sand = go.SandPit(hole_img, topleft[0], topleft[1], wh[0], wh[1])
-                                TERRAIN_LIST.append(sand)
-                            elif trace_color == RED:
-                                mn = min(wh[0], wh[1])
-                                tornado = go.Tornado(hole_img, topleft[0], topleft[1], mn, mn)
-                                TERRAIN_LIST.append(tornado)
-
-                        tracing = False
-
-                    else:
+                    if event.key == pygame.K_SPACE:
                         # Add sound
                         if current_projectile is None:
                             sound.normal_hit()
                         else:
                             sound.hard_hit()
 
+                        if editing:
+                            if tracing:
+                                print(trace_color)
+                                bottomright = pygame.mouse.get_pos()
+                                wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
+                                if trace_color == BLACK:
+                                    BOUNDARY.append(pygame.Rect(topleft, wh))
+                                elif trace_color == GREEN:
+                                    mn = min(wh[0], wh[1])
+                                    boost = go.BoostPad(boost_img, topleft[0], topleft[1], mn, 2, 0)
+                                    TERRAIN_LIST.append(boost)
+                                elif trace_color == YELLOW:
+                                    sand = go.SandPit(hole_img, topleft[0], topleft[1], wh[0], wh[1])
+                                    TERRAIN_LIST.append(sand)
+                                elif trace_color == RED:
+                                    mn = min(wh[0], wh[1])
+                                    tornado = go.Tornado(hole_img, topleft[0], topleft[1], mn, mn)
+                                    TERRAIN_LIST.append(tornado)
 
-                        plr.launch(VELOCITY)
-                        arrow.is_visible = False
-                        current_player = len(player_list)-1-current_player
-                        nxt_p = player_list[current_player]
+                            tracing = False
 
-                        # check if we need to delet the consumables
-                        handle_plr_consumables(nxt_p)
-
-                        if random.randint(1, 10) <= 3:
-                            random_projectile = go.GolfClub(golfClub_img, 0, 0, ICON_SIZE, ICON_SIZE, arrow)
-                            random_projectile.prepare(nxt_p)
-
-                        if nxt_p.get_vel() < 1:
-                            plr = player_list[current_player]
-                            arrow.reset(nxt_p)
+                        else:
+                            # Add sound
+                            if current_projectile is None:
+                                sound.normal_hit()
+                            else:
+                                sound.hard_hit()
 
 
-                if event.key == pygame.K_e:
-                    editing = not editing
-                    print("editing: "+ str(editing))
+                            plr.launch(VELOCITY)
+                            arrow.is_visible = False
+                            current_player = len(player_list)-1-current_player
+                            nxt_p = player_list[current_player]
+
+                            # check if we need to delet the consumables
+                            handle_plr_consumables(nxt_p)
+
+                            if random.randint(1, 10) <= 3:
+                                random_projectile = go.GolfClub(golfClub_img, 0, 0, ICON_SIZE, ICON_SIZE, arrow)
+                                random_projectile.prepare(nxt_p)
+
+                            if nxt_p.get_vel() < 1:
+                                plr = player_list[current_player]
+                                arrow.reset(nxt_p)
 
 
-                if event.key == pygame.K_RETURN and current_projectile is None:
-                    for projectile in player_list[current_player].projectiles:
-                        # if the player have golfClub projectile
-                        projectile.setPosition(player_list[current_player])
-                        current_projectile = projectile
-                        arrow.reset(player_list[current_player])
+                    if event.key == pygame.K_e:
+                        editing = not editing
+                        print("editing: "+ str(editing))
 
-                #level editing
-                if editing:
-                    if event.key == pygame.K_1:
-                        tracing = True
-                        trace_color = BLACK
-                        topleft = pygame.mouse.get_pos()
 
-                    if event.key == pygame.K_2:
-                        tracing = True
-                        trace_color = GREEN
-                        topleft = pygame.mouse.get_pos()
+                    if event.key == pygame.K_RETURN:
+                        if editing:
+                            player_list[0].set_x(75)
+                            player_list[0].set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
+                            player_list[1].set_x(75)
+                            player_list[1].set_y(HEIGHT / 2 + 50 - BALL_WIDTH / 2)
+                            player_list[0].arrow.reset(player_list[0])
+                        elif current_projectile is None:
+                            for projectile in player_list[current_player].projectiles:
+                                # if the player have golfClub projectile
+                                projectile.setPosition(player_list[current_player])
+                                current_projectile = projectile
+                                arrow.reset(player_list[current_player])
 
-                    if event.key == pygame.K_3:
-                        tracing = True
-                        trace_color = YELLOW
-                        topleft = pygame.mouse.get_pos()
 
-                    if event.key == pygame.K_4:
-                        tracing = True
-                        trace_color = RED
-                        topleft = pygame.mouse.get_pos()
+                    if event.key == pygame.K_t:
+                        game_running = False
+                        replay_game = True
 
-                    if event.key == pygame.K_0:
-                        center = pygame.mouse.get_pos()
-                        box = go.RandomBox(random_img, center[0]-20, center[1]-20)
-                        consumableList.append(box)
+                    #level editing
+                    if editing:
+                        if event.key == pygame.K_1:
+                            tracing = True
+                            trace_color = BLACK
+                            topleft = pygame.mouse.get_pos()
 
-                    if event.key == pygame.K_BACKSPACE:
-                        mp = pygame.mouse.get_pos()
-                        for i in range(4, len(BOUNDARY)):
-                            if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
-                                del BOUNDARY[i]
-                                break
-                        for tr in TERRAIN_LIST:
-                            if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
-                                TERRAIN_LIST.remove(tr)
-                                break
-                        for item in consumableList:
-                            if mp[0] > item.x and mp[0] < item.x + item.width and mp[1] > item.y and mp[1] < item.y + item.height:
-                                consumableList.remove(item)
-                                break
+                        if event.key == pygame.K_2:
+                            tracing = True
+                            trace_color = GREEN
+                            topleft = pygame.mouse.get_pos()
 
-                    if event.key == pygame.K_s:
-                        #save
-                        save_level()
+                        if event.key == pygame.K_3:
+                            tracing = True
+                            trace_color = YELLOW
+                            topleft = pygame.mouse.get_pos()
 
-                    if event.key == pygame.K_r:
-                        #reads level file
-                        level_name = input("Please input level file name: ")
-                        read_level(level_name)
+                        if event.key == pygame.K_4:
+                            tracing = True
+                            trace_color = RED
+                            topleft = pygame.mouse.get_pos()
 
-                draw_players(player_list, current_player, hole, arrow)
+                        if event.key == pygame.K_0:
+                            center = pygame.mouse.get_pos()
+                            box = go.RandomBox(random_img, center[0]-20, center[1]-20)
+                            consumableList.append(box)
 
-        # update the screen
-        draw_window(force_scale)
-        
-        # set movement of projectile
-        if current_projectile != None:
-            if current_projectile.is_moving:
-                handle_golfClub_function(current_projectile, current_projectile.attack_object)
-                current_projectile.move()
-            else:
-                if current_projectile in projectileList:
-                    projectileList.remove(current_projectile)
-                current_projectile = None
+                        if event.key == pygame.K_BACKSPACE:
+                            mp = pygame.mouse.get_pos()
+                            for i in range(4, len(BOUNDARY)):
+                                if mp[0] > BOUNDARY[i].x and mp[0] < BOUNDARY[i].right and mp[1] > BOUNDARY[i].y and mp[1] < BOUNDARY[i].bottom:
+                                    del BOUNDARY[i]
+                                    break
+                            for tr in TERRAIN_LIST:
+                                if mp[0] > tr.x and mp[0] < tr.x + tr.width and mp[1] > tr.y and mp[1] < tr.y + tr.height:
+                                    TERRAIN_LIST.remove(tr)
+                                    break
+                            for item in consumableList:
+                                if mp[0] > item.x and mp[0] < item.x + item.width and mp[1] > item.y and mp[1] < item.y + item.height:
+                                    consumableList.remove(item)
+                                    break
 
-        
-        for i in range(len(player_list)):
-            handle_collision_ball_consumables(player_list[i], consumableList)
-            handle_terrain()
-            if current_projectile is None:
-                handle_conllision_ball_projectiles(player_list[i], projectileList)
-            handle_collision_ball_ball(player_list[0], player_list[1])
-            move(player_list[i])
-            handle_terrain()
-            handle_collision_ball_hole(player_list[i], hole.get_rect())
-            
+                        if event.key == pygame.K_s:
+                            #save
+                            save_level()
 
-        if plr.get_vel() < 2 and plr.get_vel() != 0:
-            arrow.reset(plr)
-        elif plr.get_vel() > 1:
-            arrow.is_visible = False
+                        if event.key == pygame.K_r:
+                            #reads level file
+                            level_name = input("Please input level file name: ")
+                            read_level(level_name)
 
-        draw_players(player_list, current_player, hole, arrow)
+                    draw_players(player_list, current_player, hole, arrow)
+
+            # update the screen
+            draw_window(force_scale)
+
+            # set movement of projectile
+            if current_projectile != None:
+                if current_projectile.is_moving:
+                    handle_golfClub_function(current_projectile, current_projectile.attack_object)
+                    current_projectile.move()
+                else:
+                    if current_projectile in projectileList:
+                        projectileList.remove(current_projectile)
+                    current_projectile = None
+
+
+            for i in range(len(player_list)):
+                handle_collision_ball_consumables(player_list[i], consumableList)
+                handle_terrain()
+                if current_projectile is None:
+                    handle_conllision_ball_projectiles(player_list[i], projectileList)
+                handle_collision_ball_ball(player_list[0], player_list[1])
+                move(player_list[i])
+                handle_terrain()
+                handle_collision_ball_hole(player_list[i], hole.get_rect())
+
+
+            if plr.get_vel() < 2 and plr.get_vel() != 0:
+                arrow.reset(plr)
+            elif plr.get_vel() > 1:
+                arrow.is_visible = False
+
+            draw_players(player_list, current_player, hole, arrow)
+
+
+
+
+        if replay_game:
+            tr_cover = pygame.Surface((WIDTH, HEIGHT))
+            tr_cover.set_alpha(130)
+            tr_cover.fill(WHITE)
+            screen.blit(tr_cover, (0,0))
+            screen.blit(replay_text_1, (WIDTH/2 - 250, HEIGHT/2 - 100))
+            screen.blit(replay_text_2, (WIDTH/2 - 290, HEIGHT/2))
+
+
+            while replay_game:
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_q:
+                            sys.exit()
+                        if event.key == pygame.K_r:
+                            replay_game = False
+                            game_running = True
+                            current_level = 1
+                            current_player = 0
+                            current_projectile = None
+                            game_reset()
+                pygame.display.update()
+                gameClock.tick(FPS)
+
+
 
         # set FPS
         gameClock.tick(FPS)

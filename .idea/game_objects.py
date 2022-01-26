@@ -179,6 +179,7 @@ class Ball(MovingThing):
         self.projectiles = []
         self.opponent = None
         self.need_to_display = False
+        self.score = 0
 
     def display(self):
         # this list stores tuples ((x, y), consumable)
@@ -446,6 +447,7 @@ class RandomBox(Consumable):
 
     def deactivate(self, plr):
         pass
+
 
 
 
