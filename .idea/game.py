@@ -94,11 +94,12 @@ speedUp_img = pygame.image.load("../pictures/speedUp.png").convert_alpha()
 randomAngle_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 exchangePosition_img = pygame.image.load("../pictures/exchangePosition.png").convert_alpha()
 golfClub_img = pygame.image.load("../pictures/golfClub.png").convert_alpha()
-boost_img = pygame.image.load("../pictures/accelerate_icon.png").convert_alpha()
+boost_img = pygame.image.load("../pictures/acceleration_2.png").convert_alpha()
 tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
 obstacle_img = pygame.image.load("../pictures/placeholder_obstacle.png")
+sand_img = pygame.image.load("../pictures/sand.png")
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -110,7 +111,7 @@ hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BA
 
 # set up players
 player1 = go.Ball(ball_img1, debug_x if debug_mode else 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
-player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
+player2 = go.Ball(ball_img2, debug_x if debug_mode else 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
 player1.set_opponent(player2)
 player2.set_opponent(player1)
 
@@ -128,12 +129,14 @@ speedUp = go.SpeedUp(speedUp_img, 400, 400, 40, 40)
 powerUp = go.PowerUp(powerUp_img, 500, 500, 120, 120)
 #randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
 exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, 40, 40)
+exchangePosition = go.MassUp(exchangePosition_img, 800, 250, 40, 40)
 randomBox = go.RandomBox(random_img, 650, 300, images)
 #consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
 consumableList = [exchangePosition]
 
-# 
+# player2 have a golf club projectile at the beginning of the game
 player2.add_projectile(golfClub)
+golfClub.prepare(player2)
 
 # create a font
 afont = pygame.font.SysFont( "comicsans", 32, bold=True )
@@ -151,11 +154,10 @@ BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
 # adding terrain
 boost1 = go.BoostPad(boost_img, 100, 100, 80, 2, 0)
-sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
+sand1 = go.SandPit(sand_img, 100, 550, 60, 60)
 
 tor1 = go.Tornado(tornado_img, 700, 500, 120, 120)
 TERRAIN_LIST = [boost1, sand1, tor1]
-
 
 # testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
@@ -189,23 +191,24 @@ def draw_window(scale):
         # pygame.draw.rect(screen, BLACK, BOUNDARY[i])
         screen.blit(obstacle_img,BOUNDARY[i][0:2],BOUNDARY[i])
 
+    # draw terrians
     for tr in TERRAIN_LIST:
-        if tr.id != "tor":
+        if tr.id == "sand":
+            screen.blit(sand_img, (tr.get_x(), tr.get_y()), tr.get_rect())
+        elif tr.id == "boost":
             pygame.draw.rect(screen, tr.color, tr.rect)
-        if tr.id == "boost":
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
         if tr.id == "tor":
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
     for consumable in consumableList:
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
 
-    # update the screen
-    # pygame.display.update()
 
 def draw_players(player_list, current_player, hole, arrow):
     # draw consumable on the screen
 
     if arrow.is_visible:
+        arrow.track();
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
 
     screen.blit(hole.image, (hole.get_x(), hole.get_y()))
@@ -234,7 +237,9 @@ def handle_collision_ball_ball(ball1, ball2):
 
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
-        print("Ball Ball Collision!")
+        print("Collision!")
+        # play sound
+        sound.collision_ball_ball()
         if ball1.get_vel() == 0 and ball2.get_vel() == 0:
             ball1.vel_x = 1
             ball1.vel_y = 1
@@ -340,15 +345,19 @@ def handle_collision_ball_hole(ball, holeRect):
 def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
         if len(ball.get_consumables()) < 2 and check_collision_ball_rect(ball, consumable.get_rect()):
-            print("Collide with consumable")
+            print("Collide with consumable %s"%consumable)
+            if hasattr(consumable, "consumable"): print("Sub-consumable %s"%consumable.consumable)
+            print(consumable.id)
             # play sounds
             if consumable.id == "randomAngle":
-                print(1)
                 sound.randomAngle()
 
             elif consumable.id == "speedUp":
-                print("speedUp")
                 sound.speedUp()
+
+            elif consumable.id == "massUp":
+                sound.massUp()
+
 
             # activate the consumable
             consumable.activate(ball)
@@ -403,12 +412,14 @@ def handle_terrain():
         for tr in TERRAIN_LIST:
             if tr.rect.colliderect(plr.rect):
                 if tr.id == "boost":
+                    sound.acclpad()
                     plr.vel_x += tr.orientation[0] * tr.scale
                     plr.vel_y += tr.orientation[1] * tr.scale
                     plr.update_angle()
 
                 if tr.id == "tor":
                     # deal with tornado
+                    sound.tornado()
                     dx = plr.x - tr.center_x
                     dy = plr.y - tr.center_y
                     
@@ -469,8 +480,8 @@ def move(plr):
 
 
 def handle_next_level(plr):
-    global current_level, replay_game
     """Takes player to the next level"""
+    global current_level, replay_game
     goal_text = afont.render( "Player %d scored!" %plr.id, True, BLUE )
     plr.score += 1
     tr_cover = pygame.Surface((WIDTH, HEIGHT))
@@ -536,7 +547,7 @@ def read_level(filename):
                     TERRAIN_LIST.append(boost)
                 if l[0] == "s":
                     #sand
-                    sand = go.SandPit(hole_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
+                    sand = go.SandPit(sand_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
                     TERRAIN_LIST.append(sand)
                 if l[0] == "t":
                     #tornado
@@ -598,25 +609,33 @@ def check_ball_clicked(ball) -> bool:
 
 
 def game_reset(reset_score = False):
+    global current_player
+    current_player = 0
     if reset_score:
         player1.score = 0
         player2.score = 0
-    player1.set_x(debug_x if debug_mode else 75)
+        player_list[:]=[player1,player2]
+    else:
+        player_list[:]=[player_list[i] for i in range(1-player_list.__len__(), 1)]
+
+    for plr in player_list:
+        plr.consumables = []
+        plr.projectiles = []
+        plr.angle = 0
+        plr.set_vel(0)
     player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
-    player2.set_x(75)
+    player2.set_x(debug_x if debug_mode else 75)
     player2.set_y(HEIGHT / 2 + 50 + BALL_WIDTH / 2)
     player1.set_opponent(player2)
     player2.set_opponent(player1)
-    if random.random()>0.5:
-        player_list[0] = player1
-        player_list[1] = player2
-    else:
-        player_list[0] = player2
-        player_list[1] = player1
+    arrow.reset(player_list[0])
+    player1.reset()
+    player2.reset()
+    player1.arrow.reset(player_list[0])
 
 ####################### Main Event Loop #########################
 
-def main():
+def main(argv):
     global current_player, tracing, current_tracing, projectileList, trace_color, current_level, game_running, game_paused, tutorial_screen, replay_game
 
     read_level("level 1.txt")
@@ -758,7 +777,7 @@ def main():
 
                             plr.launch(VELOCITY)
                             arrow.is_visible = False
-                            current_player = len(player_list)-1-current_player
+                            current_player = (current_player+1)%player_list.__len__()
                             nxt_p = player_list[current_player]
 
                             # check if we need to delet the consumables
@@ -927,4 +946,4 @@ def main():
         gameClock.tick(FPS)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
