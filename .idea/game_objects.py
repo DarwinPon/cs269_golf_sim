@@ -445,10 +445,10 @@ class RandomBox(Consumable):
             random_consumable = PowerUp(self.images[1], self.x, self.y, self.width, self.height)
         # RandomAngle: 15%
         elif 46 <= randNum <= 60:
-            random_consumable = PowerUp(self.images[3], self.x, self.y, self.width, self.height)
+            random_consumable = RandomAngle(self.images[3], self.x, self.y, self.width, self.height)
         # ExchangePosition: 15%
         elif 61 <= randNum <= 75:
-            random_consumable = PowerUp(self.images[4], self.x, self.y, self.width, self.height)
+            random_consumable = ExchangePosition(self.images[4], self.x, self.y, self.width, self.height)
         # MassUp: 25%
         else:
             random_consumable = MassUp(self.images[2], self.x, self.y, self.width, self.height)

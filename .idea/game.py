@@ -93,7 +93,7 @@ boost_img = pygame.image.load("../pictures/accelerate_icon.png").convert_alpha()
 tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
-
+obstacle_img = pygame.image.load("../pictures/placeholder_obstacle.png")
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -104,7 +104,7 @@ arrow = go.Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
 hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 0, arrow)
 
 # set up players
-player1 = go.Ball(ball_img1, 1200, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
+player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
 player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
 player1.set_opponent(player2)
 player2.set_opponent(player1)
@@ -122,13 +122,14 @@ massUp = go.MassUp(massUp_img, 700, 100, 40, 40)
 speedUp = go.SpeedUp(speedUp_img, 400, 400, 40, 40)
 powerUp = go.PowerUp(powerUp_img, 500, 500, 120, 120)
 #randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
-exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, 40, 40)
+exchangePosition = go.MassUp(exchangePosition_img, 800, 250, 40, 40)
 randomBox = go.RandomBox(random_img, 650, 300, images)
 #consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
 consumableList = [exchangePosition]
 
-# 
+# player2 have a golf club projectile at the beginning of the game
 player2.add_projectile(golfClub)
+golfClub.prepare(player2)
 
 # create a font
 afont = pygame.font.SysFont( "comicsans", 32, bold=True )
@@ -150,7 +151,6 @@ sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 
 tor1 = go.Tornado(tornado_img, 700, 500, 120, 120)
 TERRAIN_LIST = [boost1, sand1, tor1]
-
 
 # testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
@@ -181,7 +181,8 @@ def draw_window(scale):
 
 
     for i in range(4, len(BOUNDARY)):
-        pygame.draw.rect(screen, BLACK, BOUNDARY[i])
+        # pygame.draw.rect(screen, BLACK, BOUNDARY[i])
+        screen.blit(obstacle_img,BOUNDARY[i][0:2],BOUNDARY[i])
 
     for tr in TERRAIN_LIST:
         if tr.id != "tor":
@@ -229,6 +230,8 @@ def handle_collision_ball_ball(ball1, ball2):
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
         print("Ball Ball Collision!")
+        # play sound
+        sound.collision_ball_ball()
         if ball1.get_vel() == 0 and ball2.get_vel() == 0:
             ball1.vel_x = 1
             ball1.vel_y = 1
@@ -335,14 +338,17 @@ def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
         if len(ball.get_consumables()) < 2 and check_collision_ball_rect(ball, consumable.get_rect()):
             print("Collide with consumable")
+            print(consumable.id)
             # play sounds
             if consumable.id == "randomAngle":
-                print(1)
                 sound.randomAngle()
 
             elif consumable.id == "speedUp":
-                print("speedUp")
                 sound.speedUp()
+
+            elif consumable.id == "massUp":
+                sound.massUp()
+
 
             # activate the consumable
             consumable.activate(ball)
@@ -397,12 +403,14 @@ def handle_terrain():
         for tr in TERRAIN_LIST:
             if tr.rect.colliderect(plr.rect):
                 if tr.id == "boost":
+                    sound.acclpad()
                     plr.vel_x += tr.orientation[0] * tr.scale
                     plr.vel_y += tr.orientation[1] * tr.scale
                     plr.update_angle()
 
                 if tr.id == "tor":
                     # deal with tornado
+                    sound.tornado()
                     dx = plr.x - tr.center_x
                     dy = plr.y - tr.center_y
                     
