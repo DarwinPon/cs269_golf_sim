@@ -87,7 +87,7 @@ def fadeOut(width, height, color):
     sur = pygame.Surface((width, height)).convert_alpha()
     sur.fill(color)
 
-    for alpha in range (0, 170):
+    for alpha in range (0, 165):
         sur.set_alpha(alpha//10)
         WIN.blit(sur, (0,0),special_flags=pygame.BLEND_ALPHA_SDL2)
         pygame.display.flip()
