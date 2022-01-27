@@ -128,12 +128,14 @@ speedUp = go.SpeedUp(speedUp_img, 400, 400, 40, 40)
 powerUp = go.PowerUp(powerUp_img, 500, 500, 120, 120)
 #randomAngle = go.RandomAngle(randomAngle_img, 650, 300, 40, 40)
 exchangePosition = go.ExchangePosition(exchangePosition_img, 800, 250, 40, 40)
+exchangePosition = go.MassUp(exchangePosition_img, 800, 250, 40, 40)
 randomBox = go.RandomBox(random_img, 650, 300, images)
 #consumableList = [speedUp, massUp, powerUp, randomAngle, exchangePosition]
 consumableList = [exchangePosition]
 
-# 
+# player2 have a golf club projectile at the beginning of the game
 player2.add_projectile(golfClub)
+golfClub.prepare(player2)
 
 # create a font
 afont = pygame.font.SysFont( "comicsans", 32, bold=True )
@@ -155,7 +157,6 @@ sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
 
 tor1 = go.Tornado(tornado_img, 700, 500, 120, 120)
 TERRAIN_LIST = [boost1, sand1, tor1]
-
 
 # testing stuff
 test_rect = pygame.Rect((300,300), (100,100))
@@ -236,6 +237,8 @@ def handle_collision_ball_ball(ball1, ball2):
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
         print("Collision!")
+        # play sound
+        sound.collision_ball_ball()
         if ball1.get_vel() == 0 and ball2.get_vel() == 0:
             ball1.vel_x = 1
             ball1.vel_y = 1
@@ -343,14 +346,17 @@ def handle_collision_ball_consumables(ball, consumables_list):
         if len(ball.get_consumables()) < 2 and check_collision_ball_rect(ball, consumable.get_rect()):
             print("Collide with consumable %s"%consumable)
             if hasattr(consumable, "consumable"): print("Sub-consumable %s"%consumable.consumable)
+            print(consumable.id)
             # play sounds
             if consumable.id == "randomAngle":
-                print(1)
                 sound.randomAngle()
 
             elif consumable.id == "speedUp":
-                print("speedUp")
                 sound.speedUp()
+
+            elif consumable.id == "massUp":
+                sound.massUp()
+
 
             # activate the consumable
             consumable.activate(ball)
@@ -405,12 +411,14 @@ def handle_terrain():
         for tr in TERRAIN_LIST:
             if tr.rect.colliderect(plr.rect):
                 if tr.id == "boost":
+                    sound.acclpad()
                     plr.vel_x += tr.orientation[0] * tr.scale
                     plr.vel_y += tr.orientation[1] * tr.scale
                     plr.update_angle()
 
                 if tr.id == "tor":
                     # deal with tornado
+                    sound.tornado()
                     dx = plr.x - tr.center_x
                     dy = plr.y - tr.center_y
                     
@@ -609,6 +617,13 @@ def game_reset(reset_score = False):
     else:
         player_list[:]=[player_list[i] for i in range(1-player_list.__len__(), 1)]
     player1.set_x(debug_x if debug_mode else 75)
+
+    for plr in player_list:
+        plr.consumables = []
+        plr.projectiles = []
+        plr.angle = 0
+        plr.set_vel(0)
+    player1.set_x(75)
     player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
     player2.set_x(debug_x if debug_mode else 75)
     player2.set_y(HEIGHT / 2 + 50 + BALL_WIDTH / 2)
@@ -617,6 +632,7 @@ def game_reset(reset_score = False):
     arrow.reset(player_list[0])
     player1.reset()
     player2.reset()
+    player1.arrow.reset(player_list[0])
 
 ####################### Main Event Loop #########################
 
