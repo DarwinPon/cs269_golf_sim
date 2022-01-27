@@ -10,7 +10,7 @@ import os
 pygame.init()
 #load music
 mixer.init()
-mixer.music.load('audios/BGM_startingGame_LoveDream.mp3')
+mixer.music.load('../audios/BGM_startingGame_LoveDream.mp3')
 WIDTH, HEIGHT = 1280, 720
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Golf Simulator")
@@ -26,9 +26,9 @@ BLACK = (0, 0, 0)
 BG = (248, 249, 212)# background yellow
 
 #read and transform images needed
-start_ori = pygame.image.load(os.path.join('pictures', 'startScreen.png'))
+start_ori = pygame.image.load(os.path.join('../pictures', 'startScreen.png'))
 start_img = pygame.transform.scale(start_ori, (796,562))
-ball_ori = pygame.image.load(os.path.join('pictures', 'ball_yellowbg.png')).convert()
+ball_ori = pygame.image.load(os.path.join('../pictures', 'ball_yellowbg.png')).convert()
 ball_img = pygame.transform.scale(ball_ori, (200,200))
 ball_img.set_colorkey(-1, pygame.RLEACCEL)
 
