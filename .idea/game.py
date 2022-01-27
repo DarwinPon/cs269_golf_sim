@@ -99,7 +99,7 @@ boost_img = pygame.image.load("../pictures/acceleration_2.png").convert_alpha()
 tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
-obstacle_img = pygame.image.load("../pictures/brick_wall_2.png")
+obstacle_img = pygame.image.load("../pictures/brick_wall_3.png")
 sand_img = pygame.image.load("../pictures/sandpit3_small.png")
 
 # background scenes
