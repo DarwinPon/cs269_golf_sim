@@ -45,10 +45,13 @@ BLUE = (0, 0, 255)
 HIGHLIGHT = (255,242,0)
 
 
+
 #initial velocity when force scale is 0
 VELOCITY = 8
 
 tracing = False
+show_rule = False
+editing = False
 current_tracing = pygame.Rect((0, 0), (0, 0))
 trace_color = BLACK
 
@@ -99,6 +102,8 @@ random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
 obstacle_img = pygame.image.load("../pictures/placeholder_obstacle.png")
 sand_img = pygame.image.load("../pictures/sandpit3_small.png")
+edit_rule = pygame.image.load(os.path.join('../rules', 'level_editor_rule.png'))
+game_item_rule = pygame.image.load(os.path.join('../rules', 'game_items_rule.png'))
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -201,6 +206,18 @@ def draw_window(scale):
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
     for consumable in consumableList:
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
+
+    if show_rule:
+        editing_rule_cover = pygame.Surface((WIDTH, HEIGHT))
+        editing_rule_cover.set_alpha(130)
+        editing_rule_cover.fill(WHITE)
+        screen.blit(editing_rule_cover, (0,0))
+        print(editing)
+        if editing:
+            screen.blit(edit_rule, (0, 0))
+        else:
+            screen.blit(game_item_rule, (0, 0))
+        
 
 
 def draw_players(player_list, current_player, hole, arrow):
@@ -636,7 +653,7 @@ def game_reset(reset_score = False):
 ####################### Main Event Loop #########################
 
 def main(argv):
-    global current_player, tracing, current_tracing, projectileList, trace_color, current_level, game_running, game_paused, tutorial_screen, replay_game
+    global current_player, tracing, current_tracing, projectileList, trace_color, current_level, game_running, game_paused, tutorial_screen, replay_game, show_rule, editing
 
     read_level("level 1.txt")
     draw_window(0)
@@ -652,7 +669,6 @@ def main(argv):
     force_scale = 0
     topleft = (0, 0)
     wh = (0, 0)
-    editing = False
     current_projectile = None
 
 
@@ -698,7 +714,11 @@ def main(argv):
                 if event.type == pygame.MOUSEBUTTONUP and player_list[current_player].need_to_display:
                     player_list[current_player].need_to_display = False
 
+
                 if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_LSHIFT:
+                        show_rule = not show_rule
+
                     if event.key == pygame.K_UP:
                         plr.increase_launchF()
 
@@ -894,8 +914,6 @@ def main(argv):
                 arrow.is_visible = False
 
             draw_players(player_list, current_player, hole, arrow)
-
-
 
 
         if replay_game:
