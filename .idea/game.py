@@ -188,7 +188,7 @@ def draw_window(scale):
     # draw terrians
     for tr in TERRAIN_LIST:
         if tr.id == "sand":
-            screen.blit(tr.image, (tr.get_x(), tr.get_y()), tr.get_rect())
+            screen.blit(sand_img, (tr.get_x(), tr.get_y()), tr.get_rect())
         elif tr.id == "boost":
             pygame.draw.rect(screen, tr.color, tr.rect)
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
@@ -197,8 +197,6 @@ def draw_window(scale):
     for consumable in consumableList:
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
 
-    # update the screen
-    # pygame.display.update()
 
 def draw_players(player_list, current_player, hole, arrow):
     # draw consumable on the screen
