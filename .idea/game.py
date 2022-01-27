@@ -76,7 +76,7 @@ current_level = 1
 
 
 # create caption for the screen
-pygame.display.set_caption("Golf")
+pygame.display.set_caption("Hole In One")
 
 ####################### Making Content #########################
 
