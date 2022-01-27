@@ -15,7 +15,7 @@ mixer.init()
 mixer.music.load('../audios/BGM_startingGame_LoveDream.mp3')
 WIDTH, HEIGHT = 1280, 720
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Golf Simulator")
+# pygame.display.set_caption("Hole In One")
 clock = pygame.time.Clock()
 
 # game variables
@@ -29,48 +29,58 @@ BG = (248, 249, 212)# background yellow
 
 #read and transform images needed
 start_ori = pygame.image.load(os.path.join('../pictures', 'startScreen.png'))
-start_img = pygame.transform.scale(start_ori, (796,562))
+start_img = pygame.transform.scale(start_ori, (796,465))
 ball_ori = pygame.image.load(os.path.join('../pictures', 'ball_yellowbg.png')).convert()
 ball_img = pygame.transform.scale(ball_ori, (200,200))
 ball_img.set_colorkey(-1, pygame.RLEACCEL)
 
+#tutorial png
+rule_1 = pygame.image.load(os.path.join('../rules', 'game_rule.png'))
+rule_2 = pygame.image.load(os.path.join('../rules', 'game_items.png'))
+rule_3 = pygame.image.load(os.path.join('../rules', 'level_editor_rule.png'))
 
-def interface():
-    #start music
-    mixer.music.play()
-    WIN.fill(BG)
-    pygame.display.flip()
-    pygame.time.wait(100)
-
-    #displaying start image
-    WIN.blit(start_img,(242,79))
-    pygame.display.flip()
-    pygame.time.wait(3000)
-
-    #fading out the start image
-    fadeOut(1280, 720, BG)
-
-    # blit the text onto the screen
-    start_text = font.render('Click to Start', True, BLACK)
-    WIN.blit(start_text, (540, 160))
-    pygame.display.flip()
-
-    #rotate and move ball image
-    blitRotateBall(WIN, ball_img)
-
-    #set up click to start game play and text disappearance
-    for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            fadeOut(1280, 720, BLACK)
-            tutorial()
 
 
 def tutorial():
-    WIN.fill(BG)
+    fadeOut(1280, 720, BG)
+    WIN.blit(rule_1, (0,0))
     pygame.display.flip()
-    pygame.time.wait(100)
-    tutorial_text = font.render('Hole-in-One is a 2D simulation game where two players compete by trying to launch their ball into a hole. Each player is represented as a golf ball, and their main objective is to traverse through a level filled with obstacles, and interactable terrains, and items in order to reach the goal.', True, BLACK)
-    WIN.blit(tutorial_text, (20, 160))
+    wait = True
+    while wait:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.time.wait(100)
+                wait = False
+            elif event.type == pygame.WINDOWCLOSE :
+                sys.exit()
+    fadeOut(1280, 720, BLACK)
+    fadeOut(1280, 720, BG)
+    
+    WIN.blit(rule_2, (0,0))
+    pygame.display.flip()
+    wait = True
+    while wait:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.time.wait(100)
+                wait = False
+            elif event.type == pygame.WINDOWCLOSE :
+                sys.exit()
+    fadeOut(1280, 720, BLACK)
+    fadeOut(1280, 720, BG)
+   
+    WIN.blit(rule_3, (0,0))
+    pygame.display.flip()
+    wait = True    
+    while wait:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.time.wait(100)
+                wait = False
+            elif event.type == pygame.WINDOWCLOSE :
+                sys.exit()
+    fadeOut(1280, 720, BLACK)
+    fadeOut(1280, 720, BG)
 
 #fade out function used to fade out a selected area
 def fadeOut(width, height, color):
@@ -91,7 +101,7 @@ def blitRotateBall(win, img):
         angle += 6
         win.fill(BG)
         start_text = font.render('Click to Start', True, BLACK)
-        WIN.blit(start_text, (540, 160))
+        WIN.blit(start_text, (WIDTH//2-start_text.get_width()//2, HEIGHT//4-start_text.get_height()//2))
         mx, my = pygame.mouse.get_pos()
         img_copy = pygame.transform.rotate(img, angle)
         img_copy.set_colorkey(BG)
@@ -99,8 +109,12 @@ def blitRotateBall(win, img):
         pygame.display.flip()
         pygame.time.wait(50)
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 loop = False
+            # elif event.type == pygame.WINDOWCLOSE :
+                # sys.exit()
 
 def interface():
     #start music
@@ -119,17 +133,15 @@ def interface():
         
     # blit the text onto the screen
     start_text = font.render('Click to Start', True, BLACK)
-    WIN.blit(start_text, (540, 160))
+    WIN.blit(start_text, (WIDTH//2-start_text.get_width()//2, HEIGHT//2+start_text.get_height()//2))
     pygame.display.flip()
 
     #rotate and move ball image
     blitRotateBall(WIN, ball_img)
 
     #set up click to start game play and text disappearance
-    for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            fadeOut(1280, 720, BLACK)
-            tutorial()
+    fadeOut(1280, 720, BLACK)
+    tutorial()
 
 
 def main():

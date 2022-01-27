@@ -42,14 +42,16 @@ YELLOW = (253, 223, 119)
 RED =  (255, 0, 80)
 CARAMEL = (255, 174, 105)
 BLUE = (0, 0, 255)
+HIGHLIGHT = (255,242,0)
 
-# game events
-GOAL = pygame.USEREVENT + 1
+
 
 #initial velocity when force scale is 0
 VELOCITY = 8
 
 tracing = False
+show_rule = False
+editing = False
 current_tracing = pygame.Rect((0, 0), (0, 0))
 trace_color = BLACK
 
@@ -75,7 +77,7 @@ current_level = 1
 
 
 # create caption for the screen
-pygame.display.set_caption("Golf")
+pygame.display.set_caption("Hole In One")
 
 ####################### Making Content #########################
 
@@ -98,8 +100,10 @@ boost_img = pygame.image.load("../pictures/acceleration_2.png").convert_alpha()
 tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
-obstacle_img = pygame.image.load("../pictures/placeholder_obstacle.png")
-sand_img = pygame.image.load("../pictures/sand.png")
+obstacle_img = pygame.image.load("../pictures/brick_wall_3.png")
+sand_img = pygame.image.load("../pictures/sandpit3_small.png")
+edit_rule = pygame.image.load(os.path.join('../rules', 'level_editor_rule.png'))
+game_item_rule = pygame.image.load(os.path.join('../rules', 'game_items_rule.png'))
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -177,9 +181,9 @@ def draw_window(scale):
     screen.blit(BACKGROUND, (0,0))
 
     # now draw the surfaces to the screen using the blit function
-
-    # display debug info
+    
     force_text = INFO_FONT.render("Launch force: " + str(scale), 1, BLACK)
+    pygame.draw.rect(screen,HIGHLIGHT,pygame.Rect(5,HEIGHT-force_text.get_height()-10,force_text.get_width()+10,force_text.get_height()+10))
     screen.blit(force_text, (10, HEIGHT-force_text.get_height()-5))
 
 
@@ -202,6 +206,18 @@ def draw_window(scale):
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
     for consumable in consumableList:
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
+
+    # if show_rule:
+        # editing_rule_cover = pygame.Surface((WIDTH, HEIGHT))
+        # editing_rule_cover.set_alpha(130)
+        # editing_rule_cover.fill(WHITE)
+        # screen.blit(editing_rule_cover, (0,0))
+        # print(editing)
+        # if editing:
+            # screen.blit(edit_rule, (0, 0))
+        # else:
+            # screen.blit(game_item_rule, (0, 0))
+        
 
 
 def draw_players(player_list, current_player, hole, arrow):
@@ -462,7 +478,7 @@ def move(plr):
                 col_type = handle_collision_ball_rect(plr, wall)
                 plr.traceback(steps)
                 plr.traceback(steps)
-                plr.traceback(steps)
+                #plr.traceback(steps)
                 if col_type == 0:
                     print("vertical")
                     plr.reflect_y()
@@ -623,6 +639,7 @@ def game_reset(reset_score = False):
         plr.projectiles = []
         plr.angle = 0
         plr.set_vel(0)
+    player1.set_x(debug_x if debug_mode else 75)
     player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
     player2.set_x(debug_x if debug_mode else 75)
     player2.set_y(HEIGHT / 2 + 50 + BALL_WIDTH / 2)
@@ -636,7 +653,7 @@ def game_reset(reset_score = False):
 ####################### Main Event Loop #########################
 
 def main(argv):
-    global current_player, tracing, current_tracing, projectileList, trace_color, current_level, game_running, game_paused, tutorial_screen, replay_game
+    global current_player, tracing, current_tracing, projectileList, trace_color, current_level, game_running, game_paused, tutorial_screen, replay_game, show_rule, editing
 
     read_level("level 1.txt")
     draw_window(0)
@@ -652,11 +669,7 @@ def main(argv):
     force_scale = 0
     topleft = (0, 0)
     wh = (0, 0)
-    editing = False
     current_projectile = None
-
-
-
 
 
     replay_text_1 = afont.render( "You finished all the levels!", True, BLUE)
@@ -667,6 +680,7 @@ def main(argv):
 
         # When the game is running
         if game_running:
+            
             if tracing:
                 bottomright = pygame.mouse.get_pos()
                 wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
@@ -684,15 +698,15 @@ def main(argv):
                     projectileList.append(current_projectile)
                     projectile.need_arrow = False
 
+            #updating display
+            force_scale = plr.launchF
+            draw_window(force_scale)
+
             # Check every event in the event list
             for event in pygame.event.get():
                 # click quit button, then quit
                 if event.type == pygame.QUIT:
                     sys.exit()
-
-                # if one player goal, then go to the gameover event
-                if event.type == GOAL:
-                    handle_gameover()
 
                 # display game items a ball have
                 if event.type == pygame.MOUSEBUTTONDOWN and check_ball_clicked(player_list[current_player]):
@@ -700,15 +714,16 @@ def main(argv):
                 if event.type == pygame.MOUSEBUTTONUP and player_list[current_player].need_to_display:
                     player_list[current_player].need_to_display = False
 
+
                 if event.type == pygame.KEYDOWN:
+                    # if event.key == pygame.K_LSHIFT:
+                        # show_rule = not show_rule
+
                     if event.key == pygame.K_UP:
                         plr.increase_launchF()
 
                     if event.key == pygame.K_DOWN:
                         plr.decrease_launchF()
-
-                    force_scale = plr.launchF
-                    draw_window(force_scale)
 
                     if event.key == pygame.K_LEFT:
                         if editing:
@@ -901,8 +916,6 @@ def main(argv):
             draw_players(player_list, current_player, hole, arrow)
 
 
-
-
         if replay_game:
             if player_list[0].id == 1:
                 p1 = player_list[0]
@@ -925,6 +938,8 @@ def main(argv):
 
             while replay_game:
                 for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        sys.exit()
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_q:
                             sys.exit()
