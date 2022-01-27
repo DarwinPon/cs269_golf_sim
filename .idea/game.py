@@ -595,6 +595,7 @@ def game_reset(reset_score = False):
     if reset_score:
         player1.score = 0
         player2.score = 0
+
     player1.set_x(75)
     player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
     player2.set_x(75)
@@ -607,6 +608,7 @@ def game_reset(reset_score = False):
     else:
         player_list[0] = player2
         player_list[1] = player1
+    player1.arrow.reset(player_list[0])
 
 ####################### Main Event Loop #########################
 
