@@ -167,14 +167,8 @@ class MovingThing(Thing):
         self.angle = math.degrees(math.atan2(self.vel_y, self.vel_x))
 
     def reset(self):
-        self.vel_x = 0
-        self.vel_y = 0
-        self.acc = 1
         self.angle = 0
         self.launchF = 0
-        self.mass = 1
-        self.max_power = 10
-        self.turn_angle = 15
 
 
 class Ball(MovingThing):
@@ -263,19 +257,13 @@ class Arrow(Thing):
         self.rot_img = image
         self.rot_rect = self.rect.copy()
         self.is_visible = True
-        self.ball = None
 
     def set_rot(self, rot_img, rot_x, rot_y):
         self.rot_img = rot_img
         self.rot_rect.x = rot_x
         self.rot_rect.y = rot_y
 
-    def track(self):
-        self.x = self.ball.rect.x-self.ball.width
-        self.y = self.ball.rect.y-self.ball.height
-        
     def reset(self, ball):
-        self.ball = ball
         self.x = ball.rect.x-ball.width
         self.y = ball.rect.y-ball.height
         self.rot_img = self.image.copy()
@@ -442,9 +430,8 @@ class RandomBox(Consumable):
         # images is a list storing all icons RandomBox needs
         # index 0: speedUp; index 1: powerUp; index 2: massUp
         super().__init__(1, image, x, y, 40, 40, "RandomBox")
-        # self.consumable = MassUp(self.image, self.x, self.y, self.width, self.height)
+        self.consumable = MassUp(self.image, self.x, self.y, self.width, self.height)
         self.images = images
-        self.consumable = self.generate_consumable()
 
     def generate_consumable(self):
         randNum = random.randint(1, 100)
