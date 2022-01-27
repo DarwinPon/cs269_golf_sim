@@ -95,7 +95,7 @@ def blitRotateBall(win, img):
         angle += 6
         win.fill(BG)
         start_text = font.render('Click to Start', True, BLACK)
-        WIN.blit(start_text, (540, 160))
+        WIN.blit(start_text, (WIDTH//2-start_text.get_width()//2, HEIGHT//4-start_text.get_height()//2))
         mx, my = pygame.mouse.get_pos()
         img_copy = pygame.transform.rotate(img, angle)
         img_copy.set_colorkey(BG)
@@ -123,7 +123,7 @@ def interface():
         
     # blit the text onto the screen
     start_text = font.render('Click to Start', True, BLACK)
-    WIN.blit(start_text, (540, 160))
+    WIN.blit(start_text, (WIDTH//2-start_text.get_width()//2, HEIGHT//2-start_text.get_height()//2))
     pygame.display.flip()
 
     #rotate and move ball image
