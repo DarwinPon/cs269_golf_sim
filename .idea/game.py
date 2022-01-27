@@ -613,6 +613,8 @@ def game_reset(reset_score = False):
     player1.set_opponent(player2)
     player2.set_opponent(player1)
     arrow.reset(player_list[0])
+    player1.reset()
+    player2.reset()
 
 ####################### Main Event Loop #########################
 

@@ -167,8 +167,14 @@ class MovingThing(Thing):
         self.angle = math.degrees(math.atan2(self.vel_y, self.vel_x))
 
     def reset(self):
+        self.vel_x = 0
+        self.vel_y = 0
+        self.acc = 1
         self.angle = 0
         self.launchF = 0
+        self.mass = 1
+        self.max_power = 10
+        self.turn_angle = 15
 
 
 class Ball(MovingThing):
