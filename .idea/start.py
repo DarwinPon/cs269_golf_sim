@@ -15,7 +15,7 @@ mixer.init()
 mixer.music.load('../audios/BGM_startingGame_LoveDream.mp3')
 WIDTH, HEIGHT = 1280, 720
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Golf Simulator")
+# pygame.display.set_caption("Hole In One")
 clock = pygame.time.Clock()
 
 # game variables
