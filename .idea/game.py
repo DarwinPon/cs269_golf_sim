@@ -616,14 +616,12 @@ def game_reset(reset_score = False):
         player_list[:]=[player1,player2]
     else:
         player_list[:]=[player_list[i] for i in range(1-player_list.__len__(), 1)]
-    player1.set_x(debug_x if debug_mode else 75)
 
     for plr in player_list:
         plr.consumables = []
         plr.projectiles = []
         plr.angle = 0
         plr.set_vel(0)
-    player1.set_x(75)
     player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
     player2.set_x(debug_x if debug_mode else 75)
     player2.set_y(HEIGHT / 2 + 50 + BALL_WIDTH / 2)
@@ -947,4 +945,4 @@ def main(argv):
         gameClock.tick(FPS)
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
