@@ -207,16 +207,16 @@ def draw_window(scale):
     for consumable in consumableList:
         screen.blit(consumable.image, (consumable.get_x(), consumable.get_y()))
 
-    if show_rule:
-        editing_rule_cover = pygame.Surface((WIDTH, HEIGHT))
-        editing_rule_cover.set_alpha(130)
-        editing_rule_cover.fill(WHITE)
-        screen.blit(editing_rule_cover, (0,0))
-        print(editing)
-        if editing:
-            screen.blit(edit_rule, (0, 0))
-        else:
-            screen.blit(game_item_rule, (0, 0))
+    # if show_rule:
+        # editing_rule_cover = pygame.Surface((WIDTH, HEIGHT))
+        # editing_rule_cover.set_alpha(130)
+        # editing_rule_cover.fill(WHITE)
+        # screen.blit(editing_rule_cover, (0,0))
+        # print(editing)
+        # if editing:
+            # screen.blit(edit_rule, (0, 0))
+        # else:
+            # screen.blit(game_item_rule, (0, 0))
         
 
 
@@ -716,8 +716,8 @@ def main(argv):
 
 
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LSHIFT:
-                        show_rule = not show_rule
+                    # if event.key == pygame.K_LSHIFT:
+                        # show_rule = not show_rule
 
                     if event.key == pygame.K_UP:
                         plr.increase_launchF()
