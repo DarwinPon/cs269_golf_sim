@@ -596,6 +596,11 @@ def game_reset(reset_score = False):
         player1.score = 0
         player2.score = 0
 
+    for plr in player_list:
+        plr.consumables = []
+        plr.projectiles = []
+        plr.angle = 0
+        plr.set_vel(0)
     player1.set_x(75)
     player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
     player2.set_x(75)
