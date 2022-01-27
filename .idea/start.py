@@ -109,10 +109,12 @@ def blitRotateBall(win, img):
         pygame.display.flip()
         pygame.time.wait(50)
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 loop = False
-            elif event.type == pygame.WINDOWCLOSE :
-                sys.exit()
+            # elif event.type == pygame.WINDOWCLOSE :
+                # sys.exit()
 
 def interface():
     #start music

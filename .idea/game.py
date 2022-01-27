@@ -44,8 +44,6 @@ CARAMEL = (255, 174, 105)
 BLUE = (0, 0, 255)
 HIGHLIGHT = (255,242,0)
 
-# game events
-GOAL = pygame.USEREVENT + 1
 
 #initial velocity when force scale is 0
 VELOCITY = 8
@@ -658,9 +656,6 @@ def main(argv):
     current_projectile = None
 
 
-
-
-
     replay_text_1 = afont.render( "You finished all the levels!", True, BLUE)
     replay_text_2 = afont.render( "Press \"R\" to replay, \"Q\" to quit", True, BLUE )
 
@@ -696,10 +691,6 @@ def main(argv):
                 # click quit button, then quit
                 if event.type == pygame.QUIT:
                     sys.exit()
-
-                # if one player goal, then go to the gameover event
-                if event.type == GOAL:
-                    handle_gameover()
 
                 # display game items a ball have
                 if event.type == pygame.MOUSEBUTTONDOWN and check_ball_clicked(player_list[current_player]):
@@ -930,6 +921,8 @@ def main(argv):
             while replay_game:
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:
+                        if event.type == pygame.QUIT:
+                            sys.exit()
                         if event.key == pygame.K_q:
                             sys.exit()
                         if event.key == pygame.K_r:
