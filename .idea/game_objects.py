@@ -172,13 +172,15 @@ class MovingThing(Thing):
 
 
 class Ball(MovingThing):
-    def __init__(self, image, x, y, width, height, arrow):
+    def __init__(self, image, x, y, width, height, id, arrow):
         super().__init__(image, x, y, width, height, arrow)
         self.RADIUS = 15
         self.consumables = []
         self.projectiles = []
         self.opponent = None
         self.need_to_display = False
+        self.score = 0
+        self.id = id
 
     def display(self):
         # this list stores tuples ((x, y), consumable)
@@ -420,7 +422,7 @@ class Tornado(Terrain):
     def __init__(self, image, x, y, width, height):
         super().__init__( image, x, y, width, height, "tor", (255, 0, 80))
         #orientation is a tuple
-        self.scale = 1.5
+        self.scale = 2
 
 
 class RandomBox(Consumable):
@@ -468,6 +470,7 @@ class RandomBox(Consumable):
 
 
         
+
 
 
 
