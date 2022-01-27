@@ -5,6 +5,8 @@
 import pygame
 from pygame import mixer
 import os
+import sys
+import game
 
 # initialize pygame
 pygame.init()
@@ -138,5 +140,8 @@ def main():
                 # run = False
                 # pygame.quit()
     interface()
+    
+    mixer.music.stop()
+    game.main(sys.argv)
 
 main()

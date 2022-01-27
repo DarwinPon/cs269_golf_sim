@@ -620,7 +620,7 @@ def game_reset(reset_score = False):
 
 ####################### Main Event Loop #########################
 
-def main():
+def main(argv):
     global current_player, tracing, current_tracing, projectileList, trace_color, current_level, game_running, game_paused, tutorial_screen, replay_game
 
     read_level("level 1.txt")
