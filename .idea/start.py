@@ -35,35 +35,6 @@ ball_img = pygame.transform.scale(ball_ori, (200,200))
 ball_img.set_colorkey(-1, pygame.RLEACCEL)
 
 
-def interface():
-    #start music
-    mixer.music.play()
-    WIN.fill(BG)
-    pygame.display.flip()
-    pygame.time.wait(100)
-
-    #displaying start image
-    WIN.blit(start_img,(242,79))
-    pygame.display.flip()
-    pygame.time.wait(3000)
-
-    #fading out the start image
-    fadeOut(1280, 720, BG)
-
-    # blit the text onto the screen
-    start_text = font.render('Click to Start', True, BLACK)
-    WIN.blit(start_text, (540, 160))
-    pygame.display.flip()
-
-    #rotate and move ball image
-    blitRotateBall(WIN, ball_img)
-
-    #set up click to start game play and text disappearance
-    for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            fadeOut(1280, 720, BLACK)
-            tutorial()
-
 
 def tutorial():
     WIN.fill(BG)

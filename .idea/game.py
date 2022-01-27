@@ -623,6 +623,7 @@ def game_reset(reset_score = False):
         plr.projectiles = []
         plr.angle = 0
         plr.set_vel(0)
+    player1.set_x(debug_x if debug_mode else 75)
     player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
     player2.set_x(debug_x if debug_mode else 75)
     player2.set_y(HEIGHT / 2 + 50 + BALL_WIDTH / 2)
