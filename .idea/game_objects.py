@@ -56,6 +56,7 @@ class MovingThing(Thing):
         self.mass = 1
         self.max_power = 10
         self.turn_angle = 15
+        self.powermult = 1
 
     def set_rot(self, rot_img, rot_rect):
         self.rot_img = rot_img
@@ -158,7 +159,7 @@ class MovingThing(Thing):
 
     def launch(self, velocity):
         """set initial speed when player launches ball"""
-        vel = velocity*(1+self.launchF/2)
+        vel = velocity*(1+self.launchF*self.powermult/2)
         angleInRadian = math.radians(self.angle)
         self.vel_x = vel * math.cos(angleInRadian)
         self.vel_y = vel * math.sin(angleInRadian)
@@ -175,6 +176,7 @@ class MovingThing(Thing):
         self.mass = 1
         self.max_power = 10
         self.turn_angle = 15
+        self.powermult = 1
 
 
 class Ball(MovingThing):
@@ -330,11 +332,11 @@ class PowerUp(Consumable):
         super().__init__(2, image, x, y, width, height, "powerUp")
 
     def activate(self, plr):
-        plr.max_power = 20
+        plr.powermult = 2
         plr.add_consumable(self)
 
     def deactivate(self, plr):
-        plr.max_power = 10
+        plr.powermult = 1
 
 
 class SpeedUp(Consumable):
