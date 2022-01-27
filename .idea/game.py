@@ -19,6 +19,11 @@ from pygame import mixer
 import game_objects as go
 import sound as s
 
+
+#global variables
+debug_mode = True if sys.argv.__len__()>=2 and sys.argv[1].lower()=="--debug" else False
+debug_x = 1220
+
 # initialize pygame
 pygame.init()
 
@@ -104,8 +109,9 @@ arrow = go.Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
 hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 0, arrow)
 
 # set up players
-player1 = go.Ball(ball_img1, 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
-player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
+
+player1 = go.Ball(ball_img1, debug_x if debug_mode else 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
+player2 = go.Ball(ball_img2, debug_x if debug_mode else 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
 player1.set_opponent(player2)
 player2.set_opponent(player1)
 
@@ -201,6 +207,7 @@ def draw_players(player_list, current_player, hole, arrow):
     # draw consumable on the screen
 
     if arrow.is_visible:
+        arrow.track();
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
 
     screen.blit(hole.image, (hole.get_x(), hole.get_y()))
@@ -229,9 +236,8 @@ def handle_collision_ball_ball(ball1, ball2):
 
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
-        print("Ball Ball Collision!")
-        # play sound
-        sound.collision_ball_ball()
+
+        print("Collision!")
         if ball1.get_vel() == 0 and ball2.get_vel() == 0:
             ball1.vel_x = 1
             ball1.vel_y = 1
@@ -337,8 +343,9 @@ def handle_collision_ball_hole(ball, holeRect):
 def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
         if len(ball.get_consumables()) < 2 and check_collision_ball_rect(ball, consumable.get_rect()):
-            print("Collide with consumable")
-            print(consumable.id)
+
+            print("Collide with consumable %s"%consumable)
+            if hasattr(consumable, "consumable"): print("Sub-consumable %s"%consumable.consumable)
             # play sounds
             if consumable.id == "randomAngle":
                 sound.randomAngle()
@@ -471,8 +478,8 @@ def move(plr):
 
 
 def handle_next_level(plr):
-    global current_level, replay_game
     """Takes player to the next level"""
+    global current_level, replay_game
     goal_text = afont.render( "Player %d scored!" %plr.id, True, BLUE )
     plr.score += 1
     tr_cover = pygame.Surface((WIDTH, HEIGHT))
@@ -600,32 +607,30 @@ def check_ball_clicked(ball) -> bool:
 
 
 def game_reset(reset_score = False):
+    global current_player
+    current_player = 0
     if reset_score:
         player1.score = 0
         player2.score = 0
 
-    for plr in player_list:
-        plr.consumables = []
-        plr.projectiles = []
-        plr.angle = 0
-        plr.set_vel(0)
-    player1.set_x(75)
+        player_list[:]=[player1,player2]
+    else:
+        player_list[:]=[player_list[i] for i in range(1-player_list.__len__(), 1)]
+    player1.set_x(debug_x if debug_mode else 75)
+
     player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
-    player2.set_x(75)
+    player2.set_x(debug_x if debug_mode else 75)
     player2.set_y(HEIGHT / 2 + 50 + BALL_WIDTH / 2)
     player1.set_opponent(player2)
     player2.set_opponent(player1)
-    if random.random()>0.5:
-        player_list[0] = player1
-        player_list[1] = player2
-    else:
-        player_list[0] = player2
-        player_list[1] = player1
-    player1.arrow.reset(player_list[0])
+
+    arrow.reset(player_list[0])
+    player1.reset()
+    player2.reset()
 
 ####################### Main Event Loop #########################
 
-def main():
+def main(argv):
     global current_player, tracing, current_tracing, projectileList, trace_color, current_level, game_running, game_paused, tutorial_screen, replay_game
 
     read_level("level 1.txt")
@@ -767,7 +772,7 @@ def main():
 
                             plr.launch(VELOCITY)
                             arrow.is_visible = False
-                            current_player = len(player_list)-1-current_player
+                            current_player = (current_player+1)%player_list.__len__()
                             nxt_p = player_list[current_player]
 
                             # check if we need to delet the consumables
