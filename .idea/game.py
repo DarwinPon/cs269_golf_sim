@@ -100,7 +100,7 @@ boost_img = pygame.image.load("../pictures/acceleration_2.png").convert_alpha()
 tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
-obstacle_img = pygame.image.load("../pictures/placeholder_obstacle.png")
+obstacle_img = pygame.image.load("../pictures/brick_wall_3.png")
 sand_img = pygame.image.load("../pictures/sandpit3_small.png")
 edit_rule = pygame.image.load(os.path.join('../rules', 'level_editor_rule.png'))
 game_item_rule = pygame.image.load(os.path.join('../rules', 'game_items_rule.png'))
@@ -938,9 +938,9 @@ def main(argv):
 
             while replay_game:
                 for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        sys.exit()
                     if event.type == pygame.KEYDOWN:
-                        if event.type == pygame.QUIT:
-                            sys.exit()
                         if event.key == pygame.K_q:
                             sys.exit()
                         if event.key == pygame.K_r:

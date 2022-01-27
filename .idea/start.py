@@ -36,8 +36,8 @@ ball_img.set_colorkey(-1, pygame.RLEACCEL)
 
 #tutorial png
 rule_1 = pygame.image.load(os.path.join('../rules', 'game_rule.png'))
-rule_2 = pygame.image.load(os.path.join('../rules', 'level_editor_rule.png'))
-rule_3 = pygame.image.load(os.path.join('../rules', 'game_items_rule.png'))
+rule_2 = pygame.image.load(os.path.join('../rules', 'game_items_rule.png'))
+rule_3 = pygame.image.load(os.path.join('../rules', 'level_editor_rule.png'))
 
 
 
@@ -113,8 +113,8 @@ def blitRotateBall(win, img):
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 loop = False
-            elif event.type == pygame.WINDOWCLOSE :
-                sys.exit()
+            # elif event.type == pygame.WINDOWCLOSE :
+                # sys.exit()
 
 def interface():
     #start music
