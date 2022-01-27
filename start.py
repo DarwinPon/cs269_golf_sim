@@ -72,14 +72,14 @@ def tutorial():
 
 #fade out function used to fade out a selected area
 def fadeOut(width, height, color):
-    sur = pygame.Surface((width, height))
+    sur = pygame.Surface((width, height)).convert_alpha()
     sur.fill(color)
 
-    for alpha in range (0, 3000):
+    for alpha in range (0, 300):
         sur.set_alpha(alpha//10)
-        WIN.blit(sur, (0,0))
+        WIN.blit(sur, (0,0),special_flags=pygame.BLEND_ALPHA_SDL2)
         pygame.display.flip()
-        # pygame.time.wait(90)
+        # pygame.time.wait(10)
 
 #rotate the ball and blit the img with its new position
 def blitRotateBall(win, img):
