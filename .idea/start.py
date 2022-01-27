@@ -29,7 +29,7 @@ BG = (248, 249, 212)# background yellow
 
 #read and transform images needed
 start_ori = pygame.image.load(os.path.join('../pictures', 'startScreen.png'))
-start_img = pygame.transform.scale(start_ori, (796,562))
+start_img = pygame.transform.scale(start_ori, (796,465))
 ball_ori = pygame.image.load(os.path.join('../pictures', 'ball_yellowbg.png')).convert()
 ball_img = pygame.transform.scale(ball_ori, (200,200))
 ball_img.set_colorkey(-1, pygame.RLEACCEL)
