@@ -100,7 +100,7 @@ tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
 obstacle_img = pygame.image.load("../pictures/placeholder_obstacle.png")
-sand_img = pygame.image.load("../pictures/sand.png")
+sand_img = pygame.image.load("../pictures/sandpit3_small.png")
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))

@@ -51,6 +51,8 @@ def tutorial():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.time.wait(100)
                 wait = False
+            elif event.type == pygame.WINDOWCLOSE :
+                sys.exit()
     fadeOut(1280, 720, BLACK)
     fadeOut(1280, 720, BG)
     
@@ -62,6 +64,8 @@ def tutorial():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.time.wait(100)
                 wait = False
+            elif event.type == pygame.WINDOWCLOSE :
+                sys.exit()
     fadeOut(1280, 720, BLACK)
     fadeOut(1280, 720, BG)
    
@@ -73,6 +77,8 @@ def tutorial():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.time.wait(100)
                 wait = False
+            elif event.type == pygame.WINDOWCLOSE :
+                sys.exit()
     fadeOut(1280, 720, BLACK)
     fadeOut(1280, 720, BG)
 
@@ -105,6 +111,8 @@ def blitRotateBall(win, img):
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 loop = False
+            elif event.type == pygame.WINDOWCLOSE :
+                sys.exit()
 
 def interface():
     #start music
