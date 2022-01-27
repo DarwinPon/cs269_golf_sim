@@ -235,7 +235,7 @@ def handle_collision_ball_ball(ball1, ball2):
 
     distance = math.hypot(dx, dy)
     if distance <= ball1.RADIUS + ball2.RADIUS:
-        print("Ball Ball Collision!")
+        print("Collision!")
         if ball1.get_vel() == 0 and ball2.get_vel() == 0:
             ball1.vel_x = 1
             ball1.vel_y = 1
@@ -342,6 +342,7 @@ def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
         if len(ball.get_consumables()) < 2 and check_collision_ball_rect(ball, consumable.get_rect()):
             print("Collide with consumable %s"%consumable)
+            if hasattr(consumable, "consumable"): print("Sub-consumable %s"%consumable.consumable)
             # play sounds
             if consumable.id == "randomAngle":
                 print(1)
