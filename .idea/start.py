@@ -36,7 +36,7 @@ ball_img.set_colorkey(-1, pygame.RLEACCEL)
 
 #tutorial png
 rule_1 = pygame.image.load(os.path.join('../rules', 'game_rule.png'))
-rule_2 = pygame.image.load(os.path.join('../rules', 'game_items_rule.png'))
+rule_2 = pygame.image.load(os.path.join('../rules', 'game_items.png'))
 rule_3 = pygame.image.load(os.path.join('../rules', 'level_editor_rule.png'))
 
 
