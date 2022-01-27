@@ -133,7 +133,7 @@ def interface():
         
     # blit the text onto the screen
     start_text = font.render('Click to Start', True, BLACK)
-    WIN.blit(start_text, (WIDTH//2-start_text.get_width()//2, HEIGHT//2-start_text.get_height()//2))
+    WIN.blit(start_text, (WIDTH//2-start_text.get_width()//2, HEIGHT//2+start_text.get_height()//2))
     pygame.display.flip()
 
     #rotate and move ball image
