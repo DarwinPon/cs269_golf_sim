@@ -463,7 +463,7 @@ def move(plr):
                 col_type = handle_collision_ball_rect(plr, wall)
                 plr.traceback(steps)
                 plr.traceback(steps)
-                plr.traceback(steps)
+                #plr.traceback(steps)
                 if col_type == 0:
                     print("vertical")
                     plr.reflect_y()
