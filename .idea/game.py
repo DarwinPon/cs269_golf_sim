@@ -110,7 +110,7 @@ hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BA
 
 # set up players
 player1 = go.Ball(ball_img1, debug_x if debug_mode else 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
-player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
+player2 = go.Ball(ball_img2, debug_x if debug_mode else 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
 player1.set_opponent(player2)
 player2.set_opponent(player1)
 
@@ -469,8 +469,8 @@ def move(plr):
 
 
 def handle_next_level(plr):
-    global current_level, replay_game
     """Takes player to the next level"""
+    global current_level, replay_game
     goal_text = afont.render( "Player %d scored!" %plr.id, True, BLUE )
     plr.score += 1
     tr_cover = pygame.Surface((WIDTH, HEIGHT))
@@ -598,21 +598,20 @@ def check_ball_clicked(ball) -> bool:
 
 
 def game_reset(reset_score = False):
+    global current_player
+    current_player = 0
     if reset_score:
         player1.score = 0
         player2.score = 0
+        player_list[:]=[player1,player2]
+    else:
+        player_list[:]=[player_list[i] for i in range(1-player_list.__len__(), 1)]
     player1.set_x(debug_x if debug_mode else 75)
     player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
-    player2.set_x(75)
+    player2.set_x(debug_x if debug_mode else 75)
     player2.set_y(HEIGHT / 2 + 50 + BALL_WIDTH / 2)
     player1.set_opponent(player2)
     player2.set_opponent(player1)
-    if random.random()>0.5:
-        player_list[0] = player1
-        player_list[1] = player2
-    else:
-        player_list[0] = player2
-        player_list[1] = player1
 
 ####################### Main Event Loop #########################
 
@@ -758,7 +757,7 @@ def main():
 
                             plr.launch(VELOCITY)
                             arrow.is_visible = False
-                            current_player = len(player_list)-1-current_player
+                            current_player = (current_player+1)%player_list.__len__()
                             nxt_p = player_list[current_player]
 
                             # check if we need to delet the consumables
