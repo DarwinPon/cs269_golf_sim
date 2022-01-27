@@ -22,6 +22,7 @@ import sound as s
 
 #global variables
 debug_mode = True if sys.argv.__len__()>=2 and sys.argv[1].lower()=="--debug" else False
+debug_x = 1220
 
 # initialize pygame
 pygame.init()
@@ -108,7 +109,7 @@ arrow = go.Arrow(arrow_img, 0, 0, BALL_WIDTH*3, BALL_HEIGHT*3)
 hole = go.Ball(hole_img, WIDTH - 75, HEIGHT / 2 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 0, arrow)
 
 # set up players
-player1 = go.Ball(ball_img1, 1200 if debug_mode else 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
+player1 = go.Ball(ball_img1, debug_x if debug_mode else 75, HEIGHT / 2 - 50 - BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 1, arrow)
 player2 = go.Ball(ball_img2, 75, HEIGHT / 2 + 50 + BALL_WIDTH / 2, BALL_WIDTH, BALL_HEIGHT, 2, arrow)
 player1.set_opponent(player2)
 player2.set_opponent(player1)
@@ -600,7 +601,7 @@ def game_reset(reset_score = False):
     if reset_score:
         player1.score = 0
         player2.score = 0
-    player1.set_x(75)
+    player1.set_x(debug_x if debug_mode else 75)
     player1.set_y(HEIGHT / 2 - 50 - BALL_WIDTH / 2)
     player2.set_x(75)
     player2.set_y(HEIGHT / 2 + 50 + BALL_WIDTH / 2)
