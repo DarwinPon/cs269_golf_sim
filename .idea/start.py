@@ -34,14 +34,47 @@ ball_ori = pygame.image.load(os.path.join('../pictures', 'ball_yellowbg.png')).c
 ball_img = pygame.transform.scale(ball_ori, (200,200))
 ball_img.set_colorkey(-1, pygame.RLEACCEL)
 
+#tutorial png
+rule_1 = pygame.image.load(os.path.join('../rules', 'game_rule.png'))
+rule_2 = pygame.image.load(os.path.join('../rules', 'level_editor_rule.png'))
+rule_3 = pygame.image.load(os.path.join('../rules', 'game_items_rule.png'))
+
 
 
 def tutorial():
-    WIN.fill(BG)
+    fadeOut(1280, 720, WHITE)
+    WIN.blit(rule_1, (0,0))
     pygame.display.flip()
-    pygame.time.wait(100)
-    tutorial_text = font.render('Hole-in-One is a 2D simulation game where two players compete by trying to launch their ball into a hole. Each player is represented as a golf ball, and their main objective is to traverse through a level filled with obstacles, and interactable terrains, and items in order to reach the goal.', True, BLACK)
-    WIN.blit(tutorial_text, (20, 160))
+    wait = True
+    while wait:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.time.wait(100)
+                wait = False
+    fadeOut(1280, 720, BLACK)
+    fadeOut(1280, 720, WHITE)
+    
+    WIN.blit(rule_2, (0,0))
+    pygame.display.flip()
+    wait = True
+    while wait:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.time.wait(100)
+                wait = False
+    fadeOut(1280, 720, BLACK)
+    fadeOut(1280, 720, WHITE)
+   
+    WIN.blit(rule_3, (0,0))
+    pygame.display.flip()
+    wait = True    
+    while wait:
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pygame.time.wait(100)
+                wait = False
+    fadeOut(1280, 720, BLACK)
+    fadeOut(1280, 720, WHITE)
 
 #fade out function used to fade out a selected area
 def fadeOut(width, height, color):
@@ -97,10 +130,8 @@ def interface():
     blitRotateBall(WIN, ball_img)
 
     #set up click to start game play and text disappearance
-    for event in pygame.event.get():
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            fadeOut(1280, 720, BLACK)
-            tutorial()
+    fadeOut(1280, 720, BLACK)
+    tutorial()
 
 
 def main():
