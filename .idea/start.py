@@ -42,7 +42,7 @@ rule_3 = pygame.image.load(os.path.join('../rules', 'game_items_rule.png'))
 
 
 def tutorial():
-    fadeOut(1280, 720, WHITE)
+    fadeOut(1280, 720, BG)
     WIN.blit(rule_1, (0,0))
     pygame.display.flip()
     wait = True
@@ -52,7 +52,7 @@ def tutorial():
                 pygame.time.wait(100)
                 wait = False
     fadeOut(1280, 720, BLACK)
-    fadeOut(1280, 720, WHITE)
+    fadeOut(1280, 720, BG)
     
     WIN.blit(rule_2, (0,0))
     pygame.display.flip()
@@ -63,7 +63,7 @@ def tutorial():
                 pygame.time.wait(100)
                 wait = False
     fadeOut(1280, 720, BLACK)
-    fadeOut(1280, 720, WHITE)
+    fadeOut(1280, 720, BG)
    
     WIN.blit(rule_3, (0,0))
     pygame.display.flip()
@@ -74,7 +74,7 @@ def tutorial():
                 pygame.time.wait(100)
                 wait = False
     fadeOut(1280, 720, BLACK)
-    fadeOut(1280, 720, WHITE)
+    fadeOut(1280, 720, BG)
 
 #fade out function used to fade out a selected area
 def fadeOut(width, height, color):

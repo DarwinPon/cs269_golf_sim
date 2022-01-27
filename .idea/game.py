@@ -177,10 +177,10 @@ def draw_window(scale):
     screen.blit(BACKGROUND, (0,0))
 
     # now draw the surfaces to the screen using the blit function
-
-    # display debug info
+    
     force_text = INFO_FONT.render("Launch force: " + str(scale), 1, BLACK)
     screen.blit(force_text, (10, HEIGHT-force_text.get_height()-5))
+    
 
 
     if tracing:
