@@ -42,6 +42,7 @@ YELLOW = (253, 223, 119)
 RED =  (255, 0, 80)
 CARAMEL = (255, 174, 105)
 BLUE = (0, 0, 255)
+HIGHLIGHT = (255,242,0)
 
 # game events
 GOAL = pygame.USEREVENT + 1
@@ -179,8 +180,8 @@ def draw_window(scale):
     # now draw the surfaces to the screen using the blit function
     
     force_text = INFO_FONT.render("Launch force: " + str(scale), 1, BLACK)
+    pygame.draw.rect(screen,HIGHLIGHT,pygame.Rect(5,HEIGHT-force_text.get_height()-10,force_text.get_width()+10,force_text.get_height()+10))
     screen.blit(force_text, (10, HEIGHT-force_text.get_height()-5))
-    
 
 
     if tracing:
