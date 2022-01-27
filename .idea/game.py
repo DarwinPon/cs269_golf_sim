@@ -94,6 +94,7 @@ tornado_img = pygame.image.load("../pictures/tornado.png").convert_alpha()
 random_img = pygame.image.load("../pictures/randomAngle.png").convert_alpha()
 images = [speedUp_img, powerUp_img, massUp_img, randomAngle_img, exchangePosition_img]
 obstacle_img = pygame.image.load("../pictures/placeholder_obstacle.png")
+sand_img = pygame.image.load("../pictures/sand.png")
 
 # background scenes
 BACKGROUND = pygame.transform.scale(pygame.image.load("../pictures/background.png").convert_alpha(), (WIDTH, HEIGHT))
@@ -147,7 +148,7 @@ BOUNDARY = [UPPERBOUND_RECT, LOWERBOUND_RECT, LEFTBOUND_RECT, RIGHTBOUND_RECT]
 
 # adding terrain
 boost1 = go.BoostPad(boost_img, 100, 100, 80, 2, 0)
-sand1 = go.SandPit(hole_img, 100, 550, 60, 60)
+sand1 = go.SandPit(sand_img, 100, 550, 60, 60)
 
 tor1 = go.Tornado(tornado_img, 700, 500, 120, 120)
 TERRAIN_LIST = [boost1, sand1, tor1]
@@ -184,10 +185,12 @@ def draw_window(scale):
         # pygame.draw.rect(screen, BLACK, BOUNDARY[i])
         screen.blit(obstacle_img,BOUNDARY[i][0:2],BOUNDARY[i])
 
+    # draw terrians
     for tr in TERRAIN_LIST:
-        if tr.id != "tor":
+        if tr.id == "sand":
+            screen.blit(tr.image, (tr.get_x(), tr.get_y()), tr.get_rect())
+        elif tr.id == "boost":
             pygame.draw.rect(screen, tr.color, tr.rect)
-        if tr.id == "boost":
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
         if tr.id == "tor":
             screen.blit(tr.image, (tr.get_x(), tr.get_y()))
@@ -538,7 +541,7 @@ def read_level(filename):
                     TERRAIN_LIST.append(boost)
                 if l[0] == "s":
                     #sand
-                    sand = go.SandPit(hole_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
+                    sand = go.SandPit(sand_img, int(l[1]), int(l[2]), int(l[3]), int(l[4]))
                     TERRAIN_LIST.append(sand)
                 if l[0] == "t":
                     #tornado
