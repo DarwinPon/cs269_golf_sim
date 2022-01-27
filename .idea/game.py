@@ -920,9 +920,9 @@ def main(argv):
 
             while replay_game:
                 for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        sys.exit()
                     if event.type == pygame.KEYDOWN:
-                        if event.type == pygame.QUIT:
-                            sys.exit()
                         if event.key == pygame.K_q:
                             sys.exit()
                         if event.key == pygame.K_r:
