@@ -18,7 +18,7 @@ class Sound():
         self.mixer.Sound.play(self.RANDOM_ANGLE_SOUND)
 
     def bgm(self):
-        self.mixer.Sound.play(self.BGM)
+        self.mixer.Sound.play(self.BGM,loops=-1)
 
     def normal_hit(self):
         self.mixer.Sound.play(self.NORMAL_HIT_SOUND)
