@@ -502,8 +502,6 @@ def handle_next_level(plr):
         game_reset()
 
 
-
-
 def handle_endScreen():
     """Implement end screen"""
     screen.blit(STARTSCREEN, (0,0))
@@ -655,13 +653,8 @@ def main(argv):
     editing = False
     current_projectile = None
 
-
-
-
-
     replay_text_1 = afont.render( "You finished all the levels!", True, BLUE)
     replay_text_2 = afont.render( "Press \"R\" to replay, \"Q\" to quit", True, BLUE )
-
 
     while True:
 

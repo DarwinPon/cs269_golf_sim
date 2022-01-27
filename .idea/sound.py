@@ -12,7 +12,7 @@ class Sound():
         self.TORNADO_SOUND = pygame.mixer.Sound('../audios/wind.wav')
         self.COLLISION_BALL_WALL = pygame.mixer.Sound('../audios/splash.wav')
         self.MASS_UP_SOUND = pygame.mixer.Sound('../audios/ding.wav')
-        # self.COLLISION_BALL_BALL = pygame.mixer.Sound()
+
 
     def massUp(self):
         self.mixer.Sound.play(self.MASS_UP_SOUND)
