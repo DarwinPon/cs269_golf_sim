@@ -206,6 +206,7 @@ def draw_players(player_list, current_player, hole, arrow):
     # draw consumable on the screen
 
     if arrow.is_visible:
+        arrow.track();
         screen.blit(arrow.rot_img, (arrow.rot_rect.x, arrow.rot_rect.y))
 
     screen.blit(hole.image, (hole.get_x(), hole.get_y()))

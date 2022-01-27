@@ -263,13 +263,19 @@ class Arrow(Thing):
         self.rot_img = image
         self.rot_rect = self.rect.copy()
         self.is_visible = True
+        self.ball = None
 
     def set_rot(self, rot_img, rot_x, rot_y):
         self.rot_img = rot_img
         self.rot_rect.x = rot_x
         self.rot_rect.y = rot_y
 
+    def track(self):
+        self.x = self.ball.rect.x-self.ball.width
+        self.y = self.ball.rect.y-self.ball.height
+        
     def reset(self, ball):
+        self.ball = ball
         self.x = ball.rect.x-ball.width
         self.y = ball.rect.y-ball.height
         self.rot_img = self.image.copy()
