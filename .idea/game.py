@@ -669,6 +669,7 @@ def main(argv):
 
         # When the game is running
         if game_running:
+            
             if tracing:
                 bottomright = pygame.mouse.get_pos()
                 wh = (bottomright[0] -  topleft[0], bottomright[1] -  topleft[1])
@@ -685,6 +686,10 @@ def main(argv):
                     current_projectile.acc = 0
                     projectileList.append(current_projectile)
                     projectile.need_arrow = False
+
+            #updating display
+            force_scale = plr.launchF
+            draw_window(force_scale)
 
             # Check every event in the event list
             for event in pygame.event.get():
@@ -708,9 +713,6 @@ def main(argv):
 
                     if event.key == pygame.K_DOWN:
                         plr.decrease_launchF()
-
-                    force_scale = plr.launchF
-                    draw_window(force_scale)
 
                     if event.key == pygame.K_LEFT:
                         if editing:
