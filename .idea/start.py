@@ -15,7 +15,7 @@ mixer.init()
 mixer.music.load('../audios/BGM_startingGame_LoveDream.mp3')
 WIDTH, HEIGHT = 1280, 720
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Golf Simulator")
+# pygame.display.set_caption("Hole In One")
 clock = pygame.time.Clock()
 
 # game variables
@@ -51,6 +51,8 @@ def tutorial():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.time.wait(100)
                 wait = False
+            elif event.type == pygame.WINDOWCLOSE :
+                sys.exit()
     fadeOut(1280, 720, BLACK)
     fadeOut(1280, 720, BG)
     
@@ -62,6 +64,8 @@ def tutorial():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.time.wait(100)
                 wait = False
+            elif event.type == pygame.WINDOWCLOSE :
+                sys.exit()
     fadeOut(1280, 720, BLACK)
     fadeOut(1280, 720, BG)
    
@@ -73,6 +77,8 @@ def tutorial():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pygame.time.wait(100)
                 wait = False
+            elif event.type == pygame.WINDOWCLOSE :
+                sys.exit()
     fadeOut(1280, 720, BLACK)
     fadeOut(1280, 720, BG)
 
@@ -103,8 +109,12 @@ def blitRotateBall(win, img):
         pygame.display.flip()
         pygame.time.wait(50)
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 loop = False
+            # elif event.type == pygame.WINDOWCLOSE :
+                # sys.exit()
 
 def interface():
     #start music
