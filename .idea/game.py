@@ -341,7 +341,7 @@ def handle_collision_ball_hole(ball, holeRect):
 def handle_collision_ball_consumables(ball, consumables_list):
     for consumable in consumables_list:
         if len(ball.get_consumables()) < 2 and check_collision_ball_rect(ball, consumable.get_rect()):
-            print("Collide with consumable")
+            print("Collide with consumable %s"%consumable)
             # play sounds
             if consumable.id == "randomAngle":
                 print(1)

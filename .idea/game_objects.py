@@ -442,8 +442,9 @@ class RandomBox(Consumable):
         # images is a list storing all icons RandomBox needs
         # index 0: speedUp; index 1: powerUp; index 2: massUp
         super().__init__(1, image, x, y, 40, 40, "RandomBox")
-        self.consumable = MassUp(self.image, self.x, self.y, self.width, self.height)
+        # self.consumable = MassUp(self.image, self.x, self.y, self.width, self.height)
         self.images = images
+        self.consumable = self.generate_consumable()
 
     def generate_consumable(self):
         randNum = random.randint(1, 100)
@@ -457,10 +458,10 @@ class RandomBox(Consumable):
             random_consumable = PowerUp(self.images[1], self.x, self.y, self.width, self.height)
         # RandomAngle: 15%
         elif 46 <= randNum <= 60:
-            random_consumable = PowerUp(self.images[3], self.x, self.y, self.width, self.height)
+            random_consumable = RandomAngle(self.images[3], self.x, self.y, self.width, self.height)
         # ExchangePosition: 15%
         elif 61 <= randNum <= 75:
-            random_consumable = PowerUp(self.images[4], self.x, self.y, self.width, self.height)
+            random_consumable = ExchangePosition(self.images[4], self.x, self.y, self.width, self.height)
         # MassUp: 25%
         else:
             random_consumable = MassUp(self.images[2], self.x, self.y, self.width, self.height)
