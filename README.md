@@ -15,7 +15,7 @@ Team members:
 
 Designed by Blitzen Wang
 
-![](assets/f422e3149a8c41130d80bec87709076.jpg)
+![](pictures/f422e3149a8c41130d80bec87709076.jpg)
 
 1. Overview  
 Hole-in-One is a 2D simulation game where two players compete by trying to launch their ball into a hole. Each player is represented as a golf ball, and their main objective is to traverse through a level filled with obstacles, and interactable terrains, and items in order to reach the goal. 
